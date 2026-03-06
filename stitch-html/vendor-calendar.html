@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vendor Appointment Calendar</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1754cf",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#111621",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="layout-container flex flex-col h-full min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-10 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-primary">
+<span class="material-symbols-outlined text-3xl font-bold">directions_car</span>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">AutoVendor Egypt</h2>
+</div>
+<label class="flex flex-col min-w-40 h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+<div class="text-slate-500 flex border-none bg-slate-100 dark:bg-slate-800 items-center justify-center pl-4 rounded-l-lg" data-icon="search">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-slate-900 dark:text-slate-100 focus:outline-0 focus:ring-0 border-none bg-slate-100 dark:bg-slate-800 focus:border-none h-full placeholder:text-slate-500 px-4 rounded-l-none border-l-0 pl-2 text-base font-normal" placeholder="Search appointments..." value=""/>
+</div>
+</label>
+</div>
+<div class="flex flex-1 justify-end gap-8 items-center">
+<nav class="flex items-center gap-6">
+<a class="text-slate-900 dark:text-slate-100 text-sm font-semibold border-b-2 border-primary pb-1" href="#">Dashboard</a>
+<a class="text-slate-500 dark:text-slate-400 text-sm font-medium hover:text-primary transition-colors" href="#">Calendar</a>
+<a class="text-slate-500 dark:text-slate-400 text-sm font-medium hover:text-primary transition-colors" href="#">Inventory</a>
+<a class="text-slate-500 dark:text-slate-400 text-sm font-medium hover:text-primary transition-colors" href="#">Garage Hub</a>
+</nav>
+<div class="flex gap-2">
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border border-slate-200" data-alt="Vendor profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAK6vIQzuQpp62pXhNrVvXt56AaPq2ZRMtuMr8KF9lC69ij5cmMFW8EqLeWdlK8gOsprgSSGC0JoiwIG08op9b5gcTEBMXFZHRAeLRo0SgJkl0WiDvZdXWHmrGsAnt0u9_hel5EtFpbPIVU9xxGG3Orsipk9dH7wivaAAC7sTsjVl5Ofo__hE627-GK-OVAjQzc8iVwMc59pukizARFZEs5nSag_A_dDXjHp1KI9DW9PSLp63VlfzdMmQr_XLBADj-QLWc4FvF5");'></div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 hidden lg:flex flex-col gap-6">
+<div class="flex flex-col gap-1">
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">Management</h3>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary font-semibold" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span>Appointments</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all" href="#">
+<span class="material-symbols-outlined">group</span>
+<span>Customers</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all" href="#">
+<span class="material-symbols-outlined">build</span>
+<span>Services</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span>Earnings</span>
+</a>
+</div>
+<div class="mt-auto bg-slate-50 dark:bg-slate-800 p-4 rounded-xl">
+<p class="text-sm font-bold text-slate-900 dark:text-white mb-1">Service Center Pro</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">Cairo West Branch</p>
+<div class="mt-3 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-4/5"></div>
+</div>
+<p class="text-[10px] mt-2 text-slate-400">80% Capacity Booked Today</p>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto p-6 flex gap-6">
+<!-- Calendar View -->
+<div class="flex-1 flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<div>
+<h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Booking Management</h1>
+<p class="text-slate-500 dark:text-slate-400">October 24, 2023 • Tuesday</p>
+</div>
+<div class="flex gap-2">
+<button class="px-4 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm font-semibold">Day</button>
+<button class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold">Week</button>
+<button class="px-4 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm font-semibold">Month</button>
+</div>
+</div>
+<!-- Weekly Calendar Grid -->
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+<div class="grid grid-cols-8 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
+<div class="p-4 border-r border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-400 uppercase">Time</div>
+<div class="p-4 text-center border-r border-slate-200 dark:border-slate-800"><p class="text-xs font-bold text-slate-400">MON</p><p class="text-lg font-bold">23</p></div>
+<div class="p-4 text-center border-r border-slate-200 dark:border-slate-800 bg-primary/5"><p class="text-xs font-bold text-primary">TUE</p><p class="text-lg font-bold text-primary">24</p></div>
+<div class="p-4 text-center border-r border-slate-200 dark:border-slate-800"><p class="text-xs font-bold text-slate-400">WED</p><p class="text-lg font-bold">25</p></div>
+<div class="p-4 text-center border-r border-slate-200 dark:border-slate-800"><p class="text-xs font-bold text-slate-400">THU</p><p class="text-lg font-bold">26</p></div>
+<div class="p-4 text-center border-r border-slate-200 dark:border-slate-800"><p class="text-xs font-bold text-slate-400">FRI</p><p class="text-lg font-bold">27</p></div>
+<div class="p-4 text-center border-r border-slate-200 dark:border-slate-800"><p class="text-xs font-bold text-slate-400">SAT</p><p class="text-lg font-bold">28</p></div>
+<div class="p-4 text-center"><p class="text-xs font-bold text-slate-400">SUN</p><p class="text-lg font-bold">29</p></div>
+</div>
+<div class="relative max-h-[600px] overflow-y-auto">
+<!-- Time Slots -->
+<div class="grid grid-cols-8">
+<!-- Example Time Row: 09:00 -->
+<div class="p-4 border-r border-slate-100 dark:border-slate-800 text-xs font-medium text-slate-400 h-24">09:00 AM</div>
+<div class="border-r border-slate-100 dark:border-slate-800 h-24 p-1"></div>
+<div class="border-r border-slate-100 dark:border-slate-800 h-24 p-1 bg-primary/5">
+<div class="bg-blue-500 text-white p-2 rounded-lg text-[10px] shadow-sm border-l-4 border-blue-700 h-full">
+<p class="font-bold">Ahmed Mansour</p>
+<p>Oil Change &amp; Filter</p>
+<p class="mt-1 opacity-80">BMW 320i (2021)</p>
+</div>
+</div>
+<div class="border-r border-slate-100 dark:border-slate-800 h-24 p-1"></div>
+<div class="border-r border-slate-100 dark:border-slate-800 h-24 p-1"></div>
+<div class="border-r border-slate-100 dark:border-slate-800 h-24 p-1"></div>
+<div class="border-r border-slate-100 dark:border-slate-800 h-24 p-1"></div>
+<div class="h-24 p-1"></div>
+<!-- Example Time Row: 10:00 -->
+<div class="p-4 border-r border-slate-100 dark:border-slate-800 text-xs font-medium text-slate-400 h-24 border-t">10:00 AM</div>
+<div class="border-r border-slate-100 dark:border-slate-800 h-24 border-t p-1"></div>
+<div class="border-r border-slate-100 dark:border-slate-800 h-24 border-t p-1 bg-primary/5">
+<div class="bg-amber-500 text-white p-2 rounded-lg text-[10px] shadow-sm border-l-4 border-amber-700 h-full ring-2 ring-white dark:ring-slate-900">
+<p class="font-bold">Sara Ibrahim</p>
+<p>Brake Pad Replacement</p>
+<p class="mt-1 opacity-80">Toyota Corolla</p>
+</div>
+</div>
+<div class="border-r border-slate-100 dark:border-slate-800 h-24 border-t p-1"></div>
+<div class="border-r border-slate-100 dark:border-slate-800 h-24 border-t p-1">
+<div class="bg-slate-400 text-white p-2 rounded-lg text-[10px] opacity-50">
+                                        Blocked: Maintenance
+                                    </div>
+</div>
+<div class="border-r border-slate-100 dark:border-slate-800 h-24 border-t p-1"></div>
+<div class="border-r border-slate-100 dark:border-slate-800 h-24 border-t p-1"></div>
+<div class="h-24 border-t p-1"></div>
+<!-- Example Time Row: 11:00 -->
+<div class="p-4 border-r border-slate-100 dark:border-slate-800 text-xs font-medium text-slate-400 h-24 border-t">11:00 AM</div>
+<div class="border-r border-slate-100 dark:border-slate-800 h-24 border-t p-1"></div>
+<div class="border-r border-slate-100 dark:border-slate-800 h-24 border-t p-1 bg-primary/5"></div>
+<div class="border-r border-slate-100 dark:border-slate-800 h-24 border-t p-1"></div>
+<div class="border-r border-slate-100 dark:border-slate-800 h-24 border-t p-1"></div>
+<div class="border-r border-slate-100 dark:border-slate-800 h-24 border-t p-1"></div>
+<div class="border-r border-slate-100 dark:border-slate-800 h-24 border-t p-1"></div>
+<div class="h-24 border-t p-1"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Appointment Details Sidebar (Active Selection) -->
+<div class="w-96 flex flex-col gap-6">
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-lg p-6 flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<h2 class="text-lg font-bold text-slate-900 dark:text-white">Appointment Details</h2>
+<span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold">Pending</span>
+</div>
+<!-- Customer Info -->
+<div class="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+<div class="size-12 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
+<img alt="Sara Ibrahim" class="size-full object-cover" data-alt="Customer avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXg-jjelP1T-0zrSx9jZ-AOeCiOVmSfvTymBD5lrHMsD5qoobRttZHJRILhdyEurKwYM9Cw997FS_8aoR4V3cK3T6BdZ8cPLcu7LT25xd8ts2sxrrn6dwTZY5j891vFUy8E6ppVoSS5LmWGGk3EBiolGVrYDN0zbe4rMYZaCIvfCRxvuIsZpdwnUQZXcuzvKeivWwfA83jaCPS0l7Pv_1lc-z9K6aOqgZ7SlJz2CWu96nmo7PUDSkUIDuO-y1d540CyFGA6MPP"/>
+</div>
+<div>
+<p class="text-sm font-bold text-slate-900 dark:text-white">Sara Ibrahim</p>
+<p class="text-xs text-slate-500">+20 123 456 7890</p>
+<p class="text-[10px] text-primary flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[12px]">verified</span> Trusted Customer
+                                </p>
+</div>
+</div>
+<!-- Vehicle Info (Garage) -->
+<div class="flex flex-col gap-3">
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Customer Garage</h3>
+<div class="p-3 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-400">directions_car</span>
+<div>
+<p class="text-sm font-semibold">Toyota Corolla 2022</p>
+<p class="text-xs text-slate-500">Plate: ABC 1234 • 15,000 KM</p>
+</div>
+</div>
+</div>
+<!-- Service Details -->
+<div class="flex flex-col gap-3">
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Requested Service</h3>
+<div class="p-4 bg-primary/5 rounded-xl border border-primary/20">
+<div class="flex justify-between items-start mb-2">
+<p class="text-sm font-bold text-slate-900 dark:text-white">Brake Pad Replacement</p>
+<p class="text-sm font-bold text-primary">850 EGP</p>
+</div>
+<p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed italic">"Squeaky noise coming from front wheels when braking at low speeds."</p>
+</div>
+</div>
+<!-- Status Toggles -->
+<div class="grid grid-cols-2 gap-2">
+<button class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs font-bold transition-colors">
+<span class="material-symbols-outlined text-sm">check_circle</span> Approve
+                            </button>
+<button class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-bold transition-colors">
+<span class="material-symbols-outlined text-sm">schedule</span> Reschedule
+                            </button>
+<button class="col-span-2 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-white text-xs font-bold transition-colors">
+<span class="material-symbols-outlined text-sm">task_alt</span> Mark Completed
+                            </button>
+</div>
+<hr class="border-slate-100 dark:border-slate-800"/>
+<!-- Final Invoice/Extra Charges -->
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Billing &amp; Notes</h3>
+<button class="text-primary text-[10px] font-bold uppercase">+ Add Extra</button>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center px-3 py-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+<span class="text-xs">Workshop Supplies Fee</span>
+<span class="text-xs font-bold">45 EGP</span>
+</div>
+<textarea class="w-full text-xs rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 placeholder:text-slate-400" placeholder="Add private notes or findings for the invoice..." rows="3"></textarea>
+</div>
+<div class="flex justify-between items-center mt-2 px-1">
+<p class="text-sm font-bold">Estimated Total</p>
+<p class="text-lg font-black text-slate-900 dark:text-white">895 EGP</p>
+</div>
+</div>
+</div>
+<!-- Upcoming List Quickview -->
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
+<h3 class="text-sm font-bold mb-4">Upcoming Next</h3>
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="w-1 bg-primary h-8 rounded-full"></div>
+<div class="flex-1">
+<p class="text-xs font-bold">12:30 PM - Khaled Zaki</p>
+<p class="text-[10px] text-slate-500">A/C Recharge • Jeep Grand Cherokee</p>
+</div>
+<button class="text-slate-400"><span class="material-symbols-outlined text-sm">chevron_right</span></button>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-1 bg-slate-200 dark:bg-slate-700 h-8 rounded-full"></div>
+<div class="flex-1">
+<p class="text-xs font-bold">02:00 PM - Mahmoud Ali</p>
+<p class="text-[10px] text-slate-500">General Inspection • Mercedes C200</p>
+</div>
+<button class="text-slate-400"><span class="material-symbols-outlined text-sm">chevron_right</span></button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,297 @@
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1754cf",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#111621",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<title>Service Center Booking | EgyptCarParts</title>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 lg:px-20 py-3">
+<div class="max-w-[1440px] mx-auto flex items-center justify-between gap-8">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3">
+<div class="text-primary">
+<svg class="size-8" fill="currentColor" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 4H17.3334V17.3334H30.6666V30.6666H44V44H4V4Z"></path>
+</svg>
+</div>
+<h1 class="text-xl font-bold tracking-tight">EgyptCarParts</h1>
+</div>
+<div class="hidden md:flex items-center gap-6">
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Home</a>
+<a class="text-sm font-medium hover:text-primary transition-colors border-b-2 border-primary pb-1" href="#">Services</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Parts</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Offers</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-2 px-4 py-2 text-sm font-bold text-white bg-primary rounded-lg hover:bg-primary/90 transition-all">
+<span class="material-symbols-outlined text-[20px]">account_circle</span>
+                    Login
+                </button>
+</div>
+</div>
+</header>
+<main class="max-w-[1440px] mx-auto min-h-screen flex flex-col">
+<!-- Search Header Section -->
+<section class="p-6 lg:px-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+<div class="flex flex-col gap-6">
+<div>
+<nav class="flex items-center gap-2 text-sm text-slate-500 mb-2">
+<span>Home</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="text-slate-900 dark:text-slate-100 font-medium">Services</span>
+</nav>
+<h2 class="text-3xl font-black tracking-tight">Book a Service</h2>
+<p class="text-slate-500 dark:text-slate-400">Find trusted service centers for car parts and repairs in Cairo &amp; Alexandria</p>
+</div>
+<div class="flex flex-col lg:flex-row gap-4 items-center">
+<!-- Toggle Switch -->
+<div class="flex p-1 bg-background-light dark:bg-slate-800 rounded-xl w-full lg:w-fit">
+<button class="flex-1 lg:min-w-[160px] px-4 py-2 text-sm font-semibold rounded-lg bg-white dark:bg-slate-700 shadow-sm text-primary">
+                            Search by Service
+                        </button>
+<button class="flex-1 lg:min-w-[160px] px-4 py-2 text-sm font-medium rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-700">
+                            Search by Center
+                        </button>
+</div>
+<!-- Search Input -->
+<div class="relative flex-1 w-full">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400">search</span>
+<input class="w-full pl-12 pr-4 py-3 bg-background-light dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary/20 text-slate-900 dark:text-slate-100" placeholder="Search for Oil Change, AC Repair, or Center name..." type="text"/>
+</div>
+<!-- Location Filter -->
+<div class="relative w-full lg:w-64">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400">location_on</span>
+<input class="w-full pl-12 pr-4 py-3 bg-background-light dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary/20 text-slate-900 dark:text-slate-100 font-medium" type="text" value="New Cairo, Egypt"/>
+</div>
+</div>
+<!-- Quick Filters -->
+<div class="flex flex-wrap gap-3">
+<button class="flex items-center gap-2 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-full text-sm font-medium bg-white dark:bg-slate-800 hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-lg">home_repair_service</span>
+                        At Workshop
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-full text-sm font-medium bg-white dark:bg-slate-800 hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-lg">car_repair</span>
+                        Mobile Service
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-full text-sm font-medium bg-white dark:bg-slate-800 hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-lg">event_available</span>
+                        Available Today
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-full text-sm font-medium bg-white dark:bg-slate-800 hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-lg">star</span>
+                        Top Rated
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-full text-sm font-medium bg-white dark:bg-slate-800 hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-lg">tune</span>
+                        More Filters
+                    </button>
+</div>
+</div>
+</section>
+<!-- Main Discovery Area -->
+<div class="flex-1 flex flex-col lg:flex-row h-full overflow-hidden">
+<!-- List View (Left) -->
+<div class="w-full lg:w-1/2 p-6 lg:pl-20 overflow-y-auto bg-background-light dark:bg-background-dark scrollbar-hide">
+<div class="flex justify-between items-center mb-6">
+<p class="text-sm font-semibold text-slate-500 uppercase tracking-wider">24 centers found near you</p>
+<div class="flex items-center gap-2">
+<span class="text-sm text-slate-500">Sort by:</span>
+<select class="bg-transparent border-none text-sm font-bold focus:ring-0 p-0 pr-6">
+<option>Relevance</option>
+<option>Price: Low to High</option>
+<option>Highest Rated</option>
+<option>Distance</option>
+</select>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<!-- Service Center Card 1 -->
+<div class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 flex shadow-sm hover:shadow-md transition-shadow">
+<div class="w-1/3 min-w-[140px] relative">
+<img alt="Service center interior" class="w-full h-full object-cover" data-alt="Modern car service workshop interior" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA854x6qNq8cRXP6u0d4PAggI1K81AIQulp25Y8wXlFVrJwvU42Jc2Vsm5gPgWU1h_VW_dcGmJzs_BTZFyl83yoNoh-P27TWQzq97mLiAONXT4vZYF826-MtKKXpP-gZhQAOX-qIDAeUEMsLXe-xkSl0wTaUHmeIzJz3OQKeCmVoRiS1AZYeQ6Rxax2LH7rCDhykaNsL2ifuVyFtGwj0RscjxZCpRMJKj8GtIW-JjHI7RbXU3_D3MbtHScL4iTUz4rg3Gt6OCEh"/>
+<div class="absolute top-2 left-2 bg-white/90 dark:bg-slate-900/90 px-2 py-1 rounded text-[10px] font-bold text-primary uppercase">Elite Partner</div>
+</div>
+<div class="flex-1 p-5 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-bold text-lg leading-tight">AutoCare Cairo - Maadi Center</h3>
+<div class="flex items-center gap-1 text-amber-500 font-bold text-sm">
+<span class="material-symbols-outlined text-sm">star</span>
+                                        4.8 (1.2k)
+                                    </div>
+</div>
+<p class="text-slate-500 text-sm flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-base">location_on</span>
+                                    2.4 km away • Maadi, Cairo
+                                </p>
+<div class="mt-3 flex flex-wrap gap-2">
+<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-[11px] font-medium rounded">Oil Change</span>
+<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-[11px] font-medium rounded">Brake Repair</span>
+<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-[11px] font-medium rounded">AC Service</span>
+</div>
+</div>
+<div class="mt-4 flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-4">
+<div>
+<p class="text-[10px] text-slate-500 uppercase font-bold">Starting from</p>
+<p class="text-xl font-black text-primary">850 EGP</p>
+</div>
+<button class="px-6 py-2 bg-primary text-white text-sm font-bold rounded-lg hover:bg-primary/90 transition-colors">Book Appointment</button>
+</div>
+</div>
+</div>
+<!-- Service Center Card 2 -->
+<div class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 flex shadow-sm hover:shadow-md transition-shadow">
+<div class="w-1/3 min-w-[140px] relative">
+<img alt="Mobile service van" class="w-full h-full object-cover" data-alt="Branded mobile car service van" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCU_Ql260O28BjYrLPakaEUmyNRRoYWEXNnVAhoRVUr31JZ7kLc2G6VCJr6Ar62NRXAuovy52qNr-zHlb1ydmoLbHwWo9y3jOg7qzx3UAxLaTIQjuUJzkBo-u_4230opPKl0cp_md_HKl0jooJ14tQKI0FbZ6FEIOHK8Q_LSqa5steKdhzVkOKqJf_15gKvD35ephccuDsvFB6s6GGwZbKhEwOOUmM2hmQaCmBEv4XjlNN_adgGbkY17WnVx7PiTRmVwxcV8HDH"/>
+<div class="absolute top-2 left-2 bg-primary px-2 py-1 rounded text-[10px] font-bold text-white uppercase">Mobile Service</div>
+</div>
+<div class="flex-1 p-5 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-bold text-lg leading-tight">QuickFix Mobile Mechanics</h3>
+<div class="flex items-center gap-1 text-amber-500 font-bold text-sm">
+<span class="material-symbols-outlined text-sm">star</span>
+                                        4.5 (850)
+                                    </div>
+</div>
+<p class="text-slate-500 text-sm flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-base">directions_car</span>
+                                    Available in all Cairo &amp; Giza
+                                </p>
+<div class="mt-3 flex flex-wrap gap-2">
+<span class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[11px] font-bold rounded">Fastest Response</span>
+<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-[11px] font-medium rounded">Tire Change</span>
+<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-[11px] font-medium rounded">Battery</span>
+</div>
+</div>
+<div class="mt-4 flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-4">
+<div>
+<p class="text-[10px] text-slate-500 uppercase font-bold">Starting from</p>
+<p class="text-xl font-black text-primary">500 EGP</p>
+</div>
+<button class="px-6 py-2 bg-primary text-white text-sm font-bold rounded-lg hover:bg-primary/90 transition-colors">Book Now</button>
+</div>
+</div>
+</div>
+<!-- Service Center Card 3 -->
+<div class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 flex shadow-sm hover:shadow-md transition-shadow">
+<div class="w-1/3 min-w-[140px] relative">
+<img alt="Advanced garage" class="w-full h-full object-cover" data-alt="High-end garage with diagnostic tools" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVBz3od8GZjwFzBvbdgsL82WyoKoiX2CMBZjevUsODVIfmRBLZwunDI8ilKP9BIbqK0elmvOAiKiRxvNX3u1fvu0yRaHmU5BEziP4aa-sChzUNEk55_2ReIp63o00KsAS7vaDVXMHfMSGtuORq3prF03iZFpbKq10kmqXN8coqDnNFWsrES-NpMDjodwI44vN39kFuu8XC4PvrdngrxACDy6zE1GzW8auKVUO-NlEdxHhj5j2KB5Ho36cUGArylqieYMp9c4PM"/>
+</div>
+<div class="flex-1 p-5 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-bold text-lg leading-tight">Precision Diagnostics Tagamoa</h3>
+<div class="flex items-center gap-1 text-amber-500 font-bold text-sm">
+<span class="material-symbols-outlined text-sm">star</span>
+                                        4.9 (420)
+                                    </div>
+</div>
+<p class="text-slate-500 text-sm flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-base">location_on</span>
+                                    5.8 km away • New Cairo
+                                </p>
+<div class="mt-3 flex flex-wrap gap-2">
+<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-[11px] font-medium rounded">ECU Coding</span>
+<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-[11px] font-medium rounded">Engine Tuning</span>
+<span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-[11px] font-medium rounded">Suspension</span>
+</div>
+</div>
+<div class="mt-4 flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-4">
+<div>
+<p class="text-[10px] text-slate-500 uppercase font-bold">Starting from</p>
+<p class="text-xl font-black text-primary">1,200 EGP</p>
+</div>
+<button class="px-6 py-2 bg-primary text-white text-sm font-bold rounded-lg hover:bg-primary/90 transition-colors">Book Appointment</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Map View (Right) -->
+<div class="hidden lg:block w-1/2 relative">
+<!-- Map Placeholder -->
+<div class="absolute inset-0 bg-slate-200 dark:bg-slate-800" data-location="Cairo" style="">
+<div class="w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center overflow-hidden">
+<!-- Abstract Map Visual -->
+<div class="relative w-full h-full opacity-30">
+<div class="absolute top-1/4 left-1/4 w-px h-full bg-slate-400 dark:bg-slate-600 rotate-45"></div>
+<div class="absolute top-0 left-1/2 w-px h-full bg-slate-400 dark:bg-slate-600"></div>
+<div class="absolute top-1/2 left-0 w-full h-px bg-slate-400 dark:bg-slate-600"></div>
+<div class="absolute top-1/3 left-0 w-full h-px bg-slate-400 dark:bg-slate-600 rotate-12"></div>
+</div>
+<!-- Map Markers -->
+<div class="absolute top-[40%] left-[30%]">
+<div class="flex flex-col items-center">
+<div class="bg-primary text-white p-2 rounded-xl shadow-lg font-bold text-xs whitespace-nowrap mb-1">850 EGP</div>
+<div class="size-4 bg-primary rounded-full border-4 border-white dark:border-slate-900 shadow-lg"></div>
+</div>
+</div>
+<div class="absolute top-[55%] left-[60%]">
+<div class="flex flex-col items-center">
+<div class="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-2 rounded-xl shadow-lg font-bold text-xs whitespace-nowrap mb-1">500 EGP</div>
+<div class="size-4 bg-slate-500 rounded-full border-4 border-white dark:border-slate-900 shadow-lg"></div>
+</div>
+</div>
+<div class="absolute top-[30%] left-[70%]">
+<div class="flex flex-col items-center">
+<div class="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-2 rounded-xl shadow-lg font-bold text-xs whitespace-nowrap mb-1">1,200 EGP</div>
+<div class="size-4 bg-slate-500 rounded-full border-4 border-white dark:border-slate-900 shadow-lg"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Map Controls -->
+<div class="absolute bottom-6 left-6 flex flex-col gap-2">
+<button class="size-10 bg-white dark:bg-slate-800 shadow-lg rounded-lg flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-50">
+<span class="material-symbols-outlined">my_location</span>
+</button>
+<div class="flex flex-col bg-white dark:bg-slate-800 shadow-lg rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
+<button class="size-10 flex items-center justify-center text-slate-700 dark:text-slate-200 border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50">
+<span class="material-symbols-outlined">add</span>
+</button>
+<button class="size-10 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-50">
+<span class="material-symbols-outlined">remove</span>
+</button>
+</div>
+</div>
+<div class="absolute top-6 right-6">
+<button class="px-4 py-2 bg-white dark:bg-slate-800 shadow-lg rounded-full text-sm font-bold flex items-center gap-2 border border-slate-200 dark:border-slate-700">
+<span class="material-symbols-outlined text-primary">layers</span>
+                        Satellite
+                    </button>
+</div>
+</div>
+</div>
+</main>
+
+```</body></html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>My Garage Vehicle Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1754cf",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#111621",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-10 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-primary">
+<span class="material-symbols-outlined text-3xl font-bold">directions_car</span>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em]">GarageEgypt</h2>
+</div>
+<nav class="hidden md:flex items-center gap-9">
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium leading-normal" href="#">Marketplace</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium leading-normal" href="#">Services</a>
+<a class="text-primary text-sm font-bold leading-normal border-b-2 border-primary" href="#">My Garage</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary text-sm font-medium leading-normal" href="#">Orders</a>
+</nav>
+</div>
+<div class="flex flex-1 justify-end gap-4 items-center">
+<label class="hidden lg:flex flex-col min-w-40 h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+<div class="text-slate-500 flex border-none bg-slate-100 dark:bg-slate-800 items-center justify-center pl-4 rounded-l-lg">
+<span class="material-symbols-outlined text-xl">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 border-none bg-slate-100 dark:bg-slate-800 focus:ring-0 h-full placeholder:text-slate-500 px-4 rounded-r-lg text-sm" placeholder="Search parts or services..." value=""/>
+</div>
+</label>
+<div class="flex gap-2">
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/20" data-alt="User profile avatar photo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAXXDVjifSz_-PpDQe8nGaeZ1n7KNyiJ9rbPK9vs3vsNFtsKlT5GEaxDy2P8A_RccDsgg22iEBkBEad8dS2efwVbgYQVdUs11MqJTskYnLYVV2wtOW7-BeVjheTpxZn8SrUPYAFHueJnptjAmVlxaYGusdZsXMHUP8oYqECdcV8p0Vf77SQ_Dn1-LgoBw-CVSbMolZK6SYCJN3TyJOmjPoGsBtj6rfyJSZYTs5y7UfGELGK5a9i2G8zLxpcgLlK05TQTehNLwHU");'></div>
+</div>
+</header>
+<main class="flex flex-1 justify-center py-8">
+<div class="layout-content-container flex flex-col max-w-[1200px] flex-1 px-4 lg:px-10">
+<!-- Breadcrumbs -->
+<div class="flex flex-wrap gap-2 mb-6">
+<a class="text-slate-500 text-sm font-medium hover:text-primary" href="#">Home</a>
+<span class="text-slate-400 text-sm">/</span>
+<span class="text-primary text-sm font-medium">My Garage</span>
+</div>
+<!-- Header Section -->
+<div class="flex flex-wrap justify-between items-end gap-4 mb-8">
+<div class="flex flex-col gap-1">
+<h1 class="text-slate-900 dark:text-slate-100 text-4xl font-black leading-tight tracking-[-0.033em]">My Garage</h1>
+<p class="text-slate-600 dark:text-slate-400 text-base font-normal">Manage your vehicles, track service history, and find compatible parts in Egypt.</p>
+</div>
+<button class="flex items-center justify-center gap-2 rounded-lg h-11 px-6 bg-primary text-white text-sm font-bold tracking-wide shadow-lg shadow-primary/20 hover:bg-primary/90 transition-colors">
+<span class="material-symbols-outlined">add_circle</span>
+<span>Add New Car</span>
+</button>
+</div>
+<!-- Vehicle Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+<!-- Vehicle Card 1 -->
+<div class="flex flex-col bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800">
+<div class="relative h-48 w-full bg-center bg-no-repeat bg-cover" data-alt="Modern white Toyota Corolla in a clean studio" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAsqrJWxvIb5qQYRinKg-1xOEQW2IM4eD46e_OM8nI23L9Fg5x7EJKj7Bd6yJxs9E6v_nKHghHEPTzuRZRQ4fnIrcTyLXAUKV31o2M2hV5wMaafrMK88Y_Td4cTvXx43nI1kb7z0v7jrZzdo2Y52Mj1igmBaKTMR2Kr48g_wYvWLWi4PB1AzLRtcGvD_w-Kxxt38kEFYvw780CAF77jfuCyCbVoAoStGzmb34Z4-0HxnSnzqCDIizmqFXjWtuPxYoSlvkFiSYB6");'>
+<div class="absolute top-4 left-4 bg-primary text-white text-xs font-bold px-2 py-1 rounded">Primary Vehicle</div>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="text-slate-900 dark:text-slate-100 text-xl font-bold">2018 Toyota Corolla</h3>
+<p class="text-slate-500 text-sm font-medium">Trim: GLI Premium</p>
+</div>
+<button class="text-slate-400 hover:text-primary">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-6">
+<div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-lg">
+<p class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Engine Code</p>
+<p class="text-slate-700 dark:text-slate-300 text-sm font-mono">1ZR-FE</p>
+</div>
+<div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-lg">
+<p class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Chassis</p>
+<p class="text-slate-700 dark:text-slate-300 text-sm font-mono">JT1B...4920</p>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<button class="flex items-center justify-center gap-2 w-full rounded-lg h-10 border border-primary text-primary text-sm font-bold hover:bg-primary/5">
+<span class="material-symbols-outlined text-lg">history</span>
+                                    View Service History
+                                </button>
+<button class="flex items-center justify-center gap-2 w-full rounded-lg h-10 bg-primary/10 text-primary text-sm font-bold hover:bg-primary/20">
+<span class="material-symbols-outlined text-lg">shopping_cart</span>
+                                    Recommended Parts
+                                </button>
+</div>
+</div>
+</div>
+<!-- Vehicle Card 2 -->
+<div class="flex flex-col bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800">
+<div class="relative h-48 w-full bg-center bg-no-repeat bg-cover" data-alt="Luxury blue BMW X5 SUV parked on a city street" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAQZYZFstj_MQ4-Yi_B6sF6-KaAzHxXNFYh5ytLlbTn-iXwdZpnx2PHVRnELINPgulYxQvNxR7YEd41RPZMg5n0qiZimjBrAcQj1spsHh3mjIf3_2Fkc79kEBi5W2WVeRUQVwuHOOqo8L--HqweyXxpKQ_L7vissUuh9CRPo0j0h8oIYC-rbxAkMV9zXQaFADw9DZJ_dl5S08OOX5sm5F1EpIW8Aq4ULB_9IgIsbqVDROSQH6nywm4qFQaJCRSbdCU_ZfdReyC0");'>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="text-slate-900 dark:text-slate-100 text-xl font-bold">2021 BMW X5</h3>
+<p class="text-slate-500 text-sm font-medium">Trim: xDrive40i M Sport</p>
+</div>
+<button class="text-slate-400 hover:text-primary">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-6">
+<div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-lg">
+<p class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Engine Code</p>
+<p class="text-slate-700 dark:text-slate-300 text-sm font-mono">B58B30O1</p>
+</div>
+<div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-lg">
+<p class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Chassis</p>
+<p class="text-slate-700 dark:text-slate-300 text-sm font-mono">WBA...8812</p>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<button class="flex items-center justify-center gap-2 w-full rounded-lg h-10 border border-primary text-primary text-sm font-bold hover:bg-primary/5">
+<span class="material-symbols-outlined text-lg">history</span>
+                                    View Service History
+                                </button>
+<button class="flex items-center justify-center gap-2 w-full rounded-lg h-10 bg-primary/10 text-primary text-sm font-bold hover:bg-primary/20">
+<span class="material-symbols-outlined text-lg">shopping_cart</span>
+                                    Recommended Parts
+                                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Section: Service & Parts -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Recommended Parts Sidebar -->
+<div class="lg:col-span-2 flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<h2 class="text-slate-900 dark:text-slate-100 text-2xl font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">build</span>
+                                Recommended for your Toyota
+                            </h2>
+<a class="text-primary text-sm font-bold hover:underline" href="#">See all parts</a>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex gap-4">
+<div class="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-3xl text-slate-400">oil_barrel</span>
+</div>
+<div class="flex flex-col justify-between py-1">
+<div>
+<p class="text-slate-900 dark:text-slate-100 text-sm font-bold">Synthetic Engine Oil 5W-30</p>
+<p class="text-slate-500 text-xs">Toyota Genuine Parts</p>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-primary font-bold">1,250 EGP</span>
+<button class="text-primary hover:bg-primary/10 p-1 rounded">
+<span class="material-symbols-outlined text-xl">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex gap-4">
+<div class="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-3xl text-slate-400">filter_alt</span>
+</div>
+<div class="flex flex-col justify-between py-1">
+<div>
+<p class="text-slate-900 dark:text-slate-100 text-sm font-bold">Premium Oil Filter</p>
+<p class="text-slate-500 text-xs">Bosch Performance</p>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-primary font-bold">450 EGP</span>
+<button class="text-primary hover:bg-primary/10 p-1 rounded">
+<span class="material-symbols-outlined text-xl">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Upcoming Maintenance -->
+<div class="flex flex-col gap-6">
+<h2 class="text-slate-900 dark:text-slate-100 text-2xl font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">event_note</span>
+                            Upcoming
+                        </h2>
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+<div class="p-4 border-b border-slate-100 dark:border-slate-800 bg-primary/5">
+<div class="flex items-center justify-between mb-1">
+<span class="text-xs font-bold text-primary uppercase">Scheduled Service</span>
+<span class="text-xs font-medium text-slate-500">In 1,200 km</span>
+</div>
+<p class="text-slate-900 dark:text-slate-100 text-sm font-bold">60,000 KM Major Service</p>
+</div>
+<div class="p-4 space-y-4">
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-slate-400 text-lg">check_circle</span>
+<p class="text-slate-600 dark:text-slate-400 text-xs leading-tight">Engine oil &amp; filter change</p>
+</div>
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-slate-400 text-lg">check_circle</span>
+<p class="text-slate-600 dark:text-slate-400 text-xs leading-tight">Brake fluid inspection</p>
+</div>
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-slate-400 text-lg">check_circle</span>
+<p class="text-slate-600 dark:text-slate-400 text-xs leading-tight">Tire rotation &amp; balancing</p>
+</div>
+<button class="w-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm font-bold py-2 rounded-lg hover:bg-slate-200 transition-colors">
+                                    Book Service Now
+                                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Add New Car Wizard (Static Preview) -->
+<div class="mt-16 p-8 bg-slate-900 text-white rounded-2xl relative overflow-hidden">
+<div class="relative z-10 max-w-lg">
+<h2 class="text-3xl font-black mb-4 tracking-tight">Need to add another car?</h2>
+<p class="text-slate-400 mb-8">Follow our simple 4-step wizard to register your vehicle and get tailored part recommendations instantly.</p>
+<div class="flex items-center gap-4">
+<div class="flex -space-x-2">
+<div class="w-10 h-10 rounded-full border-2 border-slate-900 bg-primary flex items-center justify-center text-xs font-bold">1</div>
+<div class="w-10 h-10 rounded-full border-2 border-slate-900 bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-500">2</div>
+<div class="w-10 h-10 rounded-full border-2 border-slate-900 bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-500">3</div>
+<div class="w-10 h-10 rounded-full border-2 border-slate-900 bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-500">4</div>
+</div>
+<span class="text-sm font-medium text-slate-300 italic">Starting with Brand selection...</span>
+</div>
+</div>
+<!-- Decorative background element -->
+<div class="absolute right-0 top-0 h-full w-1/3 opacity-20 hidden md:block" style="background: linear-gradient(90deg, transparent 0%, #1754cf 100%);">
+</div>
+<span class="absolute right-[-40px] bottom-[-40px] material-symbols-outlined text-[200px] text-primary/10">directions_car</span>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-10">
+<div class="max-w-[1200px] mx-auto px-10 flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex items-center gap-3 text-slate-400">
+<span class="material-symbols-outlined text-2xl">directions_car</span>
+<span class="text-sm font-bold">© 2024 GarageEgypt B2C Platform</span>
+</div>
+<div class="flex gap-8">
+<a class="text-slate-500 text-sm hover:text-primary" href="#">Help Center</a>
+<a class="text-slate-500 text-sm hover:text-primary" href="#">Terms of Service</a>
+<a class="text-slate-500 text-sm hover:text-primary" href="#">Privacy Policy</a>
+</div>
+<div class="flex gap-4">
+<button class="text-slate-400 hover:text-primary">
+<span class="material-symbols-outlined">language</span>
+</button>
+<span class="text-slate-400 text-sm font-medium">English (Egypt)</span>
+</div>
+</div>
+</footer>
+</div>
+</div>
+</body></html>

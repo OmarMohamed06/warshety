@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Garage Premium - Premium Car Parts &amp; Expert Services</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1754cf",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#111621",
+                        "hero-overlay": "rgba(0, 0, 0, 0.45)",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1.5rem",
+                        "3xl": "2.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .material-symbols-outlined {
+                font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            }
+            .mirror-x {
+                transform: scaleX(-1);
+            }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<header class="sticky top-0 z-50 w-full bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+<div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+<div class="flex items-center gap-12">
+<div class="flex items-center gap-2">
+<div class="bg-primary text-white p-1.5 rounded-lg">
+<span class="material-symbols-outlined text-2xl">garage</span>
+</div>
+<h2 class="text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">Garage</h2>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-sm font-semibold hover:text-primary transition-colors" href="#">Parts Shop</a>
+<a class="text-sm font-semibold hover:text-primary transition-colors" href="#">Service Centers</a>
+<a class="text-sm font-semibold hover:text-primary transition-colors" href="#">Fleet Solutions</a>
+<a class="text-sm font-semibold hover:text-primary transition-colors" href="#">Offers</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden lg:flex relative w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary/20" placeholder="Search SKU, VIN or Brand..." type="text"/>
+</div>
+<div class="flex items-center gap-3">
+<button class="px-5 py-2.5 rounded-lg text-sm font-bold bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-slate-200 transition-all">My Garage</button>
+<button class="px-5 py-2.5 rounded-lg text-sm font-bold bg-primary text-white shadow-lg shadow-primary/25 hover:opacity-90 transition-all">Sign In</button>
+</div>
+</div>
+</div>
+</header>
+<main class="w-full">
+<section class="max-w-[1440px] mx-auto px-6 pt-12 pb-24 lg:pt-16 lg:pb-32">
+<div class="relative w-full rounded-2xl overflow-hidden min-h-[700px] flex items-center justify-center bg-center bg-cover" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDGTrdIuDJxwbgka6edDtX-A_chOsB1zc9e6VLu1R6GsnVMTHdLDSJCUOy4-vTdLB1SEzcGLRg-jMhf_vsLXDUDfBn8itqdLMtkUtgnTlorxjhhLjliqulF8MUVsUikXnNf1B1DW2dIfmA5THE0EGmeZcPAn3GN4Gj3eSYv_CyZiPvgu-E2igGXKBuw2pj43BGDPKZZk3mIDEkeY3YwZ9jkLBAvSzjHfWNCQRrcnzqJXRFjFNmA3PuM2EAROb1tXKr_fNdqBUr8');">
+<div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60 z-10"></div>
+<div class="relative z-20 text-center max-w-4xl mx-auto px-8">
+<span class="inline-block px-4 py-1.5 mb-8 text-xs font-bold tracking-widest text-white uppercase bg-white/20 backdrop-blur-md border border-white/20 rounded-full">Egypt's #1 Car Marketplace</span>
+<h1 class="text-4xl lg:text-7xl font-black text-white leading-[1.1] tracking-tight mb-8 drop-shadow-lg">
+                        Everything Your Car Needs. <br/><span class="text-white">In One Place.</span>
+</h1>
+<p class="text-xl text-white/95 mb-12 leading-relaxed max-w-2xl mx-auto font-medium drop-shadow-md">
+                        Find compatible car parts, book trusted service centers, and shop from verified automotive vendors.
+                    </p>
+<div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+<button class="w-full sm:w-auto px-10 h-16 bg-slate-900 text-white rounded-xl font-bold shadow-2xl hover:bg-slate-800 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">search</span>
+                            Find My Parts
+                        </button>
+<button class="w-full sm:w-auto px-10 h-16 bg-white text-slate-900 rounded-xl font-bold shadow-lg hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">home_repair_service</span>
+                            Book a Service
+                        </button>
+</div>
+</div>
+</div>
+</section>
+<section class="relative -mt-24 z-30 max-w-5xl mx-auto px-6">
+<div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 p-8">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary">directions_car</span>
+<h3 class="text-xl font-bold">Configure Your Vehicle</h3>
+<p class="text-slate-400 text-sm ml-auto">Personalize your parts feed</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="space-y-2">
+<label class="text-xs font-bold uppercase text-slate-500 tracking-wider">Brand</label>
+<select class="w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg py-3 focus:ring-primary">
+<option>Select Make</option>
+<option>BMW</option>
+<option>Mercedes-Benz</option>
+<option>Audi</option>
+<option>Porsche</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold uppercase text-slate-500 tracking-wider">Model</label>
+<select class="w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg py-3 focus:ring-primary">
+<option>Select Model</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold uppercase text-slate-500 tracking-wider">Year</label>
+<select class="w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-lg py-3 focus:ring-primary">
+<option>Select Year</option>
+</select>
+</div>
+</div>
+<button class="mt-8 w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all uppercase tracking-widest text-sm">Save to My Garage</button>
+</div>
+</section>
+<section class="py-24 max-w-7xl mx-auto px-6">
+<div class="flex items-end justify-between mb-12">
+<div>
+<h2 class="text-3xl font-black mb-2">Browse by Category</h2>
+<p class="text-slate-500">Premium parts for every performance need</p>
+</div>
+<a class="text-primary font-bold flex items-center gap-1 group" href="#">
+                    View All Categories <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">chevron_right</span>
+</a>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+<div class="bg-white dark:bg-slate-800 p-8 rounded-2xl text-center border border-slate-100 dark:border-slate-700 hover:border-primary transition-all group cursor-pointer shadow-sm hover:shadow-xl">
+<div class="w-16 h-16 mx-auto mb-4 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">minor_crash</span>
+</div>
+<h4 class="font-bold text-sm">Brake Systems</h4>
+</div>
+<div class="bg-white dark:bg-slate-800 p-8 rounded-2xl text-center border border-slate-100 dark:border-slate-700 hover:border-primary transition-all group cursor-pointer shadow-sm hover:shadow-xl">
+<div class="w-16 h-16 mx-auto mb-4 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">earth_engine</span>
+</div>
+<h4 class="font-bold text-sm">Engine Parts</h4>
+</div>
+<div class="bg-white dark:bg-slate-800 p-8 rounded-2xl text-center border border-slate-100 dark:border-slate-700 hover:border-primary transition-all group cursor-pointer shadow-sm hover:shadow-xl">
+<div class="w-16 h-16 mx-auto mb-4 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">shutter_speed</span>
+</div>
+<h4 class="font-bold text-sm">Suspension</h4>
+</div>
+<div class="bg-white dark:bg-slate-800 p-8 rounded-2xl text-center border border-slate-100 dark:border-slate-700 hover:border-primary transition-all group cursor-pointer shadow-sm hover:shadow-xl">
+<div class="w-16 h-16 mx-auto mb-4 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">lightbulb</span>
+</div>
+<h4 class="font-bold text-sm">Lighting</h4>
+</div>
+<div class="bg-white dark:bg-slate-800 p-8 rounded-2xl text-center border border-slate-100 dark:border-slate-700 hover:border-primary transition-all group cursor-pointer shadow-sm hover:shadow-xl">
+<div class="w-16 h-16 mx-auto mb-4 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">tire_repair</span>
+</div>
+<h4 class="font-bold text-sm">Wheels &amp; Tires</h4>
+</div>
+<div class="bg-white dark:bg-slate-800 p-8 rounded-2xl text-center border border-slate-100 dark:border-slate-700 hover:border-primary transition-all group cursor-pointer shadow-sm hover:shadow-xl">
+<div class="w-16 h-16 mx-auto mb-4 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">battery_charging_full</span>
+</div>
+<h4 class="font-bold text-sm">Electrical</h4>
+</div>
+</div>
+</section>
+<section class="py-24 bg-slate-50 dark:bg-slate-900/50">
+<div class="max-w-7xl mx-auto px-6">
+<div class="mb-12">
+<h2 class="text-3xl font-black mb-2">Featured Service Centers</h2>
+<p class="text-slate-500">Certified excellence in Cairo, Giza &amp; Alexandria</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<div class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-700 group shadow-md hover:shadow-2xl transition-all">
+<div class="h-56 bg-center bg-cover relative" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDM6v9903PHEN-dgowhzASd_Obu_HzFJ7mCUcHerHw3cJX0LqY5ygDoaf_XA4Qo1iJxIe5f5QtpxPubE0Dp3VHawyEVTG-IXHrDHfwfL2ntBdJhukmXQ9RqX0F36wQ3yfaiUh9us7kWfGjRW4P12a1Lss-mFF8QbOlsIdnQw3FSHBkhwDb00j2vVhmZNS5pM5qu3WSW_Dt2VCF_wyVyy0aL03aLeGg1hoXiTgIiMiGmMxaMMOwNB6o7VHtdle-RsV5Sd32hu4eo')">
+<div class="absolute top-4 right-4 bg-white dark:bg-slate-800 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
+<span class="material-symbols-outlined text-yellow-500 text-sm">star</span> 4.9
+                            </div>
+</div>
+<div class="p-6">
+<h4 class="text-xl font-bold mb-2">Elite Auto Haus</h4>
+<div class="flex items-center gap-2 text-slate-500 text-sm mb-4">
+<span class="material-symbols-outlined text-base">location_on</span>
+                                New Cairo, Egypt
+                            </div>
+<div class="flex flex-wrap gap-2 mb-6">
+<span class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded text-[10px] font-bold uppercase text-slate-500">BMW Specialist</span>
+<span class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded text-[10px] font-bold uppercase text-slate-500">Mercedes-Benz</span>
+</div>
+<button class="w-full py-3 rounded-xl border-2 border-primary text-primary font-bold hover:bg-primary hover:text-white transition-all">Book Inspection</button>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-700 group shadow-md hover:shadow-2xl transition-all">
+<div class="h-56 bg-center bg-cover relative" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB4eLV7IKyTrK1YRud09v_2EiFwAqOndh8u_w36Suuv8yTQve9OUsdV8sgn5PkCWdSIh8K473Y4jKPEvPOHrpaDhqLKgF6cBWnZ1-0req1PvUfh5U3IS5mvhWvk2-NUWJGsp82AkqWnWF7XAgpMg0ezdNf5R7fioUuWM0xHD8r6-BGQm1QywM-QHn2heYf7jB7OJm6L8YhuyHLLFWoA9ik8nFfTPbwXOFu4f4dBq1QRTgMhJVDkfih4vV5mTG6QO3-eY_w4o8Mb')">
+<div class="absolute top-4 right-4 bg-white dark:bg-slate-800 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
+<span class="material-symbols-outlined text-yellow-500 text-sm">star</span> 4.8
+                            </div>
+</div>
+<div class="p-6">
+<h4 class="text-xl font-bold mb-2">Precision Motors</h4>
+<div class="flex items-center gap-2 text-slate-500 text-sm mb-4">
+<span class="material-symbols-outlined text-base">location_on</span>
+                                Sheikh Zayed, Egypt
+                            </div>
+<div class="flex flex-wrap gap-2 mb-6">
+<span class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded text-[10px] font-bold uppercase text-slate-500">Audi</span>
+<span class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded text-[10px] font-bold uppercase text-slate-500">Porsche</span>
+</div>
+<button class="w-full py-3 rounded-xl border-2 border-primary text-primary font-bold hover:bg-primary hover:text-white transition-all">Book Inspection</button>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-700 group shadow-md hover:shadow-2xl transition-all">
+<div class="h-56 bg-center bg-cover relative" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCjzDT9dn3i1Jm8Xmz7GDDzGvawFrddJxqQu8HddbNSWIyjhktu7LxWcFUO41ALjbNzilHMVWzMvbQ7cHm8Y7vEk9SGkq_JH91bVsEY5-i1uPJt-aGyTlIptLDAbZ-CKSBGSI8eB5iSTTC2vAirSld0Usx7JUFB1DcACbPTrKmDKZyyHF310BUsNYn4vrCuNH0wloeArJzfQ5cvIVzkzG2A_NdODapDSuYbTXdkX9S7hKAxFbfQbSg_5mYM67XU_aBXTN1ee3n-')">
+<div class="absolute top-4 right-4 bg-white dark:bg-slate-800 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
+<span class="material-symbols-outlined text-yellow-500 text-sm">star</span> 5.0
+                            </div>
+</div>
+<div class="p-6">
+<h4 class="text-xl font-bold mb-2">Alex Garage Pro</h4>
+<div class="flex items-center gap-2 text-slate-500 text-sm mb-4">
+<span class="material-symbols-outlined text-base">location_on</span>
+                                Alexandria, Egypt
+                            </div>
+<div class="flex flex-wrap gap-2 mb-6">
+<span class="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded text-[10px] font-bold uppercase text-slate-500">All Luxury Makes</span>
+</div>
+<button class="w-full py-3 rounded-xl border-2 border-primary text-primary font-bold hover:bg-primary hover:text-white transition-all">Book Inspection</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-24 max-w-7xl mx-auto px-6 overflow-hidden">
+<div class="bg-slate-900 rounded-3xl p-12 relative">
+<div class="absolute top-0 right-0 p-8 opacity-20 pointer-events-none">
+<span class="material-symbols-outlined text-[200px]">auto_awesome</span>
+</div>
+<div class="relative z-10 grid grid-cols-1 lg:grid-cols-2 items-center gap-12">
+<div>
+<span class="text-primary font-black uppercase tracking-widest text-sm mb-4 block">Exclusive Offers</span>
+<h2 class="text-4xl font-black text-white mb-6">Seasonal Maintenance Package</h2>
+<p class="text-slate-400 text-lg mb-8 leading-relaxed">Get 30% off on full vehicle diagnostics and fluid change for all European models. Limited time offer available until end of month.</p>
+<div class="flex items-center gap-8 mb-10 text-white">
+<div>
+<span class="block text-3xl font-black">12</span>
+<span class="text-xs uppercase text-slate-500 font-bold">Days Left</span>
+</div>
+<div class="w-px h-10 bg-slate-800"></div>
+<div>
+<span class="block text-3xl font-black">24</span>
+<span class="text-xs uppercase text-slate-500 font-bold">Hours Left</span>
+</div>
+</div>
+<button class="bg-white text-slate-900 px-10 py-4 rounded-xl font-bold text-lg hover:bg-slate-100 transition-all">Claim Offer Now</button>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-slate-800/50 backdrop-blur p-6 rounded-2xl border border-white/5">
+<span class="material-symbols-outlined text-primary mb-3">oil_barrel</span>
+<h5 class="text-white font-bold mb-1">Synthetic Oil</h5>
+<p class="text-xs text-slate-400">Starting from 1,200 EGP</p>
+</div>
+<div class="bg-slate-800/50 backdrop-blur p-6 rounded-2xl border border-white/5 mt-8">
+<span class="material-symbols-outlined text-primary mb-3">speed</span>
+<h5 class="text-white font-bold mb-1">Brake Pads</h5>
+<p class="text-xs text-slate-400">Save 15% Today</p>
+</div>
+<div class="bg-slate-800/50 backdrop-blur p-6 rounded-2xl border border-white/5">
+<span class="material-symbols-outlined text-primary mb-3">filter_alt</span>
+<h5 class="text-white font-bold mb-1">Air Filters</h5>
+<p class="text-xs text-slate-400">Bundle &amp; Save</p>
+</div>
+<div class="bg-slate-800/50 backdrop-blur p-6 rounded-2xl border border-white/5 mt-8">
+<span class="material-symbols-outlined text-primary mb-3">ac_unit</span>
+<h5 class="text-white font-bold mb-1">AC Refill</h5>
+<p class="text-xs text-slate-400">Fixed Price 800 EGP</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<footer class="bg-white dark:bg-background-dark border-t border-slate-200 dark:border-slate-800 pt-20 pb-10">
+<div class="max-w-7xl mx-auto px-6">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+<div class="space-y-6">
+<div class="flex items-center gap-2">
+<div class="bg-primary text-white p-1.5 rounded-lg">
+<span class="material-symbols-outlined text-2xl">garage</span>
+</div>
+<h2 class="text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase">Garage</h2>
+</div>
+<p class="text-slate-500 text-sm leading-relaxed">Egypt's leading platform for premium automotive parts and expert vehicle services. Dedicated to quality and authenticity.</p>
+</div>
+<div>
+<h5 class="font-bold mb-6 text-slate-900 dark:text-white uppercase text-xs tracking-widest">Shop &amp; Service</h5>
+<ul class="space-y-4 text-sm text-slate-500">
+<li><a class="hover:text-primary transition-colors" href="#">Find Spare Parts</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Book a Mechanic</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Brake Services</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Engine Diagnosis</a></li>
+</ul>
+</div>
+<div>
+<h5 class="font-bold mb-6 text-slate-900 dark:text-white uppercase text-xs tracking-widest">Company</h5>
+<ul class="space-y-4 text-sm text-slate-500">
+<li><a class="hover:text-primary transition-colors" href="#">About Garage</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Partner With Us</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Customer Support</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Careers</a></li>
+</ul>
+</div>
+<div>
+<h5 class="font-bold mb-6 text-slate-900 dark:text-white uppercase text-xs tracking-widest">Newsletter</h5>
+<p class="text-sm text-slate-500 mb-4">Get the latest parts arrivals and deals.</p>
+<div class="flex gap-2">
+<input class="flex-1 px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 border-none text-sm" placeholder="Email address" type="email"/>
+<button class="bg-primary text-white p-2 rounded-lg"><span class="material-symbols-outlined text-sm">send</span></button>
+</div>
+</div>
+</div>
+<div class="border-t border-slate-100 dark:border-slate-800 pt-8 flex flex-col md:row items-center justify-between gap-6 text-xs font-medium text-slate-400">
+<p>© 2024 Garage Marketplace Egypt. All rights reserved.</p>
+<div class="flex gap-8">
+<a class="hover:text-slate-900 dark:hover:text-white" href="#">Privacy Policy</a>
+<a class="hover:text-slate-900 dark:hover:text-white" href="#">Terms of Service</a>
+</div>
+</div>
+</div>
+</footer>
+<button class="fixed bottom-8 right-8 z-[100] bg-red-600 text-white flex items-center gap-3 px-6 py-4 rounded-full shadow-2xl shadow-red-600/40 hover:scale-110 transition-transform group">
+<span class="material-symbols-outlined animate-pulse">sos</span>
+<span class="font-black text-sm uppercase tracking-tighter">Emergency Roadside</span>
+</button>
+
+</body></html>

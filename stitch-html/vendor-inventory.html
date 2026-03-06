@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vendor Inventory Management - EgyptCar</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1754cf",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#111621",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col">
+<div class="p-6 flex items-center gap-3">
+<div class="bg-primary p-1.5 rounded-lg text-white">
+<span class="material-symbols-outlined block text-2xl">settings_input_component</span>
+</div>
+<h1 class="font-bold text-lg tracking-tight">EgyptCar Vendor</h1>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 bg-primary/10 text-primary rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="text-sm font-medium">Inventory</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="text-sm font-medium">Orders</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-sm font-medium">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3 p-2">
+<div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Vendor profile avatar picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB83bwOHtq9W0It2tmMvC7DRLhbL5nlPQT7B0T7R_dZLLXOaFAYchQgCJSMgPJhRq77bPfT5VRLHKHiHacGzESeDwsSZ4KTwRvC9hmC_TuOa_iBLiDdR-g_L8wtwohU5IyXRinOImsZW0jU-iRcWoIfY89aQykoqXHKxgEI-2oP7osyLnQGCk_JGD9wFxOrflHYMn5Z0JM94pw9tCdBWnsc4pMqYyCMjZk1zPqB3frrUQJlGNeGu1hPhDrT-rR9WbXhS8vLnCIQ"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-semibold truncate">Ahmed Mohamed</p>
+<p class="text-xs text-slate-500 truncate">Cairo Spare Parts Ltd.</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col overflow-y-auto">
+<!-- Header -->
+<header class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-8 sticky top-0 z-10">
+<div class="flex-1 max-w-xl">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-lg focus:ring-2 focus:ring-primary/50 text-sm transition-all" placeholder="Search by Part Name, OEM Number, or Compatibility..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-slate-900"></span>
+</button>
+<button class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-primary/90 transition-all shadow-sm">
+<span class="material-symbols-outlined text-lg">add</span>
+                        Add New Product
+                    </button>
+</div>
+</header>
+<div class="p-8 space-y-6">
+<!-- Welcome & Stats Summary -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h2 class="text-2xl font-bold tracking-tight">Inventory Management</h2>
+<p class="text-slate-500 dark:text-slate-400">Manage your car parts listing and stock levels across Egypt.</p>
+</div>
+<div class="flex gap-4">
+<div class="bg-white dark:bg-slate-900 p-3 px-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+<div class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 p-2 rounded-lg">
+<span class="material-symbols-outlined">inventory</span>
+</div>
+<div>
+<p class="text-xs text-slate-500 font-medium">Total Items</p>
+<p class="text-lg font-bold">1,284</p>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-3 px-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+<div class="bg-amber-100 dark:bg-amber-900/30 text-amber-600 p-2 rounded-lg">
+<span class="material-symbols-outlined">warning</span>
+</div>
+<div>
+<p class="text-xs text-slate-500 font-medium">Low Stock</p>
+<p class="text-lg font-bold text-amber-600">3</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Alert Area -->
+<div class="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-xl p-4 flex items-start gap-4">
+<div class="bg-amber-100 dark:bg-amber-900/50 p-2 rounded-lg text-amber-600">
+<span class="material-symbols-outlined">error_outline</span>
+</div>
+<div class="flex-1">
+<h4 class="font-bold text-amber-900 dark:text-amber-100">Low Stock Warning</h4>
+<p class="text-sm text-amber-800 dark:text-amber-200/80">3 items are currently below your minimum threshold. Update stock to avoid losing sales during peak hours.</p>
+</div>
+<button class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors self-center">
+                        View Items
+                    </button>
+</div>
+<!-- Filters & Controls -->
+<div class="flex flex-wrap items-center justify-between gap-4 py-2">
+<div class="flex gap-2">
+<button class="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-slate-50">
+<span class="material-symbols-outlined text-lg">filter_list</span>
+                            Filter
+                        </button>
+<button class="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-slate-50">
+<span class="material-symbols-outlined text-lg">sort</span>
+                            Sort
+                        </button>
+</div>
+<div class="text-sm text-slate-500">
+                        Showing <span class="font-semibold text-slate-900 dark:text-slate-100">1-10</span> of 1,284 products
+                    </div>
+</div>
+<!-- Inventory Table -->
+<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Image</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Part Name</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">OEM Number</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Compatibility</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Price (EGP)</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Stock</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<!-- Row 1 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="size-12 rounded-lg bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700">
+<img class="w-full h-full object-cover" data-alt="High performance car brake pad" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-lHxPw3byOJ-YfjQys3N9-PetnqRU06ZM07ayg0yNVGWJYLAzwCAHu-d9hvigBNLmt-Aq7-qhwplhzFrvQuqJJEH4LuPPM3FG4R6canlzLzOU8rug6SIuowNKWTe-DuyF2N3OT-GnlVpE0Z3NvvriWUgrK4x7v96ty24CXCjlLdTA57DDU6d2IRT6qwtbQDlibURjrLfIXR5YhHPkAM4KapxtFxA2kEMBuP2pk734GX1PLKLvpbIWRCUvdKlVGd1MzZrsTjS3"/>
+</div>
+</td>
+<td class="px-6 py-4">
+<p class="text-sm font-semibold">Ceramic Brake Pads (Front)</p>
+<p class="text-xs text-slate-500">Brembo Elite Series</p>
+</td>
+<td class="px-6 py-4 font-mono text-xs text-slate-600 dark:text-slate-400">BR-992-K01</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                                        Toyota Corolla (2018-23)
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right text-sm font-bold">3,450.00</td>
+<td class="px-6 py-4 text-center">
+<span class="text-sm font-medium">42</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+                                        In Stock
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="size-12 rounded-lg bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700">
+<img class="w-full h-full object-cover" data-alt="New car engine air filter" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB69AoVBccJKN0AxSCOFownEmpzxl_LwzjwiGKwfwDzBNsKEGL2QRXG6yo0AHKZWapWSPAxDYOPKCaPdwFLWUYxgLmA0GegVxIBzUcMEnEEi9w5ulI09y8ZSwsNsvn6QP4QCLscJYwSJO6PDbw5EU9NMB_Gn8FtkrpEBUd6vRORp50TkKUFMvgEEdt3TZ-Wzrz-bPbHfYlHO0ab8iNd-x3_H3rHZCHBcYDUaQ3vg4zRSvutyBL9f9DwxumAbjoSMxrC5qI8HNew"/>
+</div>
+</td>
+<td class="px-6 py-4">
+<p class="text-sm font-semibold">Premium Air Filter</p>
+<p class="text-xs text-slate-500">Mann Filter C 30 005</p>
+</td>
+<td class="px-6 py-4 font-mono text-xs text-slate-600 dark:text-slate-400">MN-AF-8822</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                                        Mercedes C-Class
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right text-sm font-bold text-amber-600">850.00</td>
+<td class="px-6 py-4 text-center">
+<span class="text-sm font-bold text-amber-600">2</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
+                                        Low Stock
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="size-12 rounded-lg bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700">
+<img class="w-full h-full object-cover" data-alt="Vehicle engine oil bottle" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSD_1vK2wz70U1-R4u5mwU4eMlvtT05LZ360YYjDNBg1WvA0iRAklhZvUDHMt0Tvru8azcj0ajieQRP-oZsRalQQ4f8v5673LqtjDhgxxuA8F-FCNGlJ5zUK-FBa3cZOqV_qZLywNTKKpfRLMuoBlGHRbqMlsU7iVpemDfyth9G1Lyy5jDmIB3rCgD9ERBwX-ZWjX_ymrr8gebFuikCOj3YYRl3jv5RKJZrTHuzRCdflz1jGrgVKpwSf27golhvzLyvnDVRk-W"/>
+</div>
+</td>
+<td class="px-6 py-4">
+<p class="text-sm font-semibold">Synthetic Motor Oil 5W-30</p>
+<p class="text-xs text-slate-500">Mobil 1 Super (4L)</p>
+</td>
+<td class="px-6 py-4 font-mono text-xs text-slate-600 dark:text-slate-400">MO-5W30-SYN</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                                        Universal
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right text-sm font-bold">1,890.00</td>
+<td class="px-6 py-4 text-center">
+<span class="text-sm font-medium">0</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">
+                                        Out of Stock
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="size-12 rounded-lg bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700">
+<img class="w-full h-full object-cover" data-alt="Modern led car headlight assembly" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAv2L0liRDbuYZsa5fhkqklYaqIArQNbOFASaDnNK90G8hOmxFijxu4SFg4zyPA_0NfBFhYFepUty96LbejX-2Ryzc5xjVusA_hTPxRI2eNlVKFgSc5cCMTcLw-bocLNd25BPhO57ZHfngN9LdrDI4Ygqx4wBu7cxd35_PCsPWEnZZJnRKX6eX-nEZGpnfwyF10IVfCn4yqJ22ZO9wuv_BrMPINOzo1tqA9szc_nmQvhJoGZrhY3-gkStnrPgJvlMlb8MFLdYL_"/>
+</div>
+</td>
+<td class="px-6 py-4">
+<p class="text-sm font-semibold">LED Headlight Assembly</p>
+<p class="text-xs text-slate-500">Philips Ultinon Gen2</p>
+</td>
+<td class="px-6 py-4 font-mono text-xs text-slate-600 dark:text-slate-400">PH-LED-H4-02</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                                        Hyundai Tucson (2015-18)
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right text-sm font-bold">7,200.00</td>
+<td class="px-6 py-4 text-center">
+<span class="text-sm font-medium">15</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+                                        In Stock
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- Pagination -->
+<div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between border-t border-slate-200 dark:border-slate-800">
+<button class="text-sm font-medium text-slate-500 hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">chevron_left</span> Previous
+                        </button>
+<div class="flex gap-1">
+<button class="size-8 rounded bg-primary text-white text-xs font-bold">1</button>
+<button class="size-8 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold transition-colors">2</button>
+<button class="size-8 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold transition-colors">3</button>
+<span class="px-1 text-slate-400">...</span>
+<button class="size-8 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold transition-colors">129</button>
+</div>
+<button class="text-sm font-medium text-slate-500 hover:text-primary transition-colors flex items-center gap-1">
+                            Next <span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Multi-step Modal Backdrop (Hidden by default, shown for UI demonstration) -->
+<div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+<div class="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+<!-- Modal Header -->
+<div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+<div>
+<h3 class="text-xl font-bold">Add New Product</h3>
+<p class="text-xs text-slate-500">Step 1 of 3: General Details</p>
+</div>
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<!-- Modal Content -->
+<div class="p-6 space-y-6">
+<!-- Stepper UI -->
+<div class="flex items-center gap-2 mb-8">
+<div class="flex-1 h-1.5 bg-primary rounded-full"></div>
+<div class="flex-1 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+<div class="flex-1 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1.5 col-span-2">
+<label class="text-sm font-bold text-slate-700 dark:text-slate-300">Product Name</label>
+<input class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg focus:ring-primary focus:border-primary" placeholder="e.g. Brake Pads" type="text"/>
+</div>
+<div class="space-y-1.5">
+<label class="text-sm font-bold text-slate-700 dark:text-slate-300">OEM Number</label>
+<input class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg focus:ring-primary focus:border-primary" placeholder="Part Number" type="text"/>
+</div>
+<div class="space-y-1.5">
+<label class="text-sm font-bold text-slate-700 dark:text-slate-300">Category</label>
+<select class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg focus:ring-primary focus:border-primary">
+<option>Braking System</option>
+<option>Engine Parts</option>
+<option>Electrical</option>
+<option>Body &amp; Exterior</option>
+</select>
+</div>
+<div class="space-y-1.5 col-span-2">
+<label class="text-sm font-bold text-slate-700 dark:text-slate-300">Description</label>
+<textarea class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg focus:ring-primary focus:border-primary" placeholder="Enter product specifications and details..." rows="3"></textarea>
+</div>
+</div>
+<!-- Media Upload Dummy -->
+<div class="space-y-1.5">
+<label class="text-sm font-bold text-slate-700 dark:text-slate-300">Photos</label>
+<div class="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-8 flex flex-col items-center justify-center gap-2 hover:border-primary/50 transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-4xl text-slate-400">add_a_photo</span>
+<p class="text-sm text-slate-500">Click to upload or drag and drop</p>
+<p class="text-xs text-slate-400">PNG, JPG up to 10MB</p>
+</div>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="px-6 py-4 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3">
+<button class="px-6 py-2 text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-800 transition-colors">
+                    Cancel
+                </button>
+<button class="px-6 py-2 bg-primary text-white text-sm font-bold rounded-lg hover:bg-primary/90 transition-all shadow-md flex items-center gap-2">
+                    Next Step <span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</body></html>

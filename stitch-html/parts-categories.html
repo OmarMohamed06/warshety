@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Parts Shop: Main Categories</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1754cf",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#111621",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .category-card:hover {
+            transform: translateY(-2px);
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Header -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 lg:px-40 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-3xl font-bold">directions_car</span>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em]">Parts Shop</h2>
+</div>
+<label class="hidden md:flex flex-col min-w-64 !h-10">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+<div class="text-slate-500 flex border-none bg-slate-100 dark:bg-slate-800 items-center justify-center pl-4 rounded-l-lg border-r-0">
+<span class="material-symbols-outlined text-xl">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-slate-900 dark:text-slate-100 focus:outline-0 focus:ring-0 border-none bg-slate-100 dark:bg-slate-800 focus:border-none h-full placeholder:text-slate-500 px-4 rounded-l-none border-l-0 pl-2 text-base font-normal" placeholder="Search for parts, brands, or OE numbers" value=""/>
+</div>
+</label>
+</div>
+<div class="flex flex-1 justify-end gap-6 items-center">
+<nav class="hidden lg:flex items-center gap-6">
+<a class="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors" href="#">Offers</a>
+<a class="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors" href="#">My Orders</a>
+<a class="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors" href="#">Support</a>
+</nav>
+<div class="flex gap-3">
+<button class="flex items-center justify-center rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold tracking-[0.015em] hover:bg-primary/90 transition-colors">
+                        Login
+                    </button>
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-xl">shopping_cart</span>
+</button>
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors relative">
+<span class="material-symbols-outlined text-xl">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+</button>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-slate-100 dark:border-slate-800" data-alt="User profile photo avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCpgQKa-PIyQmyHWXb7dJWvDXCxOCO-1hAM0R3DQTAAtIaUQPb1k7pIIjDD434TrfDM9TQMz45Be9XuT2GywhUjId9U3xLPwkH9VNtgVldhNpwUpsHhSoL_g4ciP6vb3w4wThJLxG5fPHHsO6kdVNmJ1_EC9jNmIofb5pSpN9icla6vVFJGAQQ8SQlaQLQivPhisLFU9ozghYo_wO0KGWRNTrHupaPlQVsNw9yF7bJ3EdnL33sNFs1kpxJnGBikuHUz7MWhRyuH");'></div>
+</div>
+</header>
+<main class="px-4 lg:px-40 py-8 flex-1">
+<div class="layout-content-container flex flex-col max-w-[1280px] mx-auto">
+<!-- Breadcrumbs -->
+<div class="flex items-center gap-2 mb-6">
+<a class="text-slate-500 dark:text-slate-400 text-sm font-medium hover:text-primary" href="#">Home</a>
+<span class="material-symbols-outlined text-slate-400 text-sm">chevron_right</span>
+<span class="text-primary text-sm font-semibold">Parts Shop</span>
+</div>
+<!-- Page Heading -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
+<div class="flex flex-col gap-2">
+<h1 class="text-slate-900 dark:text-slate-100 text-4xl font-black leading-tight tracking-[-0.033em]">Car Parts Categories</h1>
+<p class="text-slate-500 dark:text-slate-400 text-lg font-normal">Premium replacement parts for all major makes and models in Egypt</p>
+</div>
+</div>
+<!-- My Garage Selector -->
+<div class="mb-10 @container">
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 rounded-xl border border-primary/20 bg-primary/5 dark:bg-primary/10 p-6">
+<div class="flex items-center gap-4">
+<div class="p-3 bg-primary/20 rounded-full text-primary">
+<span class="material-symbols-outlined text-3xl">garage</span>
+</div>
+<div class="flex flex-col">
+<p class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight">My Garage</p>
+<p class="text-slate-600 dark:text-slate-400 text-base font-normal">Select your vehicle to see parts that fit perfectly</p>
+</div>
+</div>
+<div class="flex flex-wrap gap-3">
+<button class="flex min-w-[140px] cursor-pointer items-center justify-center rounded-lg h-11 px-6 bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-all shadow-md">
+<span class="material-symbols-outlined mr-2">add_circle</span>
+                                Add Vehicle
+                            </button>
+<button class="flex min-w-[140px] cursor-pointer items-center justify-center rounded-lg h-11 px-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-all">
+                                Recent Searches
+                            </button>
+</div>
+</div>
+</div>
+<!-- Categories Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<!-- Brake System -->
+<div class="category-card group flex flex-col gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 cursor-pointer hover:border-primary/50 hover:shadow-xl transition-all">
+<div class="w-14 h-14 flex items-center justify-center rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">settings_input_component</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight">Brake System</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal">Pads, Rotors, Calipers, Sensors</p>
+</div>
+</div>
+<!-- Filters -->
+<div class="category-card group flex flex-col gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 cursor-pointer hover:border-primary/50 hover:shadow-xl transition-all">
+<div class="w-14 h-14 flex items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">filter_alt</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight">Filters</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal">Air, Oil, Fuel, Cabin Filters</p>
+</div>
+</div>
+<!-- Suspension -->
+<div class="category-card group flex flex-col gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 cursor-pointer hover:border-primary/50 hover:shadow-xl transition-all">
+<div class="w-14 h-14 flex items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">vertical_align_center</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight">Suspension</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal">Shocks, Struts, Control Arms</p>
+</div>
+</div>
+<!-- Steering -->
+<div class="category-card group flex flex-col gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 cursor-pointer hover:border-primary/50 hover:shadow-xl transition-all">
+<div class="w-14 h-14 flex items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">sports_volleyball</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight">Steering</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal">Rack &amp; Pinion, Tie Rods, Pumps</p>
+</div>
+</div>
+<!-- Engine Parts -->
+<div class="category-card group flex flex-col gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 cursor-pointer hover:border-primary/50 hover:shadow-xl transition-all">
+<div class="w-14 h-14 flex items-center justify-center rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">earth_engine</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight">Engine Parts</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal">Pistons, Valves, Timing Belts</p>
+</div>
+</div>
+<!-- Transmission -->
+<div class="category-card group flex flex-col gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 cursor-pointer hover:border-primary/50 hover:shadow-xl transition-all">
+<div class="w-14 h-14 flex items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">settings</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight">Transmission</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal">Clutch Kits, Gears, Seals</p>
+</div>
+</div>
+<!-- Electrical -->
+<div class="category-card group flex flex-col gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 cursor-pointer hover:border-primary/50 hover:shadow-xl transition-all">
+<div class="w-14 h-14 flex items-center justify-center rounded-lg bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">bolt</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight">Electrical</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal">Batteries, Alternators, Starters</p>
+</div>
+</div>
+<!-- Exhaust -->
+<div class="category-card group flex flex-col gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 cursor-pointer hover:border-primary/50 hover:shadow-xl transition-all">
+<div class="w-14 h-14 flex items-center justify-center rounded-lg bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">air</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight">Exhaust</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal">Mufflers, Catalytic Converters</p>
+</div>
+</div>
+</div>
+<!-- Promotional Banner -->
+<div class="mt-12 rounded-2xl overflow-hidden relative h-64 flex items-center bg-slate-900">
+<div class="absolute inset-0 opacity-40 bg-gradient-to-r from-primary to-transparent"></div>
+<div class="relative z-10 px-10 max-w-lg">
+<h2 class="text-white text-3xl font-black mb-4 leading-tight">Need a professional installation?</h2>
+<p class="text-slate-200 text-lg mb-6">Book an appointment at one of our certified service centers across Egypt.</p>
+<button class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-8 rounded-lg transition-all">
+                            Find a Service Center
+                        </button>
+</div>
+<div class="hidden lg:block absolute right-10 bottom-0 top-0 w-1/2 bg-center bg-no-repeat bg-contain" data-alt="Modern auto repair shop with clean workspace" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCzDL4CRqEqvBVm7DfpxBAHgw6jg1BY3FvK0T0d0dtCZ4XWGv0rB3fwfgSEnhJBLWapB926lDdgcbqWwFZ6pi7Z-skjhh5SAurOMH-bDwqZfsHlxnUpV1wGI3RUrR2EpnqujuR5E-iw5jzhAtHXdNRJzVUoUhFaeD0phZDjcPrJf248KHt6X18Amx9__BL7Q8SI1Cpd8DT9fnTTekvX75PiVz9kCblawM-Nvnsru7ZPFCu1L_LpWn_E0jBPlzEvWLJFyn5YpFJ9');"></div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 mt-12 py-10 px-4 lg:px-40">
+<div class="max-w-[1280px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-3xl font-bold">directions_car</span>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold">Parts Shop</h2>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm">Egypt's largest digital marketplace for genuine and aftermarket car parts.</p>
+<div class="flex gap-4 mt-2">
+<a class="text-slate-400 hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">social_leaderboard</span></a>
+<a class="text-slate-400 hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">camera</span></a>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<h4 class="text-slate-900 dark:text-slate-100 font-bold uppercase text-xs tracking-wider">Quick Links</h4>
+<nav class="flex flex-col gap-2">
+<a class="text-slate-500 dark:text-slate-400 text-sm hover:text-primary" href="#">All Categories</a>
+<a class="text-slate-500 dark:text-slate-400 text-sm hover:text-primary" href="#">Service Centers</a>
+<a class="text-slate-500 dark:text-slate-400 text-sm hover:text-primary" href="#">Best Sellers</a>
+<a class="text-slate-500 dark:text-slate-400 text-sm hover:text-primary" href="#">Deals</a>
+</nav>
+</div>
+<div class="flex flex-col gap-4">
+<h4 class="text-slate-900 dark:text-slate-100 font-bold uppercase text-xs tracking-wider">Support</h4>
+<nav class="flex flex-col gap-2">
+<a class="text-slate-500 dark:text-slate-400 text-sm hover:text-primary" href="#">Shipping Info</a>
+<a class="text-slate-500 dark:text-slate-400 text-sm hover:text-primary" href="#">Returns</a>
+<a class="text-slate-500 dark:text-slate-400 text-sm hover:text-primary" href="#">Contact Us</a>
+<a class="text-slate-500 dark:text-slate-400 text-sm hover:text-primary" href="#">FAQ</a>
+</nav>
+</div>
+<div class="flex flex-col gap-4">
+<h4 class="text-slate-900 dark:text-slate-100 font-bold uppercase text-xs tracking-wider">Contact</h4>
+<div class="flex items-center gap-3 text-slate-500 dark:text-slate-400 text-sm">
+<span class="material-symbols-outlined text-primary text-sm">mail</span>
+                        info@partsshop.eg
+                    </div>
+<div class="flex items-center gap-3 text-slate-500 dark:text-slate-400 text-sm">
+<span class="material-symbols-outlined text-primary text-sm">call</span>
+                        19999
+                    </div>
+</div>
+</div>
+<div class="max-w-[1280px] mx-auto border-t border-slate-100 dark:border-slate-800 mt-10 pt-6 flex flex-col md:flex-row justify-between gap-4">
+<p class="text-slate-400 text-xs">© 2024 Parts Shop Egypt. All rights reserved.</p>
+<div class="flex gap-6">
+<a class="text-slate-400 text-xs hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-slate-400 text-xs hover:text-primary transition-colors" href="#">Terms of Service</a>
+</div>
+</div>
+</footer>
+</div>
+</div>
+</body></html>

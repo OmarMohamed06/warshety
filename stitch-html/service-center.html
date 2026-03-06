@@ -1,0 +1,361 @@
+<html><head>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/></head><body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">view
+<meta charset="utf-8"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#1754cf",
+          "background-light": "#f6f6f8",
+          "background-dark": "#111621",
+        },
+        fontFamily: {
+          "display": ["Inter"]
+        },
+        borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+      },
+    },
+  }
+</script>
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 md:px-20 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-3xl">minor_crash</span>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">Egypt Car Parts</h2>
+</div>
+<label class="hidden md:flex flex-col min-w-40 h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+<div class="text-slate-500 flex border-none bg-slate-100 dark:bg-slate-800 items-center justify-center pl-4 rounded-l-lg border-r-0">
+<span class="material-symbols-outlined text-xl">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-slate-900 dark:text-slate-100 focus:outline-0 focus:ring-0 border-none bg-slate-100 dark:bg-slate-800 h-full placeholder:text-slate-500 px-4 rounded-l-none border-l-0 pl-2 text-base font-normal" placeholder="Search parts or services..."/>
+</div>
+</label>
+</div>
+<div class="flex flex-1 justify-end gap-6 items-center">
+<nav class="hidden lg:flex items-center gap-6">
+<a class="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors" href="#">Marketplace</a>
+<a class="text-primary text-sm font-semibold underline decoration-2 underline-offset-4" href="#">Service Centers</a>
+<a class="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors" href="#">My Garage</a>
+</nav>
+<div class="flex gap-3">
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+<span class="material-symbols-outlined text-primary">person</span>
+</div>
+</div>
+</div>
+</header>
+<main class="flex flex-1 justify-center py-6 px-4 md:px-20">
+<div class="layout-content-container flex flex-col max-w-[1200px] flex-1">
+<!-- Breadcrumbs -->
+<div class="flex flex-wrap gap-2 mb-4">
+<a class="text-slate-500 text-sm font-medium" href="#">Home</a>
+<span class="text-slate-400 text-sm">/</span>
+<a class="text-slate-500 text-sm font-medium" href="#">Service Centers</a>
+<span class="text-slate-400 text-sm">/</span>
+<span class="text-slate-900 dark:text-white text-sm font-bold">Elite Auto Workshop</span>
+</div>
+<!-- Hero & Gallery Section -->
+<div class="grid grid-cols-12 gap-4 mb-8">
+<div class="col-span-12 lg:col-span-8">
+<div class="relative rounded-xl overflow-hidden h-[400px] group">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="Interior of a modern clean car repair workshop" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAFx29zxX36qlQT6KbbrVnqPPcoM5Wby8DBddJ1R5jmdptCQSYOkTqvQf_0q8BIvPKbUvm7hBVQX_YQpBylPxrIPk2BgpZssKcxY8VCripaqup6RqYSgCGAnhCFCMttQ2DVtiwOdUqIGTB4tlnodxC1j7kYmmc6147EbZ7-Y-MfMtykupv5q1oA43sywwiecOpSzvnAdZnFZBLiFoUvJJMZ9y7QK8dR-jhtXvTRG0ORdbJ9mA2xqZnwh0IZVN8MkX7LbHde9esy");'></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
+<div>
+<h1 class="text-white text-3xl font-bold mb-1">Elite Auto Service Center</h1>
+<p class="text-white/80 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">location_on</span> Maadi, Cairo • 4.9 (124 reviews)
+                  </p>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-4 gap-2 mt-2">
+<div class="h-24 rounded-lg bg-cover bg-center cursor-pointer opacity-90 hover:opacity-100" data-alt="Mechanic working on car engine details" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCXFKNv0uRcjIaUKdM-ycz7aNlpWG-GM9SH2JluFxaPKDcJ0F-xm6PH9Kc5XL7C46qtd3d5bit-FBedp8Tt8oN6NpjhVy1xOhoXnKsbU4aGx0ExUuGa4IjasgZR-vfmsWdieGBT2Eg6UURGTMzmNc5Qnt-9cjUdqobTnBqd7gPTCHT7cb-6QlCRj4NzoRz8XxJbLNLwh8gwSywrIcMuSmGosyKpsq3ZHEhBGkfQkKKOX7-9W-6a3WdzPY-XPP1D7SBgp8EH0_ip");'></div>
+<div class="h-24 rounded-lg bg-cover bg-center cursor-pointer opacity-90 hover:opacity-100" data-alt="Car lift in repair shop" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuADhu1Aso-fxtW5WhllMDEJBfO1cNkWmEO67jgWhGdLOXYIcadZLGifIVtCIc6IOkfOwGzzNxYHscEv4EydC0i801IPMWN5wp3_vh_vEZSsOB-O3W0kK_DBlLp_b8n7SWHpsJUGOepwF5YKgrbXW7ThyiKo26BDV8dRSTan_g11vWy-lN-Z82DbyE_bX0jkLbWlUVyUP4D3vRIppShg2_g64Zs0p-hZbHE77iK6mt752Bi71Onp4TTRu6ENuSm5Gw8y-Huw0sAd");'></div>
+<div class="h-24 rounded-lg bg-cover bg-center cursor-pointer opacity-90 hover:opacity-100" data-alt="Diagnostic tools for vehicles" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCLaTwSvc-lQ5uQR80hucWWYzV70xx0FicClf4gAsWES0BkiywiOQdrzI0L_MoFYhZ9AFkQNIdDFxFfjVY-oRjoM5WvBAwxHxl1lWkX0wnsqoy2c_X5aGSQpvOjBzIu6V1eUIiSXrOJc-TCZKm31j5YSM7Up7azNjUPw2HU9xbujMm--HX_BZuRpynAzlGEIFBLyOMecFf_tB6parFSXne40aJf_o34X7VNZbRLZJQEPNfxUPPfRtL12LkWWK4Z7NqBWNyUDUBh");'></div>
+<div class="relative h-24 rounded-lg bg-cover bg-center cursor-pointer flex items-center justify-center text-white font-bold" data-alt="Workshop reception and waiting area" style='background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("https://lh3.googleusercontent.com/aida-public/AB6AXuACDXvFdFAmYJkyxfqE-HVEZ3OpgNOwAaSVBD2Q_S2ugJXxbnKynWT1i7qI_pugvARV9WLt0naxp9XtQqQL-u6yx2poT7WoRBNZqJ2XQDm6PpaXazImsErsyFR6QN_eFqRSWlJizyWhb4CfJAS6VKnOlpZHr0qHfkreVnlYh87pSvstia9aBQlPfMIY2vQhr7PPv4RXF4iH5wUXtMdxJ9mlDwOE1P_dHUDDwj0XgLuWTsgniOZE0wF4gyUfUNR42YcGGfd8MwIA");'>
+                +12 more
+              </div>
+</div>
+</div>
+<!-- Sticky Booking Sidebar -->
+<div class="col-span-12 lg:col-span-4">
+<div class="sticky top-24 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+<h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">event_available</span> Book Appointment
+              </h3>
+<div class="space-y-4">
+<div>
+<label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Select Service</label>
+<select class="w-full rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:border-primary focus:ring-primary">
+<option>Standard Maintenance - 10k KM</option>
+<option>Brake Inspection &amp; Repair</option>
+<option>Oil Change &amp; Filter</option>
+<option>AC Deep Cleaning</option>
+</select>
+</div>
+<div>
+<label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Your Car</label>
+<div class="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+<span class="material-symbols-outlined text-primary">directions_car</span>
+<div class="flex-1">
+<p class="text-sm font-semibold">BMW X5 (2022)</p>
+<p class="text-xs text-slate-500">Plate: ABC-123</p>
+</div>
+<button class="text-primary text-xs font-bold">Change</button>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">Pick Date &amp; Time</label>
+<div class="grid grid-cols-7 gap-1 mb-2">
+<div class="text-[10px] text-center text-slate-400 font-bold uppercase">M</div>
+<div class="text-[10px] text-center text-slate-400 font-bold uppercase">T</div>
+<div class="text-[10px] text-center text-slate-400 font-bold uppercase">W</div>
+<div class="text-[10px] text-center text-slate-400 font-bold uppercase">T</div>
+<div class="text-[10px] text-center text-slate-400 font-bold uppercase">F</div>
+<div class="text-[10px] text-center text-slate-400 font-bold uppercase">S</div>
+<div class="text-[10px] text-center text-slate-400 font-bold uppercase">S</div>
+<button class="h-8 rounded text-sm text-slate-300">12</button>
+<button class="h-8 rounded text-sm text-slate-300">13</button>
+<button class="h-8 rounded text-sm font-medium bg-primary text-white">14</button>
+<button class="h-8 rounded text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-700">15</button>
+<button class="h-8 rounded text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-700">16</button>
+<button class="h-8 rounded text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-700">17</button>
+<button class="h-8 rounded text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-700">18</button>
+</div>
+<div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+<button class="px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 text-xs font-medium bg-white dark:bg-slate-900 whitespace-nowrap">09:00 AM</button>
+<button class="px-3 py-1.5 rounded-full border border-primary text-xs font-bold bg-primary/10 text-primary whitespace-nowrap">10:30 AM</button>
+<button class="px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 text-xs font-medium bg-white dark:bg-slate-900 whitespace-nowrap">12:00 PM</button>
+</div>
+</div>
+<div class="pt-4 border-t border-slate-200 dark:border-slate-800">
+<div class="flex justify-between mb-2">
+<span class="text-sm text-slate-500">Estimated Total</span>
+<span class="text-sm font-bold">1,250 EGP</span>
+</div>
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">verified</span>
+                    Confirm Booking
+                  </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Details Sections -->
+<div class="grid grid-cols-12 gap-8">
+<div class="col-span-12 lg:col-span-8 space-y-8">
+<!-- About & Certifications -->
+<section>
+<h2 class="text-xl font-bold mb-4">About the Service Center</h2>
+<p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
+                Elite Auto Service Center is a premium Bosch-certified facility specialized in German and European vehicle brands. 
+                With over 15 years of excellence in Cairo, we offer state-of-the-art diagnostic equipment and factory-trained technicians 
+                to ensure your car receives the highest quality care.
+              </p>
+<div class="flex flex-wrap gap-4">
+<div class="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg">
+<span class="material-symbols-outlined text-primary">verified_user</span>
+<span class="text-sm font-semibold">Bosch Certified</span>
+</div>
+<div class="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg">
+<span class="material-symbols-outlined text-primary">rewarded_ads</span>
+<span class="text-sm font-semibold">GDI Specialist</span>
+</div>
+<div class="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg">
+<span class="material-symbols-outlined text-primary">workspace_premium</span>
+<span class="text-sm font-semibold">VAG Certified</span>
+</div>
+</div>
+</section>
+<!-- Popular Services -->
+<section>
+<h2 class="text-xl font-bold mb-4">Services &amp; Pricing</h2>
+<div class="grid gap-3">
+<div class="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">oil_barrel</span>
+</div>
+<div>
+<p class="font-bold">Full Maintenance Service</p>
+<p class="text-xs text-slate-500">Fluids, filters, and 50-point inspection</p>
+</div>
+</div>
+<p class="font-bold text-primary">850 EGP</p>
+</div>
+<div class="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">car_repair</span>
+</div>
+<div>
+<p class="font-bold">Brake System Overhaul</p>
+<p class="text-xs text-slate-500">Pads replacement and rotor resurfacing</p>
+</div>
+</div>
+<p class="font-bold text-primary">1,400 EGP</p>
+</div>
+<div class="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">settings_suggest</span>
+</div>
+<div>
+<p class="font-bold">Computer Diagnostics</p>
+<p class="text-xs text-slate-500">Full scan and error clearing</p>
+</div>
+</div>
+<p class="font-bold text-primary">300 EGP</p>
+</div>
+</div>
+</section>
+<!-- Map & Hours -->
+<section class="grid md:grid-cols-2 gap-6">
+<div>
+<h2 class="text-xl font-bold mb-4">Location</h2>
+<div class="rounded-xl overflow-hidden h-48 relative border border-slate-200 dark:border-slate-800">
+<div class="absolute inset-0 bg-slate-200 dark:bg-slate-700 bg-[url('https://placeholder.pics/svg/400x200')] bg-cover" data-alt="Static map of Maadi district Cairo" data-location="Cairo, Egypt" style=""></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-4xl text-primary drop-shadow-md">location_on</span>
+</div>
+</div>
+<p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Street 257, Victoria Square, Maadi, Cairo</p>
+</div>
+<div>
+<h2 class="text-xl font-bold mb-4">Working Hours</h2>
+<ul class="space-y-2">
+<li class="flex justify-between text-sm">
+<span class="text-slate-500">Saturday - Thursday</span>
+<span class="font-medium">09:00 AM - 08:00 PM</span>
+</li>
+<li class="flex justify-between text-sm">
+<span class="text-slate-500">Friday</span>
+<span class="font-bold text-red-500">Closed</span>
+</li>
+</ul>
+<div class="mt-4 p-3 bg-green-500/10 rounded-lg border border-green-500/20 flex items-center gap-2">
+<span class="size-2 rounded-full bg-green-500 animate-pulse"></span>
+<span class="text-sm font-semibold text-green-600 dark:text-green-400">Open Now</span>
+</div>
+</div>
+</section>
+<!-- Customer Reviews -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-xl font-bold">Reviews (124)</h2>
+<button class="text-primary text-sm font-bold">Write a Review</button>
+</div>
+<div class="space-y-4">
+<div class="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+<div class="flex justify-between mb-2">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold">Ahmed</div>
+<div>
+<p class="text-sm font-bold">Ahmed Hassan</p>
+<div class="flex gap-1">
+<span class="material-symbols-outlined text-[14px] text-yellow-500 fill-current">star</span>
+<span class="material-symbols-outlined text-[14px] text-yellow-500 fill-current">star</span>
+<span class="material-symbols-outlined text-[14px] text-yellow-500 fill-current">star</span>
+<span class="material-symbols-outlined text-[14px] text-yellow-500 fill-current">star</span>
+<span class="material-symbols-outlined text-[14px] text-yellow-500 fill-current">star</span>
+</div>
+</div>
+</div>
+<span class="inline-flex items-center gap-1 h-fit px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase">
+<span class="material-symbols-outlined text-[12px]">verified</span> Verified Booking
+                    </span>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-400">"Excellent service! They were very professional and finished my 20k maintenance in just 3 hours. The waiting area is very comfortable and clean."</p>
+<p class="mt-2 text-xs text-slate-400">2 days ago • BMW 320i</p>
+</div>
+<div class="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+<div class="flex justify-between mb-2">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center font-bold">Sara</div>
+<div>
+<p class="text-sm font-bold">Sara K.</p>
+<div class="flex gap-1">
+<span class="material-symbols-outlined text-[14px] text-yellow-500 fill-current">star</span>
+<span class="material-symbols-outlined text-[14px] text-yellow-500 fill-current">star</span>
+<span class="material-symbols-outlined text-[14px] text-yellow-500 fill-current">star</span>
+<span class="material-symbols-outlined text-[14px] text-yellow-500 fill-current">star</span>
+<span class="material-symbols-outlined text-[14px] text-slate-300">star</span>
+</div>
+</div>
+</div>
+<span class="inline-flex items-center gap-1 h-fit px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase">
+<span class="material-symbols-outlined text-[12px]">verified</span> Verified Booking
+                    </span>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-400">"Professional workshop, genuine Bosch parts used. Slightly more expensive than others but worth the peace of mind."</p>
+<p class="mt-2 text-xs text-slate-400">1 week ago • VW Tiguan</p>
+</div>
+<button class="w-full py-2 text-primary font-bold text-sm bg-primary/5 rounded-lg border border-primary/20 hover:bg-primary/10 transition-colors">
+                  View All Reviews
+                </button>
+</div>
+</section>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="mt-12 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-12 px-4 md:px-20">
+<div class="max-w-[1200px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+<div class="col-span-2 md:col-span-1">
+<div class="flex items-center gap-2 text-primary mb-4">
+<span class="material-symbols-outlined">minor_crash</span>
+<span class="font-bold text-lg text-slate-900 dark:text-white">Egypt Car Parts</span>
+</div>
+<p class="text-sm text-slate-500">The leading marketplace for car services and parts in Egypt.</p>
+</div>
+<div>
+<h4 class="font-bold mb-4">Marketplace</h4>
+<ul class="text-sm text-slate-500 space-y-2">
+<li><a href="#">Engine Parts</a></li>
+<li><a href="#">Tires &amp; Wheels</a></li>
+<li><a href="#">Accessories</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-bold mb-4">Support</h4>
+<ul class="text-sm text-slate-500 space-y-2">
+<li><a href="#">Help Center</a></li>
+<li><a href="#">Contact Us</a></li>
+<li><a href="#">Partner With Us</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-bold mb-4">App</h4>
+<div class="flex flex-col gap-2">
+<div class="bg-black text-white px-4 py-2 rounded-lg flex items-center gap-2 cursor-pointer border border-white/10">
+<span class="material-symbols-outlined">shop</span>
+<div class="text-[10px] leading-tight">Get it on <br/><span class="text-xs font-bold">Google Play</span></div>
+</div>
+<div class="bg-black text-white px-4 py-2 rounded-lg flex items-center gap-2 cursor-pointer border border-white/10">
+<span class="material-symbols-outlined">ios</span>
+<div class="text-[10px] leading-tight">Download on <br/><span class="text-xs font-bold">App Store</span></div>
+</div>
+</div>
+</div>
+</div>
+<div class="max-w-[1200px] mx-auto mt-12 pt-8 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-400">
+        © 2024 Egypt Car Parts &amp; Repair. All rights reserved.
+      </div>
+</footer>
+</div>
+</div>
+</body></html>
