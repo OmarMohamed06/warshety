@@ -10,67 +10,68 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useLanguage } from "@/context/LanguageContext";
 import type { BookingStatus, DbBookingStatusHistory } from "@/types/database";
 
 // ── Status pipeline config ────────────────────────────────────────────────────
 
 interface StatusStep {
   status: BookingStatus;
-  label: string;
   icon: string;
-  description: string;
+  labelKey: string;
+  descKey: string;
 }
 
 const STATUS_PIPELINE: StatusStep[] = [
   {
     status: "booked",
-    label: "Booked",
     icon: "bookmark_added",
-    description: "Your booking has been received.",
+    labelKey: "tracking.statusBooked",
+    descKey: "tracking.statusBookedDesc",
   },
   {
     status: "confirmed",
-    label: "Confirmed",
     icon: "task_alt",
-    description: "The service center confirmed your appointment.",
+    labelKey: "tracking.statusConfirmed",
+    descKey: "tracking.statusConfirmedDesc",
   },
   {
     status: "checked_in",
-    label: "Checked In",
     icon: "login",
-    description: "Your vehicle has arrived at the workshop.",
+    labelKey: "tracking.statusCheckedIn",
+    descKey: "tracking.statusCheckedInDesc",
   },
   {
     status: "in_progress",
-    label: "In Progress",
     icon: "build",
-    description: "Technicians are working on your vehicle.",
+    labelKey: "tracking.statusInProgress",
+    descKey: "tracking.statusInProgressDesc",
   },
   {
     status: "waiting_parts",
-    label: "Waiting for Parts",
     icon: "inventory_2",
-    description: "Awaiting spare parts. We'll update you soon.",
+    labelKey: "tracking.statusWaitingParts",
+    descKey: "tracking.statusWaitingPartsDesc",
   },
   {
     status: "ready_for_pickup",
-    label: "Ready for Pickup",
     icon: "directions_car",
-    description: "Your vehicle is ready! You can collect it now.",
+    labelKey: "tracking.statusReadyForPickup",
+    descKey: "tracking.statusReadyForPickupDesc",
   },
   {
     status: "completed",
-    label: "Completed",
     icon: "check_circle",
-    description: "Service completed successfully. Thank you!",
+    labelKey: "tracking.statusCompleted",
+    descKey: "tracking.statusCompletedDesc",
   },
 ];
 
 const CANCELLED_STEP: StatusStep = {
   status: "cancelled",
-  label: "Cancelled",
   icon: "cancel",
-  description: "This booking has been cancelled.",
+  labelKey: "tracking.statusCancelled",
+  descKey: "tracking.statusCancelledDesc",
 };
 
 const ACTIVE_STATUSES = STATUS_PIPELINE.map((s) => s.status);
@@ -85,6 +86,7 @@ interface BookingTrackerProps {
 
 export default function BookingTracker({ bookingId }: BookingTrackerProps) {
   const supabase = createClient();
+  const { t, locale, isRTL } = useLanguage();
 
   const [booking, setBooking] = useState<any | null>(null);
   const [history, setHistory] = useState<DbBookingStatusHistory[]>([]);
@@ -94,7 +96,7 @@ export default function BookingTracker({ bookingId }: BookingTrackerProps) {
     const { data } = await supabase
       .from("bookings")
       .select(
-        "*, vendor:vendors(business_name,phone,city), vehicle:vehicles(*), service:services(name)",
+        "*, vendor:vendors(business_name,phone,city), vehicle:vehicles(*)",
       )
       .eq("id", bookingId)
       .single();
@@ -165,7 +167,7 @@ export default function BookingTracker({ bookingId }: BookingTrackerProps) {
         <span className="material-symbols-outlined text-5xl mb-3 block">
           search_off
         </span>
-        <p className="font-semibold">Booking not found.</p>
+        <p className="font-semibold">{t("tracking.notFound")}</p>
       </div>
     );
   }
@@ -178,16 +180,18 @@ export default function BookingTracker({ bookingId }: BookingTrackerProps) {
   const currentStep = pipeline[currentIndex] ?? pipeline[0];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={isRTL ? "rtl" : "ltr"}>
       {/* Booking summary card */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-bold uppercase text-slate-400 tracking-wider mb-1">
-              Booking #{booking.id.slice(0, 8).toUpperCase()}
+              {t("tracking.bookingPrefix")}
+              {booking.id.slice(0, 8).toUpperCase()}
             </p>
             <h2 className="text-xl font-black">
-              {booking.vendor?.business_name ?? "Service Center"}
+              {booking.vendor?.business_name ??
+                t("tracking.serviceCenterFallback")}
             </h2>
             {booking.vendor?.city && (
               <p className="text-sm text-slate-500 flex items-center gap-1 mt-1">
@@ -225,12 +229,14 @@ export default function BookingTracker({ bookingId }: BookingTrackerProps) {
           </div>
         )}
 
-        {booking.service && (
+        {booking.service_key && (
           <div className="mt-3 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
             <span className="material-symbols-outlined text-[16px]">
               home_repair_service
             </span>
-            {booking.service.name}
+            <span className="capitalize">
+              {booking.service_key.replace(/_/g, " ")}
+            </span>
           </div>
         )}
       </div>
@@ -253,10 +259,10 @@ export default function BookingTracker({ bookingId }: BookingTrackerProps) {
           </div>
           <div>
             <p className="text-xs font-bold uppercase tracking-widest opacity-80 mb-1">
-              Current Status
+              {t("tracking.currentStatus")}
             </p>
-            <p className="text-2xl font-black">{currentStep.label}</p>
-            <p className="text-sm opacity-90 mt-1">{currentStep.description}</p>
+            <p className="text-2xl font-black">{t(currentStep.labelKey)}</p>
+            <p className="text-sm opacity-90 mt-1">{t(currentStep.descKey)}</p>
           </div>
         </div>
       </div>
@@ -264,7 +270,7 @@ export default function BookingTracker({ bookingId }: BookingTrackerProps) {
       {/* Progress timeline */}
       {!isCancelled && (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6">
-          <h3 className="font-black mb-5">Progress</h3>
+          <h3 className="font-black mb-5">{t("tracking.progress")}</h3>
           <div className="space-y-0">
             {STATUS_PIPELINE.map((step, i) => {
               const isDone =
@@ -320,10 +326,10 @@ export default function BookingTracker({ bookingId }: BookingTrackerProps) {
                             : "text-slate-400"
                       }`}
                     >
-                      {step.label}
+                      {t(step.labelKey)}
                       {isCurrent && (
                         <span className="ml-2 text-[10px] font-bold uppercase tracking-wider bg-[#FF4B19]/10 text-[#FF4B19] px-2 py-0.5 rounded-full animate-pulse">
-                          Now
+                          {t("tracking.nowBadge")}
                         </span>
                       )}
                     </p>
@@ -335,7 +341,7 @@ export default function BookingTracker({ bookingId }: BookingTrackerProps) {
                     {historyEntry?.changed_at && (
                       <p className="text-[11px] text-slate-400 mt-0.5">
                         {new Date(historyEntry.changed_at).toLocaleString(
-                          "en-EG",
+                          locale === "ar" ? "ar-EG" : "en-EG",
                           {
                             day: "numeric",
                             month: "short",
@@ -356,7 +362,7 @@ export default function BookingTracker({ bookingId }: BookingTrackerProps) {
       {/* Full history log */}
       {history.length > 0 && (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6">
-          <h3 className="font-black mb-4">Activity Log</h3>
+          <h3 className="font-black mb-4">{t("tracking.activityLog")}</h3>
           <div className="space-y-3">
             {[...history].reverse().map((h) => (
               <div key={h.id} className="flex items-start gap-3 text-sm">
@@ -371,13 +377,16 @@ export default function BookingTracker({ bookingId }: BookingTrackerProps) {
                     <p className="text-slate-500 text-xs mt-0.5">{h.note}</p>
                   )}
                   <p className="text-slate-400 text-[11px] mt-0.5">
-                    {new Date(h.changed_at).toLocaleString("en-EG", {
-                      weekday: "short",
-                      day: "numeric",
-                      month: "short",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {new Date(h.changed_at).toLocaleString(
+                      locale === "ar" ? "ar-EG" : "en-EG",
+                      {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      },
+                    )}
                   </p>
                 </div>
               </div>

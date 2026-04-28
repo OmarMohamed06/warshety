@@ -4,6 +4,16 @@ import Link from "next/link";
 import { useState } from "react";
 import { formatPrice } from "@/lib/utils";
 import { useVehicle } from "@/hooks";
+import { useLanguage } from "@/context/LanguageContext";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Car, Star, RotateCcw } from "lucide-react";
 
 export interface FilterState {
   condition: string;
@@ -13,6 +23,8 @@ export interface FilterState {
   minRating: number;
   /** When true, only parts compatible with the active vehicle are shown */
   compatibleOnly: boolean;
+  /** Filter by part type: 'all' | 'oem' | 'aftermarket' | 'original' */
+  partType: string;
 }
 
 export default function FilterSidebar({
@@ -21,6 +33,7 @@ export default function FilterSidebar({
   onFilterChange?: (f: FilterState) => void;
 }) {
   const { activeVehicle, hasActiveVehicle, compatibilityString } = useVehicle();
+  const { t, localePath } = useLanguage();
 
   const [filters, setFilters] = useState<FilterState>({
     condition: "all",
@@ -28,7 +41,8 @@ export default function FilterSidebar({
     priceMax: "",
     inStockOnly: false,
     minRating: 0,
-    compatibleOnly: hasActiveVehicle, // on by default when a vehicle is active
+    compatibleOnly: hasActiveVehicle,
+    partType: "all",
   });
 
   const update = (patch: Partial<FilterState>) => {
@@ -45,233 +59,235 @@ export default function FilterSidebar({
       inStockOnly: false,
       minRating: 0,
       compatibleOnly: false,
+      partType: "all",
     };
     setFilters(reset);
     onFilterChange?.(reset);
   };
 
   return (
-    <aside className="w-full space-y-6">
-      {/* ── Vehicle Compatibility ── */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700">
-        <h4 className="font-bold text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
-          <span
-            className="material-symbols-outlined text-[#FF4B19]"
-            style={{ fontSize: "18px" }}
-          >
-            directions_car
-          </span>
-          Filter by Vehicle
-        </h4>
-
-        {hasActiveVehicle && activeVehicle ? (
-          /* Active vehicle chip */
-          <div className="space-y-3">
-            <div className="flex items-start gap-3 bg-[#FF4B19]/6 border border-[#FF4B19]/20 rounded-xl p-3">
-              <span
-                className="material-symbols-outlined text-[#FF4B19] mt-0.5 shrink-0"
-                style={{ fontSize: "18px" }}
-              >
-                check_circle
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-black text-[#FF4B19] leading-tight">
-                  {activeVehicle.year} {activeVehicle.brand}{" "}
-                  {activeVehicle.model}
-                </p>
-                {activeVehicle.trim && (
-                  <p className="text-[11px] text-slate-500 mt-0.5">
-                    {activeVehicle.trim}
+    <aside className="w-full space-y-4">
+      {/* Vehicle Compatibility */}
+      <Card>
+        <CardHeader className="pb-2 pt-4 px-4">
+          <div className="flex items-center gap-2">
+            <Car className="h-4 w-4 text-primary" />
+            <span className="text-sm font-semibold">
+              {t("filterSidebar.vehicleCompatibility")}
+            </span>
+          </div>
+        </CardHeader>
+        <CardContent className="px-4 pb-4">
+          {hasActiveVehicle && activeVehicle ? (
+            <div className="space-y-3">
+              <div className="flex items-start gap-2.5 bg-primary/5 border border-primary/20 rounded-lg p-3">
+                <Car className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-primary leading-tight">
+                    {activeVehicle.year} {activeVehicle.brand}{" "}
+                    {activeVehicle.model}
                   </p>
-                )}
-                {activeVehicle.engineCode && (
-                  <p className="text-[11px] text-slate-500">
-                    Engine: {activeVehicle.engineCode}
-                  </p>
-                )}
+                  {activeVehicle.trim && (
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      {activeVehicle.trim}
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-
-            {/* Compatible only toggle */}
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <div
-                onClick={() =>
-                  update({ compatibleOnly: !filters.compatibleOnly })
-                }
-                className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer ${
-                  filters.compatibleOnly
-                    ? "bg-[#FF4B19]"
-                    : "bg-slate-200 dark:bg-slate-600"
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
-                    filters.compatibleOnly ? "translate-x-5" : "translate-x-0"
-                  }`}
+              <div className="flex items-center justify-between">
+                <label
+                  htmlFor="compat-toggle"
+                  className="text-sm font-medium cursor-pointer"
+                >
+                  {t("filterSidebar.compatibleOnly")}
+                </label>
+                <Switch
+                  id="compat-toggle"
+                  checked={filters.compatibleOnly}
+                  onCheckedChange={(v) => update({ compatibleOnly: v })}
                 />
               </div>
-              <div>
-                <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 leading-tight">
-                  Compatible parts only
-                </p>
-                <p className="text-[10px] text-slate-400">
-                  {filters.compatibleOnly
-                    ? `Showing parts for ${compatibilityString}`
-                    : "Showing all parts"}
-                </p>
-              </div>
-            </label>
-
-            <Link
-              href="/garage"
-              className="text-xs font-bold text-slate-400 hover:text-[#FF4B19] transition-colors flex items-center gap-1"
-            >
-              <span
-                className="material-symbols-outlined"
-                style={{ fontSize: "14px" }}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs w-full"
+                asChild
               >
-                swap_horiz
-              </span>
-              Change vehicle
-            </Link>
-          </div>
-        ) : (
-          /* No active vehicle — prompt to set one */
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 rounded-xl p-3">
-              <span
-                className="material-symbols-outlined text-amber-500 shrink-0"
-                style={{ fontSize: "18px" }}
-              >
-                info
-              </span>
-              <p className="text-xs text-amber-700 dark:text-amber-400 font-medium">
-                Select a vehicle to filter compatible parts only
-              </p>
+                <Link href={localePath("/garage")}>
+                  {t("filterSidebar.changeVehicle")}
+                </Link>
+              </Button>
             </div>
-            <Link
-              href="/garage"
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-500 hover:border-[#FF4B19] hover:text-[#FF4B19] transition-all"
-            >
-              <span
-                className="material-symbols-outlined"
-                style={{ fontSize: "18px" }}
+          ) : (
+            <div className="space-y-3">
+              <p className="text-xs text-muted-foreground">
+                {t("filterSidebar.selectVehicleHint")}
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full text-xs h-8"
+                asChild
               >
-                add
-              </span>
-              Add my vehicle
-            </Link>
+                <Link href={localePath("/garage")}>
+                  {t("filterSidebar.addMyVehicle")}
+                </Link>
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Separator />
+
+      {/* Condition */}
+      <Card>
+        <CardContent className="p-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+            {t("filterSidebar.condition")}
+          </p>
+          <RadioGroup
+            value={filters.condition}
+            onValueChange={(v) => update({ condition: v })}
+            className="space-y-2"
+          >
+            {["all", "new", "used", "refurbished"].map((opt) => (
+              <div key={opt} className="flex items-center gap-2.5">
+                <RadioGroupItem
+                  value={opt}
+                  id={`cond-${opt}`}
+                  className="text-primary"
+                />
+                <label
+                  htmlFor={`cond-${opt}`}
+                  className="text-sm cursor-pointer capitalize"
+                >
+                  {opt === "all"
+                    ? t("filterSidebar.allConditions")
+                    : opt === "new"
+                      ? t("filterSidebar.condNew")
+                      : opt === "used"
+                        ? t("filterSidebar.condUsed")
+                        : t("filterSidebar.condRefurbished")}
+                </label>
+              </div>
+            ))}
+          </RadioGroup>
+        </CardContent>
+      </Card>
+
+      {/* Price Range */}
+      <Card>
+        <CardContent className="p-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+            {t("filterSidebar.priceRange")}
+          </p>
+          <div className="flex gap-2">
+            <Input
+              type="number"
+              placeholder={t("filterSidebar.pricePlaceholderMin")}
+              value={filters.priceMin}
+              onChange={(e) => update({ priceMin: e.target.value })}
+              className="h-8 text-sm"
+            />
+            <Input
+              type="number"
+              placeholder={t("filterSidebar.pricePlaceholderMax")}
+              value={filters.priceMax}
+              onChange={(e) => update({ priceMax: e.target.value })}
+              className="h-8 text-sm"
+            />
           </div>
-        )}
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* ── Condition ── */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700">
-        <h4 className="font-bold text-sm uppercase tracking-wider mb-4">
-          Condition
-        </h4>
-        <div className="space-y-2">
-          {[
-            { value: "all", label: "All" },
-            { value: "new", label: "New" },
-            { value: "used", label: "Used" },
-            { value: "refurbished", label: "Refurbished" },
-          ].map((opt) => (
+      {/* Rating */}
+      <Card>
+        <CardContent className="p-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+            {t("filterSidebar.minRating")}
+          </p>
+          <RadioGroup
+            value={String(filters.minRating)}
+            onValueChange={(v) => update({ minRating: Number(v) })}
+            className="space-y-2"
+          >
+            {[4, 3, 2, 0].map((r) => (
+              <div key={r} className="flex items-center gap-2.5">
+                <RadioGroupItem value={String(r)} id={`rat-${r}`} />
+                <label
+                  htmlFor={`rat-${r}`}
+                  className="text-sm cursor-pointer flex items-center gap-1"
+                >
+                  {r > 0 ? (
+                    <>
+                      {r}+{" "}
+                      <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                    </>
+                  ) : (
+                    t("filterSidebar.allRatings")
+                  )}
+                </label>
+              </div>
+            ))}
+          </RadioGroup>
+        </CardContent>
+      </Card>
+
+      {/* Part Type */}
+      <Card>
+        <CardContent className="p-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+            {t("filterSidebar.partType")}
+          </p>
+          <RadioGroup
+            value={filters.partType}
+            onValueChange={(v) => update({ partType: v })}
+            className="space-y-2"
+          >
+            {[
+              { value: "all", label: t("filterSidebar.allTypes") },
+              { value: "oem", label: "OEM" },
+              { value: "original", label: "Original" },
+              { value: "aftermarket", label: "Aftermarket" },
+            ].map((opt) => (
+              <div key={opt.value} className="flex items-center gap-2.5">
+                <RadioGroupItem value={opt.value} id={`pt-${opt.value}`} />
+                <label
+                  htmlFor={`pt-${opt.value}`}
+                  className="text-sm cursor-pointer"
+                >
+                  {opt.label}
+                </label>
+              </div>
+            ))}
+          </RadioGroup>
+        </CardContent>
+      </Card>
+
+      {/* In Stock */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <Checkbox
+              id="instock"
+              checked={filters.inStockOnly}
+              onCheckedChange={(v) => update({ inStockOnly: v === true })}
+            />
             <label
-              key={opt.value}
-              className="flex items-center gap-3 cursor-pointer"
+              htmlFor="instock"
+              className="text-sm font-semibold cursor-pointer"
             >
-              <input
-                type="radio"
-                name="condition"
-                value={opt.value}
-                checked={filters.condition === opt.value}
-                onChange={() => update({ condition: opt.value })}
-                className="accent-[#FF4B19]"
-              />
-              <span className="text-sm">{opt.label}</span>
+              {t("filterSidebar.inStockOnly")}
             </label>
-          ))}
-        </div>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* ── Price range ── */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700">
-        <h4 className="font-bold text-sm uppercase tracking-wider mb-4">
-          Price Range (EGP)
-        </h4>
-        <div className="flex gap-3">
-          <input
-            type="number"
-            placeholder="Min"
-            value={filters.priceMin}
-            onChange={(e) => update({ priceMin: e.target.value })}
-            className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF4B19]/30"
-          />
-          <input
-            type="number"
-            placeholder="Max"
-            value={filters.priceMax}
-            onChange={(e) => update({ priceMax: e.target.value })}
-            className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF4B19]/30"
-          />
-        </div>
-      </div>
-
-      {/* ── Rating ── */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700">
-        <h4 className="font-bold text-sm uppercase tracking-wider mb-4">
-          Min Rating
-        </h4>
-        <div className="space-y-2">
-          {[4, 3, 2, 0].map((r) => (
-            <label key={r} className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="radio"
-                name="rating"
-                checked={filters.minRating === r}
-                onChange={() => update({ minRating: r })}
-                className="accent-[#FF4B19]"
-              />
-              <span className="text-sm flex items-center gap-1">
-                {r > 0 ? (
-                  <>
-                    {r}+{" "}
-                    <span
-                      className="material-symbols-outlined text-[#FF4B19] text-sm"
-                      style={{ fontVariationSettings: "'FILL' 1" }}
-                    >
-                      star
-                    </span>
-                  </>
-                ) : (
-                  "All ratings"
-                )}
-              </span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      {/* ── In stock ── */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700">
-        <label className="flex items-center gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={filters.inStockOnly}
-            onChange={(e) => update({ inStockOnly: e.target.checked })}
-            className="accent-[#FF4B19] w-4 h-4"
-          />
-          <span className="text-sm font-semibold">In Stock Only</span>
-        </label>
-      </div>
-
-      <button
-        onClick={handleClearAll}
-        className="w-full py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-sm font-bold hover:border-[#FF4B19] hover:text-[#FF4B19] transition-all"
-      >
-        Clear All Filters
-      </button>
+      <Button variant="outline" className="w-full" onClick={handleClearAll}>
+        <RotateCcw className="h-4 w-4 mr-2" />{" "}
+        {t("filterSidebar.clearAllFilters")}
+      </Button>
     </aside>
   );
 }

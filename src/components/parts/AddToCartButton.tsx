@@ -9,6 +9,7 @@
 
 import { useState } from "react";
 import { useCart } from "@/hooks";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface Props {
   id: string;
@@ -38,6 +39,8 @@ export default function AddToCartButton({
   installationAvailable,
 }: Props) {
   const { addItem, isInCart, getItemQty } = useCart();
+  const { locale } = useLanguage();
+  const isAr = locale === "ar";
   const [adding, setAdding] = useState(false);
 
   const inCart = isInCart(id);
@@ -82,19 +85,23 @@ export default function AddToCartButton({
             >
               check_circle
             </span>
-            In Cart ({qty})
+            {isAr ? `في السلة (${qty})` : `In Cart (${qty})`}
           </>
         ) : stock === 0 ? (
-          "Out of Stock"
+          isAr ? (
+            "نفذت الكمية"
+          ) : (
+            "Out of Stock"
+          )
         ) : adding ? (
           <>
             <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            Adding…
+            {isAr ? "جارٍ الإضافة..." : "Adding…"}
           </>
         ) : (
           <>
             <span className="material-symbols-outlined">shopping_cart</span>
-            Add to Cart
+            {isAr ? "أضف إلى السلة" : "Add to Cart"}
           </>
         )}
       </button>
@@ -105,7 +112,7 @@ export default function AddToCartButton({
           className="w-full py-4 rounded-xl border-2 border-[#FF4B19] text-[#FF4B19] font-bold hover:bg-[#FF4B19]/5 transition-all flex items-center justify-center gap-2"
         >
           <span className="material-symbols-outlined">build</span>
-          Add with Installation
+          {isAr ? "أضف مع التركيب" : "Add with Installation"}
         </button>
       )}
     </div>

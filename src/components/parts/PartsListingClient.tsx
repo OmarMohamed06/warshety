@@ -10,9 +10,13 @@
  */
 
 import { useMemo, useState } from "react";
-import FilterSidebar, {
-  type FilterState,
-} from "@/components/parts/FilterSidebar";
+import dynamic from "next/dynamic";
+import type { FilterState } from "@/components/parts/FilterSidebar";
+import { useLanguage } from "@/context/LanguageContext";
+const FilterSidebar = dynamic(
+  () => import("@/components/parts/FilterSidebar"),
+  { ssr: false },
+);
 import ProductCard from "@/components/parts/ProductCard";
 import { useVehicle } from "@/hooks";
 import type { Part } from "@/types";
@@ -32,6 +36,8 @@ export default function PartsListingClient({
 }: PartsListingClientProps) {
   const { filterCompatible, hasActiveVehicle, compatibilityString } =
     useVehicle();
+  const { locale } = useLanguage();
+  const isAr = locale === "ar";
 
   const [filters, setFilters] = useState<FilterState>({
     condition: "all",
@@ -40,6 +46,7 @@ export default function PartsListingClient({
     inStockOnly: false,
     minRating: 0,
     compatibleOnly: hasActiveVehicle,
+    partType: "all",
   });
 
   const [sort, setSort] = useState<SortOption>("best");
@@ -55,6 +62,11 @@ export default function PartsListingClient({
     // 2. Condition
     if (filters.condition !== "all") {
       result = result.filter((p) => p.condition === filters.condition);
+    }
+
+    // 2b. Part type
+    if (filters.partType && filters.partType !== "all") {
+      result = result.filter((p) => p.partType === filters.partType);
     }
 
     // 3. Price range
@@ -108,6 +120,7 @@ export default function PartsListingClient({
     filters.inStockOnly,
     filters.minRating > 0,
     filters.compatibleOnly && hasActiveVehicle,
+    filters.partType !== "all",
   ].filter(Boolean).length;
 
   return (
@@ -126,9 +139,17 @@ export default function PartsListingClient({
               <span className="font-bold text-slate-800 dark:text-slate-200">
                 {filtered.length}
               </span>{" "}
-              {filtered.length === 1 ? "result" : "results"}
+              {isAr
+                ? filtered.length === 1
+                  ? "نتيجة"
+                  : "نتيجة"
+                : filtered.length === 1
+                  ? "result"
+                  : "results"}
               {parts.length !== filtered.length && (
-                <span className="text-slate-400"> of {parts.length}</span>
+                <span className="text-slate-400">
+                  {isAr ? ` من ${parts.length}` : ` of ${parts.length}`}
+                </span>
               )}
             </p>
 
@@ -168,11 +189,12 @@ export default function PartsListingClient({
                     inStockOnly: false,
                     minRating: 0,
                     compatibleOnly: false,
+                    partType: "all",
                   })
                 }
                 className="text-[11px] font-bold text-slate-400 hover:text-[#FF4B19] transition-colors"
               >
-                Clear filters
+                {isAr ? "مسح الفلاتر" : "Clear filters"}
               </button>
             )}
           </div>
@@ -182,11 +204,21 @@ export default function PartsListingClient({
             onChange={(e) => setSort(e.target.value as SortOption)}
             className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF4B19]/30"
           >
-            <option value="best">Sort: Best Match</option>
-            <option value="price-asc">Price: Low to High</option>
-            <option value="price-desc">Price: High to Low</option>
-            <option value="rating">Highest Rated</option>
-            <option value="newest">Newest First</option>
+            <option value="best">
+              {isAr ? "الترتيب: الأنسب" : "Sort: Best Match"}
+            </option>
+            <option value="price-asc">
+              {isAr ? "السعر: من الأقل" : "Price: Low to High"}
+            </option>
+            <option value="price-desc">
+              {isAr ? "السعر: من الأعلى" : "Price: High to Low"}
+            </option>
+            <option value="rating">
+              {isAr ? "الأعلى تقييماً" : "Highest Rated"}
+            </option>
+            <option value="newest">
+              {isAr ? "الأحدث أولاً" : "Newest First"}
+            </option>
           </select>
         </div>
 
@@ -202,12 +234,18 @@ export default function PartsListingClient({
               </span>
             </div>
             <p className="font-bold text-slate-700 dark:text-slate-200 mb-1">
-              No parts match your filters
+              {isAr
+                ? "لا توجد قطع تطابق الفلاتر"
+                : "No parts match your filters"}
             </p>
             <p className="text-sm text-slate-400 mb-6">
               {filters.compatibleOnly && hasActiveVehicle
-                ? `No compatible parts found for ${compatibilityString}. Try turning off the compatibility filter.`
-                : "Try adjusting or clearing your filters."}
+                ? isAr
+                  ? `لا توجد قطع متوافقة مع ${compatibilityString}. جرب إيقاف فلتر التوافق.`
+                  : `No compatible parts found for ${compatibilityString}. Try turning off the compatibility filter.`
+                : isAr
+                  ? "جرب تعديل أو مسح الفلاتر."
+                  : "Try adjusting or clearing your filters."}
             </p>
             <button
               onClick={() =>
@@ -218,11 +256,12 @@ export default function PartsListingClient({
                   inStockOnly: false,
                   minRating: 0,
                   compatibleOnly: false,
+                  partType: "all",
                 })
               }
               className="px-6 py-2.5 bg-[#FF4B19] text-white text-sm font-bold rounded-xl hover:bg-[#e03d0f] transition-colors"
             >
-              Clear All Filters
+              {isAr ? "مسح كل الفلاتر" : "Clear All Filters"}
             </button>
           </div>
         ) : (

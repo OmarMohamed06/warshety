@@ -16,6 +16,8 @@ export interface Vehicle {
 }
 
 // Part / Product types
+export type PartType = "oem" | "aftermarket" | "original";
+
 export interface Part {
   id: string;
   slug: string;
@@ -24,8 +26,18 @@ export interface Part {
   price: number;
   originalPrice?: number;
   condition: "new" | "used" | "refurbished";
+  /** OEM = factory-spec, original = genuine from car brand, aftermarket = third-party */
+  partType?: PartType;
   oemNumber?: string;
   partNumber?: string;
+  /** Primary car make this part fits (e.g. "Toyota") */
+  make?: string;
+  /** Primary car model this part fits (e.g. "Corolla") */
+  model?: string;
+  /** Earliest compatible model year */
+  yearFrom?: number;
+  /** Latest compatible model year */
+  yearTo?: number;
   images: string[];
   compatibleVehicles: string[];
   vendorId: string;

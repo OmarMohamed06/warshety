@@ -17,3 +17,9 @@ export type { UseCartReturn, CartItem, AddCartItemInput } from "./useCart";
 
 export { useVehicle } from "./useVehicle";
 export type { UseVehicleReturn, VehicleCompatibilityQuery } from "./useVehicle";
+
+export { useBooking } from "./useBooking";
+export type { UseBookingReturn } from "./useBooking";
+
+export { useCarMakes, useCarModels } from "./useCarData";
+export type { CarMake, CarModel } from "./useCarData";

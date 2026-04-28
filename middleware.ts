@@ -1,117 +1,217 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
-import { createServerClient } from "@supabase/ssr";
-import type { Database } from "@/types/database";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Locale configuration
+// ─────────────────────────────────────────────────────────────────────────────
+
+type Locale = "en" | "ar";
+const DEFAULT_LOCALE: Locale = "en";
+
+/** Infer best locale from cookie or Accept-Language header */
+function detectLocale(request: NextRequest): Locale {
+  const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
+  if (cookieLocale === "en" || cookieLocale === "ar") return cookieLocale;
+  const acceptLang = request.headers.get("accept-language") ?? "";
+  // Accept-Language like "ar,en;q=0.9" → Arabic
+  if (/\bar\b/i.test(acceptLang)) return "ar";
+  return DEFAULT_LOCALE;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Route configuration
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Routes that require any authenticated user */
 const PROTECTED_ROUTES = [
   "/profile",
   "/orders",
   "/bookings",
   "/garage",
   "/checkout",
+  "/branch",
 ];
 
-/** Routes that require role=vendor */
 const VENDOR_ROUTES = [
   "/vendor/dashboard",
   "/vendor/bookings",
+  "/vendor/branches", // includes /vendor/branches/[id]/managers
   "/vendor/services",
   "/vendor/products",
   "/vendor/orders",
   "/vendor/inventory",
   "/vendor/calendar",
   "/vendor/settings",
+  "/vendor/customers",
+  "/vendor/reviews",
+  "/vendor/billing",
 ];
 
-/** Routes that require role=admin */
 const ADMIN_ROUTES = ["/admin"];
-
-/** Routes that should redirect to home if already authenticated */
 const AUTH_ROUTES = ["/auth/login", "/auth/register"];
+const VENDOR_AUTH_ROUTES = ["/vendor/login", "/auth/vendor-setup"];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Middleware
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function middleware(request: NextRequest) {
-  const { supabaseResponse, user } = await updateSession(request);
   const pathname = request.nextUrl.pathname;
 
-  // ── If user is signed in, redirect away from auth pages ──────────────────
-  if (user && AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
-    return NextResponse.redirect(new URL("/", request.url));
+  // ── Step 1: detect locale prefix in URL ───────────────────────────────────
+  const localeMatch = pathname.match(/^\/(en|ar)(\/|$)/);
+
+  if (!localeMatch) {
+    // No locale prefix → redirect to /{detectedLocale}/path
+    const locale = detectLocale(request);
+    const redirectUrl = new URL(
+      `/${locale}${pathname === "/" ? "" : pathname}${request.nextUrl.search}`,
+      request.url,
+    );
+    return NextResponse.redirect(redirectUrl);
   }
 
-  // ── Guard: must be authenticated ─────────────────────────────────────────
-  const needsAuth = PROTECTED_ROUTES.some((r) => pathname.startsWith(r));
-  if (needsAuth && !user) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
-    url.searchParams.set("next", pathname);
-    return NextResponse.redirect(url);
+  // ── Step 2: extract locale + internal path ────────────────────────────────
+  const locale = localeMatch[1] as Locale;
+  const internalPath = pathname.replace(/^\/(en|ar)/, "") || "/";
+
+  // ── Step 3: refresh Supabase session ──────────────────────────────────────
+  const { supabaseResponse, user, supabase } = await updateSession(request);
+
+  // Helper: create a locale-prefixed redirect carrying Supabase cookies
+  function localeRedirect(path: string, search = ""): NextResponse {
+    const url = new URL(`/${locale}${path}${search}`, request.url);
+    const res = NextResponse.redirect(url);
+    for (const cookie of supabaseResponse.cookies.getAll()) {
+      res.cookies.set(cookie.name, cookie.value);
+    }
+    return res;
   }
 
-  // ── Guard: vendor & admin routes ──────────────────────────────────────────
+  // ── Step 4: auth guards (based on internalPath) ───────────────────────────
+  const isVendorAuthRoute = VENDOR_AUTH_ROUTES.some((r) =>
+    internalPath.startsWith(r),
+  );
+  void isVendorAuthRoute; // used implicitly by pass-through below
+
+  if (user && AUTH_ROUTES.some((r) => internalPath.startsWith(r))) {
+    return localeRedirect("/");
+  }
+
+  if (user && internalPath.startsWith("/vendor/login")) {
+    return localeRedirect("/vendor/dashboard");
+  }
+
+  if (internalPath.startsWith("/auth/vendor-setup") && !user) {
+    return localeRedirect("/auth/login", "?error=session_required");
+  }
+
+  if (PROTECTED_ROUTES.some((r) => internalPath.startsWith(r)) && !user) {
+    return localeRedirect("/auth/login", `?next=/${locale}${internalPath}`);
+  }
+
   const needsVendorOrAdmin =
-    VENDOR_ROUTES.some((r) => pathname.startsWith(r)) ||
-    ADMIN_ROUTES.some((r) => pathname.startsWith(r));
+    VENDOR_ROUTES.some((r) => internalPath.startsWith(r)) ||
+    ADMIN_ROUTES.some((r) => internalPath.startsWith(r));
 
   if (needsVendorOrAdmin) {
     if (!user) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/auth/login";
-      url.searchParams.set("next", pathname);
-      return NextResponse.redirect(url);
+      return localeRedirect("/vendor/login", `?next=/${locale}${internalPath}`);
     }
 
-    // Fetch user role from DB
-    let supabaseResponse2 = NextResponse.next({ request });
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll: () => request.cookies.getAll(),
-          setAll: (cookiesToSet) => {
-            cookiesToSet.forEach(({ name, value }) =>
-              request.cookies.set(name, value),
-            );
-            supabaseResponse2 = NextResponse.next({ request });
-            cookiesToSet.forEach(({ name, value, options }) =>
-              supabaseResponse2.cookies.set(name, value, options),
-            );
-          },
-        },
-      },
-    );
+    // Check role cache cookie first to avoid a DB round-trip on every request
+    const cachedRole = request.cookies.get("_role")?.value;
+    let role: string | undefined = cachedRole;
 
-    const { data: profile } = await supabase
-      .from("users")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    const role = profile?.role;
-
-    if (ADMIN_ROUTES.some((r) => pathname.startsWith(r)) && role !== "admin") {
-      return NextResponse.redirect(new URL("/", request.url));
+    if (!role) {
+      // Reuse the supabase client already created by updateSession
+      const { data: profile } = await supabase
+        .from("users")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      role = profile?.role ?? undefined;
     }
 
     if (
-      VENDOR_ROUTES.some((r) => pathname.startsWith(r)) &&
-      role !== "vendor" &&
+      ADMIN_ROUTES.some((r) => internalPath.startsWith(r)) &&
       role !== "admin"
     ) {
-      return NextResponse.redirect(new URL("/vendor/apply", request.url));
+      return localeRedirect("/");
+    }
+
+    if (
+      VENDOR_ROUTES.some((r) => internalPath.startsWith(r)) &&
+      role !== "vendor" &&
+      role !== "admin" &&
+      role !== "manager"
+    ) {
+      return localeRedirect("/vendor/apply");
+    }
+
+    // Branch managers (role='manager') cannot access owner-only routes
+    if (role === "manager") {
+      const isBranchListExact =
+        internalPath === "/vendor/branches" ||
+        internalPath === "/vendor/branches/";
+      const isOwnerOnly =
+        isBranchListExact ||
+        ["/vendor/billing", "/vendor/settings"].some((r) =>
+          internalPath.startsWith(r),
+        );
+      if (isOwnerOnly) {
+        return localeRedirect("/vendor/dashboard");
+      }
     }
   }
 
-  return supabaseResponse;
+  // ── Step 5: pass through — inject locale headers for root layout SSR ────────
+  // No rewrite needed: /en/services maps natively to app/[lang]/services
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-locale", locale);
+  requestHeaders.set("x-pathname", pathname); // e.g. /ar/services
+
+  const response = NextResponse.next({
+    request: { headers: requestHeaders },
+  });
+
+  // Transfer Supabase session cookies to the response
+  for (const cookie of supabaseResponse.cookies.getAll()) {
+    response.cookies.set(cookie.name, cookie.value);
+  }
+
+  // Persist locale cookie (1 year)
+  response.cookies.set("NEXT_LOCALE", locale, {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+    sameSite: "lax",
+  });
+
+  // Cache role for 5 minutes so repeat navigations skip the DB query
+  if (user && needsVendorOrAdmin) {
+    const cachedRole = request.cookies.get("_role")?.value;
+    if (!cachedRole) {
+      const roleRes = await supabase
+        .from("users")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      const resolvedRole =
+        (roleRes.data as { role?: string } | null)?.role ?? "";
+      if (resolvedRole) {
+        response.cookies.set("_role", resolvedRole, {
+          path: "/",
+          maxAge: 60 * 5,
+          sameSite: "lax",
+          httpOnly: true,
+        });
+      }
+    }
+  } else if (!user) {
+    // Clear stale role cookie on logout
+    response.cookies.delete("_role");
+  }
+
+  return response;
 }
 
 export const config = {

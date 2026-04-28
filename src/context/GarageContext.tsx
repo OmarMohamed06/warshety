@@ -27,7 +27,14 @@ import { createClient } from "@/lib/supabase/client";
 // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function generateId(): string {
-  return `v_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // fallback (SSR / very old browsers)
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+  });
 }
 
 /** Human-readable label for a vehicle, e.g. "2019 BMW 3 Series 320i" */
@@ -177,6 +184,7 @@ export function GarageProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (cancelled) return;
       if (event === "SIGNED_IN" && session?.user) {
         setUserId(session.user.id);
         const { data: rows } = await supabase
@@ -184,10 +192,11 @@ export function GarageProvider({ children }: { children: React.ReactNode }) {
           .select("*")
           .eq("user_id", session.user.id)
           .order("created_at");
-        if (rows) {
+        if (!cancelled && rows) {
           setVehicles(rows.map(dbRowToVehicle));
         }
       } else if (event === "SIGNED_OUT") {
+        if (cancelled) return;
         setUserId(null);
         // Fall back to localStorage on sign-out
         setVehicles(readVehicles());
@@ -260,7 +269,13 @@ export function GarageProvider({ children }: { children: React.ReactNode }) {
             is_default: false,
           })
           .then(({ error }) => {
-            if (error) console.error("Failed to save vehicle to DB:", error);
+            if (error)
+              console.error(
+                "Failed to save vehicle to DB:",
+                error.message,
+                error.details,
+                error.hint,
+              );
           });
       }
 

@@ -1,108 +1,264 @@
-import Link from "next/link";
+"use client";
 
-const SERVICE_CENTERS = [
+import { useRef, useEffect, useState } from "react";
+import Image from "next/image";
+import { LocaleLink as Link } from "@/components/ui/locale-link";
+import {
+  ArrowRight,
+  Star,
+  MapPin,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/client";
+import { useLanguage } from "@/context/LanguageContext";
+
+interface ServiceCenter {
+  id: string;
+  name: string;
+  city: string | null;
+  rating: number;
+  reviews: number;
+  makes: string[];
+  image: string | null;
+  completedBookings: number;
+}
+
+const FALLBACK_CENTERS: ServiceCenter[] = [
   {
-    id: "elite-auto-haus",
+    id: "f1",
     name: "Elite Auto Haus",
-    city: "New Cairo, Egypt",
+    city: "New Cairo",
     rating: 4.9,
-    specializations: ["BMW Specialist", "Mercedes-Benz"],
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDM6v9903PHEN-dgowhzASd_Obu_HzFJ7mCUcHerHw3cJX0LqY5ygDoaf_XA4Qo1iJxIe5f5QtpxPubE0Dp3VHawyEVTG-IXHrDHfwfL2ntBdJhukmXQ9RqX0F36wQ3yfaiUh9us7kWfGjRW4P12a1Lss-mFF8QbOlsIdnQw3FSHBkhwDb00j2vVhmZNS5pM5qu3WSW_Dt2VCF_wyVyy0aL03aLeGg1hoXiTgIiMiGmMxaMMOwNB6o7VHtdle-RsV5Sd32hu4eo",
+    reviews: 312,
+    makes: ["BMW", "Mercedes", "Audi"],
+    image: null,
+    completedBookings: 0,
   },
   {
-    id: "precision-motors",
-    name: "Precision Motors",
-    city: "Sheikh Zayed, Egypt",
+    id: "f2",
+    name: "Speedy Motors Service",
+    city: "Giza",
+    rating: 4.7,
+    reviews: 188,
+    makes: ["Toyota", "Hyundai", "Kia"],
+    image: null,
+    completedBookings: 0,
+  },
+  {
+    id: "f3",
+    name: "AutoCare Plus",
+    city: "Cairo",
     rating: 4.8,
-    specializations: ["Audi", "Porsche"],
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuB4eLV7IKyTrK1YRud09v_2EiFwAqOndh8u_w36Suuv8yTQve9OUsdV8sgn5PkCWdSIh8K473Y4jKPEvPOHrpaDhqLKgF6cBWnZ1-0req1PvUfh5U3IS5mvhWvk2-NUWJGsp82AkqWnWF7XAgpMg0ezdNf5R7fioUuWM0xHD8r6-BGQm1QywM-QHn2heYf7jB7OJm6L8YhuyHLLFWoA9ik8nFfTPbwXOFu4f4dBq1QRTgMhJVDkfih4vV5mTG6QO3-eY_w4o8Mb",
+    reviews: 245,
+    makes: ["All Makes"],
+    image: null,
+    completedBookings: 0,
   },
   {
-    id: "alex-garage-pro",
-    name: "Alex Garage Pro",
-    city: "Alexandria, Egypt",
-    rating: 5.0,
-    specializations: ["All Luxury Makes"],
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCjzDT9dn3i1Jm8Xmz7GDDzGvawFrddJxqQu8HddbNSWIyjhktu7LxWcFUO41ALjbNzilHMVWzMvbQ7cHm8Y7vEk9SGkq_JH91bVsEY5-i1uPJt-aGyTlIptLDAbZ-CKSBGSI8eB5iSTTC2vAirSld0Usx7JUFB1DcACbPTrKmDKZyyHF310BUsNYn4vrCuNH0wloeArJzfQ5cvIVzkzG2A_NdODapDSuYbTXdkX9S7hKAxFbfQbSg_5mYM67XU_aBXTN1ee3n-",
+    id: "f4",
+    name: "ProTech Garage",
+    city: "Alexandria",
+    rating: 4.6,
+    reviews: 132,
+    makes: ["Nissan", "Mitsubishi"],
+    image: null,
+    completedBookings: 0,
   },
 ];
 
-export default function FeaturedServiceCenters() {
+/** Raw DB row shape (subset of vendors table columns we select) */
+export interface RawVendor {
+  id: string;
+  business_name: string;
+  city: string | null;
+  rating: number | null;
+  total_reviews: number | null;
+  cover_image_url: string | null;
+  supported_makes: string[] | null;
+  completed_bookings?: number | null;
+}
+
+function mapRawVendors(data: RawVendor[]): ServiceCenter[] {
+  return data.map((v) => ({
+    id: v.id,
+    name: v.business_name,
+    city: v.city,
+    rating: Number(v.rating) || 0,
+    reviews: v.total_reviews ?? 0,
+    makes: v.supported_makes?.length
+      ? v.supported_makes.slice(0, 3)
+      : ["All Makes"],
+    image: v.cover_image_url,
+    completedBookings: v.completed_bookings ?? 0,
+  }));
+}
+
+interface Props {
+  /** Server-prefetched vendor rows — if provided, client-side fetch is skipped */
+  initialData?: RawVendor[];
+}
+
+export default function FeaturedServiceCenters({ initialData }: Props = {}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [centers, setCenters] = useState<ServiceCenter[]>(() => {
+    if (initialData !== undefined) {
+      return initialData.length > 0
+        ? mapRawVendors(initialData)
+        : FALLBACK_CENTERS;
+    }
+    return [];
+  });
+  const [loading, setLoading] = useState(initialData === undefined);
+  const { t } = useLanguage();
+
+  useEffect(() => {
+    // Skip client-side fetch when server already provided data
+    if (initialData !== undefined) return;
+    const supabase = createClient();
+    supabase
+      .from("vendors")
+      .select(
+        "id, business_name, city, rating, total_reviews, cover_image_url, supported_makes, completed_bookings",
+      )
+      .in("status", ["approved", "pending"])
+      .eq("vendor_type", "service_center")
+      .order("completed_bookings", { ascending: false })
+      .limit(8)
+      .then(({ data }) => {
+        setCenters(
+          data && data.length > 0 ? mapRawVendors(data) : FALLBACK_CENTERS,
+        );
+        setLoading(false);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function scroll(dir: "left" | "right") {
+    if (!scrollRef.current) return;
+    scrollRef.current.scrollBy({
+      left: dir === "left" ? -248 : 248,
+      behavior: "smooth",
+    });
+  }
+
   return (
-    <section className="py-24 bg-slate-50 dark:bg-slate-900/50">
+    <section className="py-6 md:py-12">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="mb-12">
-          <h2 className="text-3xl font-black mb-2">Featured Service Centers</h2>
-          <p className="text-slate-500">
-            Certified excellence in Cairo, Giza &amp; Alexandria
-          </p>
+        <div className="flex items-end justify-between mb-6 md:mb-10">
+          <div>
+            <h2 className="text-xl md:text-3xl font-black uppercase tracking-tight mb-0.5 md:mb-1.5">
+              {t("home.featuredCenters")}
+            </h2>
+          </div>
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/services">
+              {t("home.viewAll")} <ArrowRight className="ml-1 h-3.5 w-3.5" />
+            </Link>
+          </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
-          {SERVICE_CENTERS.map((center) => (
-            <div
-              key={center.id}
-              className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-700 group shadow-md hover:shadow-2xl transition-all"
-            >
-              <div
-                className="h-56 bg-center bg-cover relative"
-                style={{ backgroundImage: `url('${center.image}')` }}
-              >
-                <div className="absolute top-4 right-4 bg-white dark:bg-slate-800 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
-                  <span
-                    className="material-symbols-outlined text-[#FF4B19] text-sm"
-                    style={{ fontVariationSettings: "'FILL' 1" }}
-                  >
-                    star
-                  </span>
-                  {center.rating}
-                </div>
-              </div>
-
-              <div className="p-6">
-                <h4 className="text-xl font-bold mb-2">{center.name}</h4>
-                <div className="flex items-center gap-2 text-slate-500 text-sm mb-4">
-                  <span className="material-symbols-outlined text-base">
-                    location_on
-                  </span>
-                  {center.city}
-                </div>
-
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {center.specializations.map((s) => (
-                    <span
-                      key={s}
-                      className="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded text-[10px] font-bold uppercase text-slate-500"
-                    >
-                      {s}
-                    </span>
-                  ))}
-                </div>
-
-                <Link
-                  href={`/services/${center.id}`}
-                  className="block w-full py-3 rounded-xl border-2 border-[#FF4B19] text-[#FF4B19] font-bold text-center hover:bg-[#FF4B19] hover:text-white transition-all"
-                >
-                  Book Inspection
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="text-center">
-          <Link
-            href="/services"
-            className="inline-flex items-center gap-2 px-8 py-3 bg-[#FF4B19] text-white font-bold rounded-xl hover:bg-[#e03d10] transition-all shadow-md hover:shadow-lg"
+        <div className="relative px-5">
+          {/* Left arrow */}
+          <button
+            onClick={() => scroll("left")}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 shadow-md flex items-center justify-center hover:border-[#FF4B19] hover:text-[#FF4B19] transition-colors"
           >
-            View All Service Centers
-            <span className="material-symbols-outlined text-base">
-              arrow_forward
-            </span>
-          </Link>
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+
+          <div
+            ref={scrollRef}
+            className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-1"
+          >
+            {loading
+              ? Array.from({ length: 4 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="flex-none w-[220px] h-[260px] rounded-2xl bg-muted animate-pulse border border-slate-100 dark:border-slate-700"
+                  />
+                ))
+              : centers.map((center) => (
+                  <Link
+                    key={center.id}
+                    href={`/services/${center.id}`}
+                    className="group flex-none w-[220px] rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden hover:shadow-lg hover:border-[#FF4B19]/60 transition-all duration-200 flex flex-col"
+                  >
+                    {/* Cover image / placeholder */}
+                    <div className="relative h-[110px] flex-shrink-0 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 overflow-hidden">
+                      {center.image ? (
+                        <Image
+                          src={center.image}
+                          alt={center.name}
+                          fill
+                          sizes="220px"
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center opacity-30">
+                          <span className="material-symbols-outlined text-5xl text-slate-500">
+                            car_repair
+                          </span>
+                        </div>
+                      )}
+                      {/* Rating pill */}
+                      <div className="absolute top-2 right-2">
+                        <span className="inline-flex items-center gap-1 bg-white/95 dark:bg-slate-900/90 text-foreground text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                          <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
+                          {center.rating > 0 ? center.rating.toFixed(1) : "—"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Info */}
+                    <div className="p-3 flex flex-col gap-2 flex-1">
+                      <p className="text-sm font-bold leading-tight line-clamp-2 group-hover:text-[#FF4B19] transition-colors">
+                        {center.name}
+                      </p>
+                      <div className="flex items-center gap-1 text-muted-foreground text-[11px]">
+                        <MapPin className="h-3 w-3 flex-shrink-0" />
+                        <span className="truncate">
+                          {center.city ?? t("home.egypt")}
+                        </span>
+                        {center.reviews > 0 && (
+                          <>
+                            <span className="mx-1 opacity-40">·</span>
+                            <span className="flex-shrink-0">
+                              {center.reviews} {t("home.reviews")}
+                            </span>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Makes */}
+                      <div className="flex flex-wrap gap-1 mt-auto">
+                        {center.makes.slice(0, 3).map((make) => (
+                          <span
+                            key={make}
+                            className="text-[10px] font-medium bg-muted text-muted-foreground rounded-md px-1.5 py-0.5"
+                          >
+                            {make}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Book button */}
+                      <div className="mt-2 w-full text-center text-[11px] font-bold text-[#FF4B19] border border-[#FF4B19]/30 rounded-lg py-1.5 group-hover:bg-[#FF4B19] group-hover:text-white transition-colors">
+                        {t("home.bookInspection")}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+          </div>
+
+          {/* Right arrow */}
+          <button
+            onClick={() => scroll("right")}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 shadow-md flex items-center justify-center hover:border-[#FF4B19] hover:text-[#FF4B19] transition-colors"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </section>

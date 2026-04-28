@@ -1,26 +1,13 @@
-import type { Metadata } from "next";
-import HeroSection from "@/components/home/HeroSection";
-import VehicleConfigurator from "@/components/home/VehicleConfigurator";
-import FeaturedParts from "@/components/home/FeaturedParts";
-import CategoriesGrid from "@/components/home/CategoriesGrid";
-import FeaturedServiceCenters from "@/components/home/FeaturedServiceCenters";
-import OffersSection from "@/components/home/OffersSection";
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
-export const metadata: Metadata = {
-  title: "Garage Egypt — Premium Car Parts & Expert Services",
-  description:
-    "Egypt's #1 automotive marketplace. Buy compatible spare parts, book trusted service centers. قطع غيار سيارات ومراكز خدمة موثوقة في مصر.",
-};
-
-export default function HomePage() {
-  return (
-    <div className="w-full overflow-x-hidden">
-      <HeroSection />
-      <VehicleConfigurator />
-      <FeaturedParts />
-      <CategoriesGrid />
-      <FeaturedServiceCenters />
-      <OffersSection />
-    </div>
-  );
+/**
+ * Root fallback — immediately redirects to the locale-prefixed home page.
+ * Middleware handles this for most requests, but this ensures no 404
+ * when Next.js resolves / before the middleware redirect is followed.
+ */
+export default async function RootPage() {
+  const cookieStore = await cookies();
+  const locale = cookieStore.get("NEXT_LOCALE")?.value === "ar" ? "ar" : "en";
+  redirect(`/${locale}`);
 }

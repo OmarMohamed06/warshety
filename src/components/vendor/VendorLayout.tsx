@@ -1,56 +1,118 @@
-"use client";
+﻿"use client";
 
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { LocaleLink as Link } from "@/components/ui/locale-link";
 
-// ── Navigation items per vendor type ─────────────────────────────────────────
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 
-const SHARED_TOP = [
-  { href: "/vendor/dashboard", icon: "dashboard", label: "Dashboard" },
+import {
+  LayoutDashboard,
+  CalendarDays,
+  Wrench,
+  CalendarCheck,
+  Package,
+  ShoppingCart,
+  Warehouse,
+  Settings,
+  Menu,
+  Bell,
+  ExternalLink,
+  LogOut,
+  Search,
+  Users,
+  Star,
+  ChevronRight,
+  Receipt,
+  GitBranch,
+  MapPin,
+} from "lucide-react";
+
+// ── Nav definitions ────────────────────────────────────────────────────────────
+
+const SHARED_TOP_DEFS = [
+  { href: "/vendor/dashboard", icon: LayoutDashboard, key: "navDashboard" },
 ];
 
-const SHARED_BOTTOM = [
-  { href: "/vendor/settings", icon: "settings", label: "Settings" },
+const SERVICE_CENTER_DEFS = [
+  { href: "/vendor/bookings", icon: CalendarDays, key: "navBookings" },
+  { href: "/vendor/branches", icon: GitBranch, key: "navBranches" },
+  { href: "/vendor/services", icon: Wrench, key: "navServices" },
+  { href: "/vendor/calendar", icon: CalendarCheck, key: "navCalendar" },
 ];
 
-const SERVICE_CENTER_ITEMS = [
-  { href: "/vendor/bookings", icon: "calendar_month", label: "Bookings" },
-  { href: "/vendor/services", icon: "home_repair_service", label: "Services" },
-  { href: "/vendor/calendar", icon: "event", label: "Calendar" },
+const PARTS_SELLER_DEFS = [
+  { href: "/vendor/products", icon: Package, key: "navProducts" },
+  { href: "/vendor/orders", icon: ShoppingCart, key: "navOrders" },
+  { href: "/vendor/inventory", icon: Warehouse, key: "navInventory" },
 ];
 
-const PARTS_SELLER_ITEMS = [
-  { href: "/vendor/products", icon: "inventory_2", label: "Products" },
-  { href: "/vendor/orders", icon: "shopping_cart", label: "Orders" },
-  { href: "/vendor/inventory", icon: "warehouse", label: "Inventory" },
+const MANAGE_DEFS = [
+  { href: "/vendor/customers", icon: Users, key: "navCustomers" },
+  { href: "/vendor/reviews", icon: Star, key: "navReviews" },
+  { href: "/vendor/billing", icon: Receipt, key: "navBilling" },
+  { href: "/vendor/settings", icon: Settings, key: "navSettings" },
 ];
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// ── Sidebar content (shared between desktop and Sheet) ────────────────────────
 
-export default function VendorLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const { user, vendor, signOut } = useAuth();
+interface SidebarProps {
+  onNavigate?: () => void;
+}
+
+// Owner-only routes that branch managers should not see
+const OWNER_ONLY_HREFS = [
+  "/vendor/branches",
+  "/vendor/billing",
+  "/vendor/settings",
+];
+
+function SidebarContent({ onNavigate }: SidebarProps) {
+  const { user, vendor, vendorType, role, managedBranchId, signOut } =
+    useAuth();
   const pathname = usePathname();
   const router = useRouter();
+  const { localePath, t } = useLanguage();
 
-  const vendorType = vendor?.vendor_type;
+  const isManager = role === "manager";
 
-  const dynamicItems =
+  const dynamicItems = (
     vendorType === "service_center"
-      ? SERVICE_CENTER_ITEMS
+      ? SERVICE_CENTER_DEFS
       : vendorType === "parts_seller"
-        ? PARTS_SELLER_ITEMS
-        : [];
+        ? PARTS_SELLER_DEFS
+        : []
+  )
+    .filter((d) => !isManager || !OWNER_ONLY_HREFS.includes(d.href))
+    .map((d) => ({ ...d, label: t(`vendor.${d.key}`) }));
 
-  const navItems = [...SHARED_TOP, ...dynamicItems, ...SHARED_BOTTOM];
+  const dynamicLabel =
+    vendorType === "service_center"
+      ? t("vendor.navGroupService")
+      : vendorType === "parts_seller"
+        ? t("vendor.navGroupStore")
+        : "";
+
+  const sharedTop = SHARED_TOP_DEFS.map((d) => ({
+    ...d,
+    label: t(`vendor.${d.key}`),
+  }));
+  const manageItems = MANAGE_DEFS.filter(
+    (d) => !isManager || !OWNER_ONLY_HREFS.includes(d.href),
+  ).map((d) => ({ ...d, label: t(`vendor.${d.key}`) }));
 
   const handleSignOut = async () => {
     await signOut();
-    router.replace("/auth/login");
+    router.refresh();
+    router.replace(localePath("/auth/login"));
   };
 
   const initials = (vendor?.business_name ?? user?.full_name ?? "V")
@@ -60,153 +122,229 @@ export default function VendorLayout({
     .toUpperCase()
     .slice(0, 2);
 
-  const typeLabel =
-    vendorType === "service_center"
-      ? "Service Center"
-      : vendorType === "parts_seller"
-        ? "Parts Seller"
-        : "Vendor";
+  function NavItem({
+    href,
+    icon: Icon,
+    label,
+  }: {
+    href: string;
+    icon: React.ElementType;
+    label: string;
+  }) {
+    const resolved = localePath(href);
+    const active = pathname === resolved || pathname.startsWith(resolved + "/");
+    return (
+      <Link
+        href={href}
+        onClick={onNavigate}
+        className={cn(
+          "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+          active
+            ? "bg-primary text-primary-foreground"
+            : "text-muted-foreground hover:bg-muted hover:text-foreground",
+        )}
+      >
+        <Icon className="h-4 w-4 shrink-0" />
+        <span className="flex-1">{label}</span>
+        {active && <ChevronRight className="h-3 w-3 opacity-60" />}
+      </Link>
+    );
+  }
+
+  function NavGroup({
+    label,
+    items,
+  }: {
+    label: string;
+    items: Array<{ href: string; icon: React.ElementType; label: string }>;
+  }) {
+    return (
+      <>
+        <p className="px-3 pt-4 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          {label}
+        </p>
+        {items.map((item) => (
+          <NavItem
+            key={item.href}
+            href={item.href}
+            icon={item.icon}
+            label={item.label}
+          />
+        ))}
+      </>
+    );
+  }
 
   return (
-    <div className="flex h-screen bg-[#f6f6f8] dark:bg-[#111621] overflow-hidden">
-      {/* Sidebar */}
-      <aside className="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col flex-shrink-0">
-        {/* Logo */}
-        <div className="p-5 border-b border-slate-200 dark:border-slate-800">
-          <Link href="/vendor/dashboard" className="flex items-center">
-            <img
-              src="/motorlogo.png"
-              alt="Garage Egypt"
-              className="h-16 w-auto object-contain"
-            />
-          </Link>
+    <div className="flex h-full flex-col bg-background">
+      {/* Vendor type badge */}
+      {vendorType && (
+        <div className="px-3 pt-3 pb-1 shrink-0">
+          <Badge
+            variant="outline"
+            className={cn(
+              "text-[10px] font-bold uppercase tracking-wider",
+              vendorType === "service_center"
+                ? "border-blue-200 text-blue-700 bg-blue-50 dark:bg-blue-950 dark:text-blue-400 dark:border-blue-800"
+                : "border-primary/30 text-primary bg-primary/5",
+            )}
+          >
+            {vendorType === "service_center"
+              ? t("vendor.navServiceCenterBadge")
+              : t("vendor.navPartsSellerBadge")}
+          </Badge>
         </div>
+      )}
 
-        {/* Vendor type badge */}
-        {vendorType && (
-          <div className="px-4 pt-4">
-            <span
-              className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full ${
-                vendorType === "service_center"
-                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                  : "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300"
-              }`}
-            >
-              <span className="material-symbols-outlined text-[12px]">
-                {vendorType === "service_center"
-                  ? "home_repair_service"
-                  : "inventory_2"}
-              </span>
-              {typeLabel}
-            </span>
-          </div>
+      {/* Navigation */}
+      <nav className="flex-1 space-y-0.5 p-3 overflow-y-auto">
+        {sharedTop.map((item) => (
+          <NavItem
+            key={item.href}
+            href={item.href}
+            icon={item.icon}
+            label={item.label}
+          />
+        ))}
+
+        {/* Branch manager shortcut */}
+        {isManager && managedBranchId && (
+          <NavItem
+            href={`/branch/${managedBranchId}`}
+            icon={MapPin}
+            label={t("vendor.myBranch")}
+          />
         )}
 
-        {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          {navItems.map((item) => {
-            const active =
-              pathname === item.href || pathname.startsWith(item.href + "/");
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                  active
-                    ? "bg-[#FF4B19] text-white shadow-lg shadow-[#FF4B19]/20"
-                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
-                }`}
-              >
-                <span className="material-symbols-outlined text-[20px]">
-                  {item.icon}
-                </span>
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
+        {dynamicItems.length > 0 && (
+          <NavGroup label={dynamicLabel} items={dynamicItems} />
+        )}
 
-        {/* User card */}
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800">
-          <div className="bg-slate-100 dark:bg-slate-800 p-3 rounded-xl flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#FF4B19] flex items-center justify-center text-white font-black text-sm flex-shrink-0">
+        <NavGroup label={t("vendor.navGroupManage")} items={manageItems} />
+      </nav>
+
+      <Separator />
+
+      {/* User card */}
+      <div className="p-3 shrink-0">
+        <div className="flex items-center gap-2.5 rounded-lg bg-muted p-2.5">
+          <Avatar className="h-8 w-8 shrink-0">
+            <AvatarFallback className="bg-primary text-primary-foreground text-xs font-black">
               {initials}
-            </div>
-            <div className="flex-1 overflow-hidden">
-              <p className="text-xs font-bold truncate">
-                {vendor?.business_name ?? user?.full_name ?? "Vendor"}
-              </p>
-              <p className="text-[10px] text-slate-500 truncate">
-                {vendor?.city ?? user?.email ?? ""}
-              </p>
-            </div>
-            <button
-              onClick={handleSignOut}
-              title="Sign out"
-              className="text-slate-400 hover:text-red-500 transition-colors"
-            >
-              <span className="material-symbols-outlined text-[18px]">
-                logout
-              </span>
-            </button>
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 overflow-hidden">
+            <p className="text-xs font-bold truncate">
+              {vendor?.business_name ?? user?.full_name ?? "Vendor"}
+            </p>
+            <p className="text-[10px] text-muted-foreground truncate">
+              {vendor?.city ?? user?.email ?? ""}
+            </p>
           </div>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={handleSignOut}
+            className="h-7 w-7 text-muted-foreground hover:text-destructive shrink-0"
+            title={t("vendor.navSignOut")}
+          >
+            <LogOut className="h-3.5 w-3.5" />
+          </Button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Main layout ────────────────────────────────────────────────────────────────
+
+export default function VendorLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { vendor, vendorType } = useAuth();
+  const { t } = useLanguage();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  return (
+    <div className="flex h-screen bg-muted/30 overflow-hidden">
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex w-60 flex-col border-r shrink-0">
+        <SidebarContent />
       </aside>
+
+      {/* Mobile Sidebar */}
+      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+        <SheetContent
+          side="left"
+          className="w-60 p-0 gap-0"
+          showCloseButton={false}
+        >
+          <SidebarContent onNavigate={() => setMobileOpen(false)} />
+        </SheetContent>
+      </Sheet>
 
       {/* Main area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-8 flex items-center justify-between flex-shrink-0">
-          <div className="flex-1 max-w-md relative">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">
-              search
-            </span>
-            <input
-              className="w-full bg-[#f6f6f8] dark:bg-slate-800 border-none rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#FF4B19]"
+        <header className="h-14 border-b bg-background flex items-center gap-3 px-4 shrink-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setMobileOpen(true)}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+
+          <div className="flex-1 max-w-sm relative hidden sm:block">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              className="pl-8 h-8 bg-muted border-transparent text-sm"
               placeholder={
                 vendorType === "service_center"
-                  ? "Search bookings, customers…"
-                  : "Search products, orders…"
+                  ? t("vendor.navSearchBookings")
+                  : t("vendor.navSearchProducts")
               }
             />
           </div>
-          <div className="flex items-center gap-4">
-            <button className="relative text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
-              <span className="material-symbols-outlined text-[22px]">
-                notifications
-              </span>
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#FF4B19] rounded-full text-[9px] text-white flex items-center justify-center font-black">
-                3
-              </span>
-            </button>
-            <Link
-              href="/"
-              target="_blank"
-              className="text-xs text-slate-500 hover:text-[#FF4B19] transition-colors flex items-center gap-1"
+
+          <div className="ml-auto flex items-center gap-1">
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-4 w-4" />
+              <span className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-primary" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1.5 hidden sm:flex"
+              asChild
             >
-              <span className="material-symbols-outlined text-[16px]">
-                open_in_new
-              </span>
-              View store
-            </Link>
+              <Link href="/" target="_blank" locale={false}>
+                <ExternalLink className="h-3.5 w-3.5" />
+                {t("vendor.navViewStore")}
+              </Link>
+            </Button>
           </div>
         </header>
 
         {/* Status banners */}
         {vendor?.status === "suspended" && (
-          <div className="bg-red-500 text-white text-sm text-center py-2 font-semibold px-4">
-            ⚠️ Your vendor account has been suspended. Contact support.
+          <div className="bg-destructive text-destructive-foreground text-xs text-center py-2 font-semibold px-4 shrink-0">
+            {t("vendor.bannerSuspended")}
           </div>
         )}
         {vendor?.status === "pending" && (
-          <div className="bg-amber-500 text-white text-sm text-center py-2 font-semibold px-4">
-            ⏳ Your account is pending approval. Features will unlock once
-            approved.
+          <div className="bg-amber-500 text-white text-xs text-center py-2 font-semibold px-4 shrink-0">
+            {t("vendor.bannerPending")}
           </div>
         )}
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-8">{children}</main>
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+          {children}
+        </main>
       </div>
     </div>
   );

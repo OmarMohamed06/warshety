@@ -21,6 +21,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -83,7 +84,7 @@ export interface CartContextValue {
   clearCart: () => void;
 
   /** Returns error string if code is invalid, null if applied successfully */
-  applyPromo: (code: string) => string | null;
+  applyPromo: (code: string) => Promise<string | null>;
   removePromo: () => void;
 }
 
@@ -92,12 +93,8 @@ export interface CartContextValue {
 const FREE_SHIPPING_THRESHOLD = 2_000; // EGP
 const FLAT_SHIPPING = 99; // EGP
 
-/** Demo promo codes — replace with API call when backend is ready */
-const PROMO_CODES: Record<string, PromoResult> = {
-  GARAGE10: { code: "GARAGE10", discountPct: 10, label: "10% off your order" },
-  WELCOME20: { code: "WELCOME20", discountPct: 20, label: "20% Welcome offer" },
-  SAVE50: { code: "SAVE50", discountPct: 5, label: "5% flash sale" },
-};
+/** Demo promo codes — loaded from Supabase promo_codes table */
+// (removed hardcoded codes)
 
 // ── Context ───────────────────────────────────────────────────────────────────
 
@@ -228,12 +225,31 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setPromo(null);
   }, []);
 
-  const applyPromo = useCallback((code: string): string | null => {
-    const found = PROMO_CODES[code.toUpperCase().trim()];
-    if (!found) return "Invalid promo code. Please try again.";
-    setPromo(found);
-    return null;
-  }, []);
+  const applyPromo = useCallback(
+    async (code: string): Promise<string | null> => {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("promo_codes")
+        .select("code, discount_pct, label")
+        .eq("code", code.toUpperCase().trim())
+        .eq("active", true)
+        .or("expires_at.is.null,expires_at.gt." + new Date().toISOString())
+        .maybeSingle();
+      const row = data as unknown as {
+        code: string;
+        discount_pct: number;
+        label: string;
+      } | null;
+      if (!row) return "Invalid or expired promo code.";
+      setPromo({
+        code: row.code,
+        discountPct: row.discount_pct,
+        label: row.label,
+      });
+      return null;
+    },
+    [],
+  );
 
   const removePromo = useCallback(() => {
     setPromo(null);

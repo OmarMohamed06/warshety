@@ -1,63 +1,67 @@
 "use client";
 
+import { LocaleLink as Link } from "@/components/ui/locale-link";
+import { useLanguage } from "@/context/LanguageContext";
+
 export default function VehicleConfigurator() {
+  const { t } = useLanguage();
+
+  const CARDS = [
+    {
+      labelKey: "home.bookService",
+      href: "/services",
+      bg: "#FF4B19",
+      textColor: "#fff",
+      img: "/tools.png",
+      imgClass: "bottom-0 right-2 h-[75%] w-auto object-contain object-bottom",
+    },
+    {
+      labelKey: "home.findParts",
+      href: "/parts",
+      bg: "#0f172a",
+      textColor: "#fff",
+      img: "/barkes.png",
+      imgClass: "bottom-0 right-0 h-[80%] w-auto object-contain object-bottom",
+    },
+  ];
+
   return (
-    <section className="relative -mt-24 z-30 max-w-5xl mx-auto px-6">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 p-8">
-        <div className="flex items-center gap-3 mb-6">
-          <span className="material-symbols-outlined text-[#FF4B19]">
-            directions_car
+    <section className="hidden sm:grid w-full grid-cols-2 mt-0">
+      {CARDS.map((card) => (
+        <Link
+          key={card.labelKey}
+          href={card.href}
+          className="group relative flex h-36 sm:h-44 md:h-48 overflow-hidden"
+          style={{ background: card.bg }}
+        >
+          {/* Background / decorative image */}
+          <img
+            src={card.img}
+            alt=""
+            aria-hidden
+            className={`pointer-events-none absolute select-none transition-transform duration-500 group-hover:scale-105 ${card.imgClass}`}
+          />
+
+          {/* Dark overlay on hover */}
+          <div className="absolute inset-0 bg-black/0 transition-all duration-300 group-hover:bg-black/15" />
+
+          {/* Label */}
+          <span
+            className="relative z-10 m-3 self-start font-black uppercase leading-tight tracking-tight text-[clamp(0.85rem,2.2vw,1.15rem)]"
+            style={{ color: card.textColor }}
+          >
+            {t(card.labelKey)}
           </span>
-          <h3 className="text-xl font-bold">Configure Your Vehicle</h3>
-          <p className="text-slate-400 text-sm ml-auto">
-            Personalize your parts feed
-          </p>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="space-y-2">
-            <label className="text-xs font-bold uppercase text-slate-500 tracking-wider">
-              Brand
-            </label>
-            <select className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg py-3 px-3 focus:outline-none focus:ring-2 focus:ring-[#FF4B19]/30">
-              <option>Select Make</option>
-              <option>BMW</option>
-              <option>Mercedes-Benz</option>
-              <option>Toyota</option>
-              <option>Hyundai</option>
-              <option>Kia</option>
-              <option>Chevrolet</option>
-              <option>Audi</option>
-              <option>Porsche</option>
-            </select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs font-bold uppercase text-slate-500 tracking-wider">
-              Model
-            </label>
-            <select className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg py-3 px-3 focus:outline-none focus:ring-2 focus:ring-[#FF4B19]/30">
-              <option>Select Model</option>
-            </select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs font-bold uppercase text-slate-500 tracking-wider">
-              Year
-            </label>
-            <select className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg py-3 px-3 focus:outline-none focus:ring-2 focus:ring-[#FF4B19]/30">
-              <option>Select Year</option>
-              {Array.from({ length: 30 }, (_, i) => 2024 - i).map((y) => (
-                <option key={y}>{y}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <button className="mt-8 w-full bg-[#FF4B19] text-white font-bold py-4 rounded-xl shadow-lg shadow-[#FF4B19]/20 hover:bg-[#FF4B19]/90 transition-all uppercase tracking-widest text-sm">
-          Save to My Garage
-        </button>
-      </div>
+          {/* Arrow on hover */}
+          <span
+            className="material-symbols-outlined absolute bottom-3 right-3 z-10 text-[20px] opacity-0 transition-all duration-300 group-hover:opacity-100"
+            style={{ color: card.textColor }}
+          >
+            arrow_forward
+          </span>
+        </Link>
+      ))}
     </section>
   );
 }

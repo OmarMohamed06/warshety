@@ -1,11 +1,61 @@
 "use client";
 
-import Link from "next/link";
-import { useState, useRef, useEffect } from "react";
+import { LocaleLink as Link } from "@/components/ui/locale-link";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useGarage, vehicleLabel } from "@/context/GarageContext";
 import { useAuth } from "@/context/AuthContext";
+import { globalSearch, type SearchResult } from "@/services/searchService";
+
+import { useLanguage } from "@/context/LanguageContext";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  ShoppingCart,
+  Search,
+  ChevronDown,
+  Trash2,
+  Minus,
+  Plus,
+  Lock,
+  Car,
+  CheckCircle2,
+  PlusCircle,
+  LayoutDashboard,
+  CalendarDays,
+  ShoppingBag,
+  LogOut,
+  UserCircle2,
+  ShieldCheck,
+  Settings,
+  Wrench,
+  Menu,
+  X,
+  ArrowRight,
+  Ticket,
+  Store,
+  Home,
+  MoreHorizontal,
+  Globe,
+  ChevronRight,
+} from "lucide-react";
 
 const LANGUAGES = [
   { code: "en", label: "EN", flag: "🇺🇸" },
@@ -13,11 +63,201 @@ const LANGUAGES = [
 ] as const;
 
 const NAV_LINKS = [
-  { label: "Car Parts", href: "/parts", icon: "settings" },
-  { label: "Service Centers", href: "/services", icon: "home_repair_service" },
-  { label: "Offers", href: "#offers", icon: "local_offer" },
-  { label: "Become a Vendor", href: "/vendor/apply", icon: "store" },
+  {
+    tKey: "nav.carParts",
+    href: "/parts",
+    icon: <Settings className="w-4 h-4" />,
+  },
+  {
+    tKey: "nav.serviceCenters",
+    href: "/services",
+    icon: <Wrench className="w-4 h-4" />,
+  },
+  {
+    tKey: "nav.becomeVendor",
+    href: "/vendor/apply",
+    icon: <Store className="w-4 h-4" />,
+  },
 ];
+
+// ── Search Box ────────────────────────────────────────────────────────────────
+function SearchBox({ className = "" }: { className?: string }) {
+  const router = useRouter();
+  const { locale, t } = useLanguage();
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [activeIdx, setActiveIdx] = useState(-1);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const runSearch = useCallback(async (q: string) => {
+    if (q.trim().length < 2) {
+      setResults([]);
+      setOpen(false);
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await globalSearch(q);
+      setResults(res.slice(0, 8));
+      setOpen(res.length > 0);
+    } catch {
+      setResults([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => runSearch(query), 350);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [query, runSearch]);
+
+  // Close on outside click
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  function navigate(href: string) {
+    setOpen(false);
+    setQuery("");
+    router.push(`/${locale}${href}`);
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (!open) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIdx((i) => Math.min(i + 1, results.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIdx((i) => Math.max(i - 1, -1));
+    } else if (e.key === "Enter") {
+      if (activeIdx >= 0 && results[activeIdx])
+        navigate(results[activeIdx].href);
+      else if (query.trim()) {
+        setOpen(false);
+        router.push(`/${locale}/search?q=${encodeURIComponent(query.trim())}`);
+      }
+    } else if (e.key === "Escape") {
+      setOpen(false);
+      inputRef.current?.blur();
+    }
+  }
+
+  const typeIcon: Record<string, string> = {
+    vendor: "🏪",
+    service: "🔧",
+    part: "⚙️",
+  };
+
+  return (
+    <div ref={containerRef} className={`relative ${className}`}>
+      <Search className="absolute left-3 rtl:left-auto rtl:right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-10" />
+      <Input
+        ref={inputRef}
+        type="text"
+        value={query}
+        onChange={(e) => {
+          setQuery(e.target.value);
+          setActiveIdx(-1);
+        }}
+        onKeyDown={handleKeyDown}
+        onFocus={() => results.length > 0 && setOpen(true)}
+        placeholder={t("nav.searchPlaceholder")}
+        className="pl-9 rtl:pl-3 rtl:pr-9 bg-muted border-transparent focus-visible:ring-primary/30 w-full"
+      />
+      {query.length > 0 && (
+        <button
+          onClick={() => {
+            setQuery("");
+            setResults([]);
+            setOpen(false);
+            inputRef.current?.focus();
+          }}
+          className="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
+      )}
+
+      {open && (
+        <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-xl shadow-xl z-50 overflow-hidden max-h-[380px] overflow-y-auto">
+          {loading && (
+            <div className="px-4 py-3 text-sm text-muted-foreground flex items-center gap-2">
+              <span className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin inline-block" />
+              {locale === "ar" ? "جاري البحث..." : "Searching..."}
+            </div>
+          )}
+          {!loading && results.length === 0 && query.length >= 2 && (
+            <div className="px-4 py-3 text-sm text-muted-foreground">
+              {locale === "ar" ? "لا توجد نتائج" : "No results found"}
+            </div>
+          )}
+          {!loading &&
+            results.map((r, idx) => (
+              <button
+                key={`${r.type}-${r.id}`}
+                onClick={() => navigate(r.href)}
+                onMouseEnter={() => setActiveIdx(idx)}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 text-start transition-colors ${idx === activeIdx ? "bg-muted" : "hover:bg-muted/60"}`}
+              >
+                {r.image ? (
+                  <img
+                    src={r.image}
+                    alt=""
+                    className="w-9 h-9 rounded-lg object-cover shrink-0 bg-muted"
+                  />
+                ) : (
+                  <span className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center text-lg shrink-0">
+                    {typeIcon[r.type]}
+                  </span>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold truncate">{r.title}</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {r.subtitle}
+                  </p>
+                </div>
+                <ChevronRight className="w-3.5 h-3.5 text-muted-foreground rtl:rotate-180 shrink-0" />
+              </button>
+            ))}
+          {!loading && results.length > 0 && (
+            <button
+              onClick={() => {
+                setOpen(false);
+                router.push(
+                  `/${locale}/search?q=${encodeURIComponent(query.trim())}`,
+                );
+              }}
+              className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-primary border-t hover:bg-muted/50 transition-colors"
+            >
+              <Search className="w-3.5 h-3.5" />
+              {locale === "ar"
+                ? `عرض كل نتائج "${query}"`
+                : `See all results for "${query}"`}
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ── Cart Drawer ────────────────────────────────────────────────────────────────
 function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -34,121 +274,91 @@ function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
     applyPromo,
     removePromo,
   } = useCart();
+  const { t, locale, isRTL } = useLanguage();
 
   const [promoInput, setPromoInput] = useState("");
   const [promoError, setPromoError] = useState<string | null>(null);
 
-  const handleApplyPromo = () => {
-    const err = applyPromo(promoInput);
+  const handleApplyPromo = async () => {
+    const err = await applyPromo(promoInput);
     setPromoError(err);
     if (!err) setPromoInput("");
   };
 
-  // Trap focus / close on Escape
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [onClose]);
-
-  // Lock body scroll when open
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
-
   return (
-    <>
-      {/* Backdrop */}
-      <div
-        onClick={onClose}
-        className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-[998] transition-opacity duration-300 ${
-          open
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-        }`}
-      />
-
-      {/* Drawer */}
-      <div
-        className={`fixed top-0 right-0 h-full w-full max-w-[440px] bg-white dark:bg-[#111621] z-[999] flex flex-col shadow-2xl transition-transform duration-300 ease-in-out ${
-          open ? "translate-x-0" : "translate-x-full"
-        }`}
+    <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
+      <SheetContent
+        side={isRTL ? "left" : "right"}
+        className="w-full max-w-[440px] p-0 flex flex-col"
       >
-        {/* ── Header ── */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-slate-800 shrink-0">
+        {/* Header */}
+        <SheetHeader className="px-6 py-5 border-b shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-[#FF4B19]/10 rounded-xl flex items-center justify-center">
-              <span
-                className="material-symbols-outlined text-[#FF4B19]"
-                style={{ fontSize: "20px" }}
-              >
-                shopping_cart
-              </span>
+            <div className="w-9 h-9 bg-primary/10 rounded-xl flex items-center justify-center">
+              <ShoppingCart className="w-5 h-5 text-primary" />
             </div>
-            <div>
-              <h2 className="text-base font-black text-slate-900 dark:text-white">
-                My Cart
-              </h2>
-              <p className="text-xs text-slate-400">
-                {cartCount} {cartCount === 1 ? "item" : "items"}
+            <div className="text-start">
+              <SheetTitle className="text-base font-black leading-tight">
+                {t("nav.cart")}
+              </SheetTitle>
+              <p className="text-xs text-muted-foreground">
+                {cartCount} {cartCount === 1 ? t("nav.item") : t("nav.items")}
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          >
-            <span
-              className="material-symbols-outlined text-slate-500"
-              style={{ fontSize: "20px" }}
-            >
-              close
-            </span>
-          </button>
-        </div>
+        </SheetHeader>
 
-        {/* ── Items ── */}
+        {/* Items */}
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center py-16">
-              <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
-                <span
-                  className="material-symbols-outlined text-slate-400"
-                  style={{ fontSize: "36px" }}
-                >
-                  shopping_cart
-                </span>
+              <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-4">
+                <ShoppingCart className="w-9 h-9 text-muted-foreground" />
               </div>
-              <p className="font-bold text-slate-700 dark:text-slate-200 mb-1">
-                Your cart is empty
+              <p className="font-bold text-foreground mb-1">
+                {t("nav.cartEmpty")}
               </p>
-              <p className="text-sm text-slate-400 mb-6">
-                Browse parts and add them to your cart
+              <p className="text-sm text-muted-foreground mb-6">
+                {t("nav.cartEmptyDesc")}
               </p>
-              <Link
-                href="/parts"
-                onClick={onClose}
-                className="px-6 py-2.5 bg-[#FF4B19] text-white text-sm font-bold rounded-xl hover:bg-[#e03d0f] transition-colors"
-              >
-                Browse Parts
-              </Link>
+              <Button asChild>
+                <Link href="/parts" onClick={onClose}>
+                  {t("nav.browseParts")}
+                </Link>
+              </Button>
             </div>
           ) : (
             items.map((item) => (
               <div
                 key={item.id}
-                className="flex gap-4 bg-[#f6f6f8] dark:bg-slate-800/60 rounded-2xl p-4"
+                className="flex gap-4 bg-muted/50 rounded-2xl p-4"
               >
-                {/* Icon thumbnail */}
-                <div className="w-14 h-14 rounded-xl bg-white dark:bg-slate-700 border border-slate-100 dark:border-slate-600 flex items-center justify-center shrink-0 shadow-sm">
+                {/* Product thumbnail */}
+                <div className="w-14 h-14 rounded-xl bg-muted border shrink-0 shadow-sm overflow-hidden flex items-center justify-center">
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display =
+                          "none";
+                        (
+                          e.currentTarget
+                            .nextElementSibling as HTMLElement | null
+                        )?.style &&
+                          ((
+                            e.currentTarget.nextElementSibling as HTMLElement
+                          ).style.display = "flex");
+                      }}
+                    />
+                  ) : null}
                   <span
-                    className="material-symbols-outlined text-[#FF4B19]"
-                    style={{ fontSize: "26px" }}
+                    className="material-symbols-outlined text-primary"
+                    style={{
+                      fontSize: "26px",
+                      display: item.image ? "none" : "block",
+                    }}
                   >
                     {item.icon}
                   </span>
@@ -157,83 +367,72 @@ function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
-                    <p className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-snug line-clamp-2">
+                    <p className="text-sm font-bold leading-snug line-clamp-2">
                       {item.name}
                     </p>
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="shrink-0 w-7 h-7 hover:text-destructive"
                       onClick={() => removeItem(item.id)}
-                      className="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
                     >
-                      <span
-                        className="material-symbols-outlined text-slate-400 hover:text-red-500 transition-colors"
-                        style={{ fontSize: "16px" }}
-                      >
-                        delete
-                      </span>
-                    </button>
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
                   </div>
 
-                  <p className="text-xs text-slate-400 mt-0.5 truncate">
+                  <p className="text-xs text-muted-foreground mt-0.5 truncate">
                     {item.vendor}
                   </p>
 
                   <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                    <span className="text-[10px] font-bold text-slate-500 bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded">
+                    <Badge
+                      variant="secondary"
+                      className="text-[10px] h-4 px-1.5"
+                    >
                       {item.sku}
-                    </span>
+                    </Badge>
                     {item.badge && (
-                      <span
-                        className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                          item.badge === "OEM"
-                            ? "bg-[#FF4B19]/10 text-[#FF4B19]"
-                            : "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-                        }`}
+                      <Badge
+                        variant={item.badge === "OEM" ? "default" : "outline"}
+                        className="text-[10px] h-4 px-1.5"
                       >
                         {item.badge}
-                      </span>
+                      </Badge>
                     )}
                     <span className="text-[10px] text-green-600 dark:text-green-400 font-semibold flex items-center gap-0.5">
-                      <span
-                        className="material-symbols-outlined"
-                        style={{ fontSize: "12px" }}
-                      >
-                        check_circle
-                      </span>
-                      Fits {item.compatible}
+                      <CheckCircle2 className="w-3 h-3" />
+                      {t("nav.fitsVehicle", { vehicle: item.compatible })}
                     </span>
                   </div>
 
                   {/* Qty + Price */}
                   <div className="flex items-center justify-between mt-3">
-                    <div className="flex items-center gap-1 bg-white dark:bg-slate-700 rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden">
-                      <button
+                    <div className="flex items-center gap-1 bg-background rounded-lg border overflow-hidden">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="w-7 h-7 rounded-none"
                         onClick={() => changeQty(item.id, -1)}
-                        className="w-7 h-7 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors text-slate-600 dark:text-slate-300"
                       >
-                        <span
-                          className="material-symbols-outlined"
-                          style={{ fontSize: "16px" }}
-                        >
-                          remove
-                        </span>
-                      </button>
-                      <span className="w-7 text-center text-sm font-bold text-slate-800 dark:text-slate-100">
+                        <Minus className="w-3 h-3" />
+                      </Button>
+                      <span className="w-7 text-center text-sm font-bold">
                         {item.qty}
                       </span>
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="w-7 h-7 rounded-none"
                         onClick={() => changeQty(item.id, 1)}
-                        className="w-7 h-7 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors text-slate-600 dark:text-slate-300"
                       >
-                        <span
-                          className="material-symbols-outlined"
-                          style={{ fontSize: "16px" }}
-                        >
-                          add
-                        </span>
-                      </button>
+                        <Plus className="w-3 h-3" />
+                      </Button>
                     </div>
-                    <p className="text-sm font-black text-slate-900 dark:text-white">
-                      EGP {(item.price * item.qty).toLocaleString("en-EG")}
+                    <p className="text-sm font-black">
+                      EGP{" "}
+                      {(item.price * item.qty).toLocaleString(
+                        locale === "ar" ? "ar-EG" : "en-EG",
+                      )}
                     </p>
                   </div>
                 </div>
@@ -242,781 +441,828 @@ function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
           )}
         </div>
 
-        {/* ── Footer / Summary ── */}
+        {/* Footer */}
         {items.length > 0 && (
-          <div className="border-t border-slate-100 dark:border-slate-800 px-6 py-5 space-y-4 shrink-0 bg-white dark:bg-[#111621]">
+          <div className="border-t px-6 py-5 space-y-4 shrink-0 bg-background">
             {/* Promo code */}
             {promo ? (
-              <div className="flex items-center justify-between px-3 py-2 bg-[#FF4B19]/8 border border-[#FF4B19]/20 rounded-xl">
+              <div className="flex items-center justify-between px-3 py-2 bg-primary/[0.08] border border-primary/20 rounded-xl">
                 <div className="flex items-center gap-2">
-                  <span
-                    className="material-symbols-outlined text-[#FF4B19]"
-                    style={{ fontSize: "16px" }}
-                  >
-                    local_offer
-                  </span>
+                  <Ticket className="w-4 h-4 text-primary" />
                   <div>
-                    <p className="text-xs font-bold text-[#FF4B19]">
+                    <p className="text-xs font-bold text-primary">
                       {promo.code}
                     </p>
-                    <p className="text-[10px] text-slate-500">{promo.label}</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {promo.label}
+                    </p>
                   </div>
                 </div>
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-6 h-6 hover:text-destructive"
                   onClick={removePromo}
-                  className="text-slate-400 hover:text-red-500 transition-colors"
                 >
-                  <span
-                    className="material-symbols-outlined"
-                    style={{ fontSize: "16px" }}
-                  >
-                    close
-                  </span>
-                </button>
+                  <X className="w-3.5 h-3.5" />
+                </Button>
               </div>
             ) : (
               <div className="space-y-1">
                 <div className="flex gap-2">
-                  <input
-                    type="text"
+                  <Input
                     value={promoInput}
                     onChange={(e) => {
                       setPromoInput(e.target.value);
                       setPromoError(null);
                     }}
                     onKeyDown={(e) => e.key === "Enter" && handleApplyPromo()}
-                    placeholder="Promo code"
-                    className="flex-1 px-3 py-2 text-sm bg-[#f6f6f8] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FF4B19]/30 text-slate-700 dark:text-slate-200 placeholder-slate-400"
+                    placeholder={t("nav.promoCode")}
+                    className="flex-1 h-9"
                   />
-                  <button
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-primary text-primary hover:bg-primary/5 whitespace-nowrap"
                     onClick={handleApplyPromo}
-                    className="px-4 py-2 text-sm font-bold text-[#FF4B19] border border-[#FF4B19] rounded-xl hover:bg-[#FF4B19]/5 transition-colors whitespace-nowrap"
                   >
-                    Apply
-                  </button>
+                    {t("nav.apply")}
+                  </Button>
                 </div>
                 {promoError && (
-                  <p className="text-[11px] text-red-500">{promoError}</p>
+                  <p className="text-[11px] text-destructive">{promoError}</p>
                 )}
               </div>
             )}
 
             {/* Totals */}
             <div className="space-y-2">
-              <div className="flex justify-between text-sm text-slate-600 dark:text-slate-300">
-                <span>Subtotal</span>
-                <span className="font-semibold">
-                  EGP {subtotal.toLocaleString("en-EG")}
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>{t("nav.subtotal")}</span>
+                <span className="font-semibold text-foreground">
+                  EGP{" "}
+                  {subtotal.toLocaleString(locale === "ar" ? "ar-EG" : "en-EG")}
                 </span>
               </div>
               {discount > 0 && (
-                <div className="flex justify-between text-sm text-[#FF4B19]">
-                  <span>Discount ({promo?.discountPct}%)</span>
+                <div className="flex justify-between text-sm text-primary">
+                  <span>
+                    {t("nav.discount")} ({promo?.discountPct}%)
+                  </span>
                   <span className="font-semibold">
-                    − EGP {discount.toLocaleString("en-EG")}
+                    − EGP{" "}
+                    {discount.toLocaleString(
+                      locale === "ar" ? "ar-EG" : "en-EG",
+                    )}
                   </span>
                 </div>
               )}
-              <div className="flex justify-between text-sm text-slate-600 dark:text-slate-300">
-                <span>Shipping</span>
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>{t("nav.shipping")}</span>
                 <span
-                  className={`font-semibold ${
-                    shipping === 0 ? "text-green-600 dark:text-green-400" : ""
-                  }`}
+                  className={`font-semibold ${shipping === 0 ? "text-green-600 dark:text-green-400" : "text-foreground"}`}
                 >
-                  {shipping === 0 ? "Free" : `EGP ${shipping}`}
+                  {shipping === 0 ? t("nav.free") : `EGP ${shipping}`}
                 </span>
               </div>
               {shipping > 0 && (
-                <p className="text-[11px] text-slate-400">
-                  Free shipping on orders above EGP 2,000
+                <p className="text-[11px] text-muted-foreground">
+                  {t("nav.freeShippingNote")}
                 </p>
               )}
-              <div className="flex justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
-                <span className="font-black text-slate-900 dark:text-white">
-                  Total
+              <Separator />
+              <div className="flex justify-between pt-1">
+                <span className="font-black text-foreground">
+                  {t("nav.total")}
                 </span>
-                <span className="font-black text-lg text-[#FF4B19]">
-                  EGP {total.toLocaleString("en-EG")}
+                <span className="font-black text-lg text-primary">
+                  EGP{" "}
+                  {total.toLocaleString(locale === "ar" ? "ar-EG" : "en-EG")}
                 </span>
               </div>
             </div>
 
             {/* CTA */}
-            <Link
-              href="/checkout"
-              onClick={onClose}
-              className="w-full h-13 bg-[#FF4B19] hover:bg-[#e03d0f] text-white font-black rounded-2xl shadow-lg shadow-[#FF4B19]/25 transition-colors flex items-center justify-center gap-2 text-sm uppercase tracking-wide"
+            <Button
+              asChild
+              size="lg"
+              className="w-full font-black uppercase tracking-wide shadow-lg shadow-primary/25"
             >
-              <span
-                className="material-symbols-outlined"
-                style={{ fontSize: "20px" }}
-              >
-                lock
-              </span>
-              Proceed to Checkout
-            </Link>
+              <Link href="/checkout" onClick={onClose}>
+                <Lock className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                {t("nav.checkout")}
+              </Link>
+            </Button>
 
-            <Link
-              href="/parts"
-              onClick={onClose}
-              className="w-full text-center text-sm font-semibold text-slate-500 hover:text-[#FF4B19] transition-colors block"
+            <Button
+              asChild
+              variant="ghost"
+              className="w-full text-muted-foreground hover:text-primary"
             >
-              Continue Shopping
-            </Link>
+              <Link href="/parts" onClick={onClose}>
+                {t("nav.continueShopping")}
+              </Link>
+            </Button>
           </div>
         )}
-      </div>
-    </>
+      </SheetContent>
+    </Sheet>
   );
 }
 
+// ── Main Navbar ────────────────────────────────────────────────────────────────
 export default function Navbar() {
   const { cartCount } = useCart();
   const { activeVehicle, vehicles, setActiveVehicle } = useGarage();
-  const { user, vendor, role, signOut, isAuthenticated } = useAuth();
+  const {
+    user,
+    role,
+    signOut,
+    isAuthenticated,
+    managedBranchId,
+    isLoading: authLoading,
+  } = useAuth();
   const router = useRouter();
 
-  const [lang, setLang] = useState<"en" | "ar">("en");
-  const [langOpen, setLangOpen] = useState(false);
-  const [garageDropdownOpen, setGarageDropdownOpen] = useState(false);
-  const [accountOpen, setAccountOpen] = useState(false);
-  const accountRef = useRef<HTMLDivElement>(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { locale, t, setLocale, localePath } = useLanguage();
+  const [moreSheetOpen, setMoreSheetOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
 
-  const langRef = useRef<HTMLDivElement>(null);
-  const garageRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
+  // Close drawers on route change
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (langRef.current && !langRef.current.contains(e.target as Node)) {
-        setLangOpen(false);
-      }
-      if (garageRef.current && !garageRef.current.contains(e.target as Node)) {
-        setGarageDropdownOpen(false);
-      }
-      if (
-        accountRef.current &&
-        !accountRef.current.contains(e.target as Node)
-      ) {
-        setAccountOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // Close menus on route change
-  useEffect(() => {
-    setMobileMenuOpen(false);
+    setMoreSheetOpen(false);
     setCartOpen(false);
-    setGarageDropdownOpen(false);
   }, [pathname]);
 
-  const current = LANGUAGES.find((l) => l.code === lang)!;
+  const current = LANGUAGES.find((l) => l.code === locale)!;
 
   return (
     <>
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
-      <header className="sticky top-0 z-50 w-full bg-white dark:bg-[#111621] shadow-sm border-b border-slate-200 dark:border-slate-800">
+
+      <header className="sticky top-0 z-50 w-full bg-background">
         {/* ── Top Bar ── */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
           {/* Logo */}
           <Link
-            href="/"
-            className="shrink-0 h-16 flex items-center justify-start overflow-visible"
+            href={localePath("/")}
+            className="shrink-0 h-16 flex items-center"
           >
             <img
-              src="/motorlogo.png"
-              alt="Garage Egypt"
-              className="relative h-10 w-auto object-contain"
+              src="/warshety-nav.svg"
+              alt="Warshety Logo"
+              className="h-14 w-auto object-contain"
             />
           </Link>
 
-          {/* Search Bar */}
-          <div className="flex-1 max-w-xl hidden sm:flex relative">
-            <span
-              className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-              style={{ fontSize: "20px" }}
-            >
-              search
-            </span>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search parts, brands, SKU or VIN…"
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-slate-800 border border-transparent rounded-xl text-sm text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF4B19]/30 focus:border-[#FF4B19]/40 transition"
-            />
+          {/* Search Bar — desktop */}
+          <div className="flex-1 max-w-xl hidden sm:flex">
+            <SearchBox className="w-full" />
           </div>
 
           {/* Right Actions */}
-          <div className="ml-auto flex items-center gap-1">
-            {/* Language Toggle */}
-            <div className="relative" ref={langRef}>
-              <button
-                onClick={() => setLangOpen((o) => !o)}
-                className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
-                aria-label="Switch language"
-              >
-                <span className="text-base leading-none">{current.flag}</span>
-                <span className="text-xs font-bold text-slate-600 dark:text-slate-300 group-hover:text-[#FF4B19] transition-colors hidden sm:block">
-                  {current.label}
-                </span>
-                <span
-                  className="material-symbols-outlined text-slate-400 group-hover:text-[#FF4B19] transition-colors"
-                  style={{ fontSize: "16px", lineHeight: 1 }}
+          <div className="ms-auto flex items-center gap-1">
+            {/* Language Toggle — globe only on mobile, flag+label on desktop */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="flex sm:hidden w-9 h-9"
+                  aria-label={t("nav.language")}
                 >
-                  expand_more
-                </span>
-              </button>
-
-              {langOpen && (
-                <div className="absolute right-0 mt-2 w-36 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 overflow-hidden z-[999]">
-                  {LANGUAGES.map((l) => (
-                    <button
-                      key={l.code}
-                      onClick={() => {
-                        setLang(l.code);
-                        setLangOpen(false);
-                      }}
-                      className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-slate-50 dark:hover:bg-slate-700 ${
-                        lang === l.code
-                          ? "text-[#FF4B19]"
-                          : "text-slate-600 dark:text-slate-300"
-                      }`}
-                    >
-                      <span className="text-lg leading-none">{l.flag}</span>
-                      {l.code === "en" ? "English" : "العربية"}
-                      {lang === l.code && (
-                        <span className="ml-auto text-[#FF4B19] text-xs">
-                          ✓
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Divider */}
-            <div className="w-px h-7 bg-slate-200 dark:bg-slate-700 mx-1 hidden sm:block" />
-
-            {/* Account — auth-aware */}
-            <div className="relative hidden sm:block" ref={accountRef}>
-              {isAuthenticated ? (
-                <>
-                  <button
-                    onClick={() => setAccountOpen((o) => !o)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
+                  <Globe className="w-5 h-5 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-36 sm:hidden">
+                {LANGUAGES.map((l) => (
+                  <DropdownMenuItem
+                    key={l.code}
+                    onClick={() => setLocale(l.code)}
+                    className={
+                      locale === l.code ? "text-primary font-bold" : ""
+                    }
                   >
-                    <div className="w-7 h-7 rounded-full bg-[#FF4B19] flex items-center justify-center text-white font-black text-xs">
-                      {(user?.full_name ?? user?.email ?? "U")[0].toUpperCase()}
-                    </div>
-                    <div className="text-left">
-                      <p className="text-xs font-bold text-slate-700 dark:text-slate-200 leading-tight truncate max-w-[80px]">
-                        {user?.full_name?.split(" ")[0] ?? "Account"}
-                      </p>
-                      <p className="text-[10px] text-slate-400 leading-tight capitalize">
-                        {role}
-                      </p>
-                    </div>
-                    <span className="material-symbols-outlined text-slate-400 text-[14px]">
-                      expand_more
-                    </span>
-                  </button>
-                  {accountOpen && (
-                    <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 overflow-hidden z-[999] py-1">
-                      {role === "vendor" && (
+                    <span className="text-base mr-2">{l.flag}</span>
+                    {l.code === "en" ? "English" : "العربية"}
+                    {locale === l.code && (
+                      <CheckCircle2 className="w-3.5 h-3.5 ml-auto text-primary" />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1.5 px-2.5 hidden sm:flex"
+                >
+                  <span className="text-base leading-none">{current.flag}</span>
+                  <span className="text-xs font-bold">{current.label}</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-36">
+                {LANGUAGES.map((l) => (
+                  <DropdownMenuItem
+                    key={l.code}
+                    onClick={() => setLocale(l.code)}
+                    className={
+                      locale === l.code ? "text-primary font-bold" : ""
+                    }
+                  >
+                    <span className="text-base mr-2">{l.flag}</span>
+                    {l.code === "en" ? "English" : "العربية"}
+                    {locale === l.code && (
+                      <CheckCircle2 className="w-3.5 h-3.5 ml-auto text-primary" />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Separator
+              orientation="vertical"
+              className="h-7 hidden sm:block mx-1"
+            />
+
+            {/* Account */}
+            <div className="hidden sm:block">
+              {isAuthenticated ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="gap-2 px-2.5">
+                      <Avatar className="w-7 h-7">
+                        <AvatarFallback className="bg-primary text-primary-foreground text-xs font-black">
+                          {(user?.full_name ??
+                            user?.email ??
+                            "U")[0].toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="text-left rtl:text-right hidden md:block">
+                        <p className="text-xs font-bold leading-tight truncate max-w-[80px]">
+                          {user?.full_name?.split(" ")[0] ?? "Account"}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground leading-tight capitalize">
+                          {role}
+                        </p>
+                      </div>
+                      <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-52">
+                    {role === "vendor" && (
+                      <DropdownMenuItem asChild>
                         <Link
                           href="/vendor/dashboard"
-                          onClick={() => setAccountOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-[#FF4B19] hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                          className="text-primary font-semibold"
                         >
-                          <span className="material-symbols-outlined text-[16px]">
-                            dashboard
-                          </span>
-                          Vendor Dashboard
+                          <LayoutDashboard className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                          {t("nav.vendorDashboard")}
                         </Link>
-                      )}
-                      {role === "admin" && (
+                      </DropdownMenuItem>
+                    )}
+                    {role === "admin" && (
+                      <DropdownMenuItem asChild>
                         <Link
                           href="/admin/dashboard"
-                          onClick={() => setAccountOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-[#FF4B19] hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                          className="text-primary font-semibold"
                         >
-                          <span className="material-symbols-outlined text-[16px]">
-                            admin_panel_settings
-                          </span>
-                          Admin
+                          <ShieldCheck className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                          {t("nav.admin")}
                         </Link>
-                      )}
-                      <Link
-                        href="/bookings"
-                        onClick={() => setAccountOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                      </DropdownMenuItem>
+                    )}
+                    {role === "manager" && (managedBranchId || authLoading) && (
+                      <DropdownMenuItem
+                        asChild={!!managedBranchId}
+                        disabled={!managedBranchId}
                       >
-                        <span className="material-symbols-outlined text-[16px]">
-                          calendar_month
-                        </span>
-                        My Bookings
+                        {managedBranchId ? (
+                          <Link
+                            href={`/branch/${managedBranchId}`}
+                            className="text-primary font-semibold"
+                          >
+                            <Store className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                            Branch Management
+                          </Link>
+                        ) : (
+                          <span className="flex items-center text-muted-foreground">
+                            <Store className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                            Branch Management
+                          </span>
+                        )}
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem asChild>
+                      <Link href="/bookings">
+                        <CalendarDays className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                        {t("nav.myBookings")}
                       </Link>
-                      <Link
-                        href="/orders"
-                        onClick={() => setAccountOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">
-                          shopping_bag
-                        </span>
-                        My Orders
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/orders">
+                        <ShoppingBag className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                        {t("nav.myOrders")}
                       </Link>
-                      <div className="h-px bg-slate-100 dark:bg-slate-700 my-1" />
-                      <button
-                        onClick={async () => {
-                          setAccountOpen(false);
-                          await signOut();
-                          router.push("/");
-                        }}
-                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">
-                          logout
-                        </span>
-                        Sign Out
-                      </button>
-                    </div>
-                  )}
-                </>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="text-destructive focus:text-destructive"
+                      onClick={async () => {
+                        await signOut();
+                        router.refresh();
+                        router.push(localePath("/"));
+                      }}
+                    >
+                      <LogOut className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                      {t("nav.signOut")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
-                <Link
-                  href="/auth/login"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2 px-2.5"
                 >
-                  <span
-                    className="material-symbols-outlined text-slate-500 group-hover:text-[#FF4B19] transition-colors"
-                    style={{ fontSize: "22px", lineHeight: 1 }}
-                  >
-                    account_circle
-                  </span>
-                  <div className="text-left">
-                    <p className="text-xs font-bold text-slate-700 dark:text-slate-200 leading-tight whitespace-nowrap">
-                      Sign In
-                    </p>
-                    <p className="text-[10px] text-slate-400 leading-tight">
-                      My Account
-                    </p>
-                  </div>
-                </Link>
+                  <Link href="/auth/login">
+                    <UserCircle2 className="w-5 h-5 text-muted-foreground" />
+                    <div className="text-left rtl:text-right">
+                      <p className="text-xs font-bold leading-tight">
+                        {t("nav.signIn")}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground leading-tight">
+                        {t("nav.myAccount")}
+                      </p>
+                    </div>
+                  </Link>
+                </Button>
               )}
             </div>
 
-            {/* Divider */}
-            <div className="w-px h-7 bg-slate-200 dark:bg-slate-700 mx-1 hidden sm:block" />
+            <Separator
+              orientation="vertical"
+              className="h-7 hidden sm:block mx-1"
+            />
 
-            {/* Cart */}
-            <button
+            {/* Cart — desktop only */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="relative gap-1.5 px-2.5 hidden sm:flex"
               onClick={() => setCartOpen(true)}
-              className="relative flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
             >
-              <span
-                className="material-symbols-outlined text-slate-500 group-hover:text-[#FF4B19] transition-colors"
-                style={{ fontSize: "24px", lineHeight: 1 }}
-              >
-                shopping_cart
-              </span>
-              {cartCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 min-w-[17px] h-[17px] bg-[#FF4B19] text-white text-[10px] font-black rounded-full flex items-center justify-center px-[3px] shadow">
-                  {cartCount}
-                </span>
-              )}
-              <div className="text-left hidden sm:block">
-                <p className="text-xs font-bold text-slate-700 dark:text-slate-200 leading-tight">
-                  Cart
+              <div className="relative">
+                <ShoppingCart className="w-5 h-5 text-muted-foreground" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 rtl:-right-auto rtl:-left-2 min-w-[17px] h-[17px] bg-primary text-primary-foreground text-[10px] font-black rounded-full flex items-center justify-center px-[3px]">
+                    {cartCount}
+                  </span>
+                )}
+              </div>
+              <div className="text-left rtl:text-right hidden sm:block">
+                <p className="text-xs font-bold leading-tight">
+                  {t("nav.cartLabel")}
                 </p>
-                <p className="text-[10px] text-slate-400 leading-tight">
-                  {cartCount} {cartCount === 1 ? "item" : "items"}
+                <p className="text-[10px] text-muted-foreground leading-tight">
+                  {cartCount} {cartCount === 1 ? t("nav.item") : t("nav.items")}
                 </p>
               </div>
-            </button>
+            </Button>
 
-            {/* Divider */}
-            <div className="w-px h-8 bg-slate-200 dark:bg-slate-700 mx-1 hidden sm:block" />
+            <Separator
+              orientation="vertical"
+              className="h-8 hidden sm:block mx-1"
+            />
 
             {/* My Garage dropdown */}
-            <div className="relative" ref={garageRef}>
-              <button
-                onClick={() => setGarageDropdownOpen((o) => !o)}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
-                aria-expanded={garageDropdownOpen}
-                aria-label="My Garage"
-              >
-                <div className="relative flex items-center justify-center">
-                  <span
-                    className={`material-symbols-outlined transition-colors ${
-                      garageDropdownOpen
-                        ? "text-[#FF4B19]"
-                        : "text-slate-500 group-hover:text-[#FF4B19]"
-                    }`}
-                    style={{
-                      fontSize: "26px",
-                      lineHeight: 1,
-                      display: "block",
-                    }}
-                  >
-                    garage
-                  </span>
-                  {!activeVehicle && (
-                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-orange-400 rounded-full flex items-center justify-center">
-                      <span
-                        className="text-white font-black"
-                        style={{ fontSize: "9px" }}
-                      >
-                        !
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="gap-2 px-2.5">
+                  <div className="relative">
+                    <Car
+                      className={`w-5 h-5 ${activeVehicle ? "text-muted-foreground" : "text-primary"}`}
+                    />
+                    {!activeVehicle && (
+                      <span className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-orange-400 rounded-full flex items-center justify-center">
+                        <span
+                          className="text-white font-black"
+                          style={{ fontSize: "7px" }}
+                        >
+                          !
+                        </span>
                       </span>
-                    </span>
-                  )}
-                </div>
-                <div className="text-left hidden sm:block">
-                  <p className="text-xs font-bold text-slate-700 dark:text-slate-200 leading-tight">
-                    My Garage{" "}
-                    <span
-                      className={`text-slate-400 inline-block transition-transform duration-200 ${
-                        garageDropdownOpen ? "rotate-180" : ""
-                      }`}
-                    >
-                      ▾
-                    </span>
-                  </p>
-                  <p className="text-[11px] text-slate-400 leading-tight truncate max-w-[110px]">
-                    {activeVehicle
-                      ? vehicleLabel(activeVehicle)
-                      : "Select your vehicle"}
-                  </p>
-                </div>
-              </button>
-
-              {/* Dropdown panel */}
-              {garageDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden z-[999]">
-                  {/* Header */}
-                  <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                    <span className="text-xs font-black uppercase tracking-wider text-slate-500">
-                      My Garage
-                    </span>
-                    <Link
-                      href="/garage"
-                      onClick={() => setGarageDropdownOpen(false)}
-                      className="text-xs font-bold text-[#FF4B19] hover:underline flex items-center gap-0.5"
-                    >
-                      Manage
-                      <span
-                        className="material-symbols-outlined"
-                        style={{ fontSize: "13px" }}
-                      >
-                        arrow_forward
-                      </span>
-                    </Link>
+                    )}
                   </div>
+                  <div className="text-left rtl:text-right hidden sm:block">
+                    <p className="text-xs font-bold leading-tight flex items-center gap-1">
+                      {t("nav.myGarage")}
+                      <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                    </p>
+                    <p className="text-[11px] text-muted-foreground leading-tight truncate max-w-[110px]">
+                      {activeVehicle
+                        ? vehicleLabel(activeVehicle)
+                        : t("nav.selectVehicle")}
+                    </p>
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-72 p-0">
+                {/* Header */}
+                <div className="px-4 py-3 border-b flex items-center justify-between">
+                  <span className="text-xs font-black uppercase tracking-wider text-muted-foreground">
+                    {t("nav.myGarage")}
+                  </span>
+                  <Button
+                    asChild
+                    variant="link"
+                    size="sm"
+                    className="h-auto p-0 text-xs text-primary"
+                  >
+                    <Link href="/garage">
+                      {t("nav.manage")}{" "}
+                      <ArrowRight className="w-3 h-3 ml-0.5 rtl:rotate-180" />
+                    </Link>
+                  </Button>
+                </div>
 
-                  {/* Vehicle list */}
-                  {vehicles.length === 0 ? (
-                    /* Empty state */
-                    <div className="px-4 py-6 flex flex-col items-center gap-3 text-center">
-                      <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                        <span
-                          className="material-symbols-outlined text-slate-400"
-                          style={{ fontSize: "24px" }}
-                        >
-                          garage
-                        </span>
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
-                          No vehicles saved
-                        </p>
-                        <p className="text-xs text-slate-400 mt-0.5">
-                          Add your car to filter compatible parts
-                        </p>
-                      </div>
-                      <Link
-                        href="/garage"
-                        onClick={() => setGarageDropdownOpen(false)}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-[#FF4B19] text-white text-xs font-bold rounded-xl hover:opacity-90 transition-all"
-                      >
-                        <span
-                          className="material-symbols-outlined"
-                          style={{ fontSize: "14px" }}
-                        >
-                          add
-                        </span>
-                        Add Vehicle
-                      </Link>
+                {vehicles.length === 0 ? (
+                  <div className="px-4 py-6 flex flex-col items-center gap-3 text-center">
+                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                      <Car className="w-6 h-6 text-muted-foreground" />
                     </div>
-                  ) : (
-                    <div className="py-2 max-h-72 overflow-y-auto">
+                    <div>
+                      <p className="text-sm font-bold">{t("nav.noVehicles")}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {t("nav.noVehiclesDesc")}
+                      </p>
+                    </div>
+                    <Button asChild size="sm" className="gap-1.5">
+                      <Link href="/garage">
+                        <Plus className="w-3.5 h-3.5" />
+                        {t("nav.addVehicle")}
+                      </Link>
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="py-1 max-h-60 overflow-y-auto">
                       {vehicles.map((v) => {
                         const isActive = activeVehicle?.id === v.id;
                         return (
                           <button
                             key={v.id}
-                            onClick={() => {
-                              setActiveVehicle(v.id);
-                              setGarageDropdownOpen(false);
-                            }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
+                            onClick={() => setActiveVehicle(v.id)}
+                            className={`w-full flex items-center gap-3 px-4 py-3 text-start transition-colors ${
                               isActive
-                                ? "bg-[#FF4B19]/6 dark:bg-[#FF4B19]/10"
-                                : "hover:bg-slate-50 dark:hover:bg-slate-800"
+                                ? "bg-primary/[0.06] dark:bg-primary/10"
+                                : "hover:bg-muted/60"
                             }`}
                           >
-                            {/* Active indicator / radio */}
                             <div
                               className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center transition-colors ${
                                 isActive
-                                  ? "border-[#FF4B19] bg-[#FF4B19]"
-                                  : "border-slate-300 dark:border-slate-600"
+                                  ? "border-primary bg-primary"
+                                  : "border-muted-foreground/40"
                               }`}
                             >
                               {isActive && (
                                 <span className="w-1.5 h-1.5 rounded-full bg-white" />
                               )}
                             </div>
-
-                            {/* Vehicle info */}
                             <div className="flex-1 min-w-0">
                               <p
-                                className={`text-sm font-bold leading-snug truncate ${
-                                  isActive
-                                    ? "text-[#FF4B19]"
-                                    : "text-slate-800 dark:text-slate-100"
-                                }`}
+                                className={`text-sm font-bold leading-snug truncate ${isActive ? "text-primary" : ""}`}
                               >
                                 {v.year} {v.brand} {v.model}
                               </p>
                               {(v.trim || v.engineCode) && (
-                                <p className="text-[11px] text-slate-400 truncate">
+                                <p className="text-[11px] text-muted-foreground truncate">
                                   {[v.trim, v.engineCode]
                                     .filter(Boolean)
                                     .join(" · ")}
                                 </p>
                               )}
                             </div>
-
                             {isActive && (
-                              <span
-                                className="material-symbols-outlined text-[#FF4B19] shrink-0"
-                                style={{ fontSize: "16px" }}
-                              >
-                                check_circle
-                              </span>
+                              <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
                             )}
                           </button>
                         );
                       })}
                     </div>
-                  )}
-
-                  {/* Footer — add vehicle shortcut */}
-                  {vehicles.length > 0 && (
-                    <div className="px-4 py-3 border-t border-slate-100 dark:border-slate-800">
-                      <Link
-                        href="/garage"
-                        onClick={() => setGarageDropdownOpen(false)}
-                        className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-[#FF4B19] transition-colors"
+                    <div className="px-4 py-3 border-t">
+                      <Button
+                        asChild
+                        variant="ghost"
+                        size="sm"
+                        className="gap-2 text-muted-foreground hover:text-primary w-full justify-start"
                       >
-                        <span
-                          className="material-symbols-outlined"
-                          style={{ fontSize: "15px" }}
-                        >
-                          add_circle
-                        </span>
-                        Add another vehicle
-                      </Link>
+                        <Link href="/garage">
+                          <PlusCircle className="w-4 h-4" />
+                          {t("nav.addAnotherVehicle")}
+                        </Link>
+                      </Button>
                     </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Mobile menu toggle */}
-            <button
-              onClick={() => setMobileMenuOpen((o) => !o)}
-              className="ml-1 flex sm:hidden items-center justify-center w-9 h-9 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              aria-label="Toggle menu"
-            >
-              <span
-                className="material-symbols-outlined text-slate-600 dark:text-slate-300"
-                style={{ fontSize: "24px" }}
-              >
-                {mobileMenuOpen ? "close" : "menu"}
-              </span>
-            </button>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
-
-        {/* ── Mobile Dropdown Menu ── */}
-        {mobileMenuOpen && (
-          <div className="sm:hidden border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-[#111621] px-4 py-3 flex flex-col gap-1">
-            {/* Mobile Search */}
-            <div className="relative mb-2">
-              <span
-                className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-                style={{ fontSize: "20px" }}
-              >
-                search
-              </span>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search parts, brands, SKU or VIN…"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-100 dark:bg-slate-800 border border-transparent rounded-xl text-sm text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF4B19]/30 transition"
-              />
-            </div>
-
-            {/* Mobile Nav Links */}
-            {NAV_LINKS.map((link) => {
-              const isActive =
-                link.href !== "#offers" &&
-                pathname.startsWith(link.href) &&
-                link.href !== "/";
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-                    isActive
-                      ? "text-[#FF4B19] bg-[#FF4B19]/8"
-                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
-                  }`}
-                >
-                  <span
-                    className="material-symbols-outlined"
-                    style={{ fontSize: "20px", lineHeight: 1 }}
-                  >
-                    {link.icon}
-                  </span>
-                  {link.label}
-                </Link>
-              );
-            })}
-
-            {/* Mobile Sign In */}
-            <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-              {isAuthenticated ? (
-                <>
-                  {role === "vendor" && (
-                    <Link
-                      href="/vendor/dashboard"
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-[#FF4B19] hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                    >
-                      <span
-                        className="material-symbols-outlined"
-                        style={{ fontSize: "20px", lineHeight: 1 }}
-                      >
-                        dashboard
-                      </span>
-                      Vendor Dashboard
-                    </Link>
-                  )}
-                  <Link
-                    href="/bookings"
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                  >
-                    <span
-                      className="material-symbols-outlined"
-                      style={{ fontSize: "20px", lineHeight: 1 }}
-                    >
-                      calendar_month
-                    </span>
-                    My Bookings
-                  </Link>
-                  <Link
-                    href="/orders"
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                  >
-                    <span
-                      className="material-symbols-outlined"
-                      style={{ fontSize: "20px", lineHeight: 1 }}
-                    >
-                      shopping_bag
-                    </span>
-                    My Orders
-                  </Link>
-                  <button
-                    onClick={async () => {
-                      await signOut();
-                      router.push("/");
-                    }}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                  >
-                    <span
-                      className="material-symbols-outlined"
-                      style={{ fontSize: "20px", lineHeight: 1 }}
-                    >
-                      logout
-                    </span>
-                    Sign Out
-                  </button>
-                </>
-              ) : (
-                <Link
-                  href="/auth/login"
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                >
-                  <span
-                    className="material-symbols-outlined"
-                    style={{ fontSize: "20px", lineHeight: 1 }}
-                  >
-                    account_circle
-                  </span>
-                  Sign In / My Account
-                </Link>
-              )}
-            </div>
-          </div>
-        )}
       </header>
 
-      {/* ── Secondary Nav Bar (not sticky) ── */}
-      <div className="hidden sm:block border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-[#111621]">
+      {/* ── Secondary Nav Bar (desktop only, not sticky) ── */}
+      <div className="hidden sm:block bg-background shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <nav className="flex items-center gap-1 h-11 overflow-x-auto scrollbar-hide">
+          <nav className="flex items-center gap-1 h-11 overflow-x-auto">
             {NAV_LINKS.map((link) => {
               const isActive =
-                link.href !== "#offers" &&
-                pathname.startsWith(link.href) &&
-                link.href !== "/";
+                link.href !== "/" &&
+                (link.href === pathname || pathname.startsWith(link.href));
               return (
                 <Link
                   key={link.href}
                   href={link.href}
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors ${
                     isActive
-                      ? "text-[#FF4B19] bg-[#FF4B19]/8"
-                      : "text-slate-600 dark:text-slate-300 hover:text-[#FF4B19] hover:bg-slate-50 dark:hover:bg-slate-800"
+                      ? "text-primary bg-primary/[0.08]"
+                      : "text-muted-foreground hover:text-primary hover:bg-muted"
                   }`}
                 >
-                  <span
-                    className="material-symbols-outlined"
-                    style={{ fontSize: "16px", lineHeight: 1 }}
-                  >
-                    {link.icon}
-                  </span>
-                  {link.label}
-                  {isActive && (
-                    <span className="ml-auto w-1 h-1 rounded-full bg-[#FF4B19]" />
-                  )}
+                  {link.icon}
+                  {t(link.tKey)}
                 </Link>
               );
             })}
           </nav>
         </div>
       </div>
+
+      {/* ── Mobile Bottom App Navbar ── */}
+      <nav className="sm:hidden fixed bottom-0 inset-x-0 z-50 bg-background border-t shadow-[0_-2px_12px_rgba(0,0,0,0.08)] flex items-stretch h-[62px]">
+        {/* Home */}
+        <Link
+          href="/"
+          className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-colors ${
+            pathname === "/" || pathname === `/${locale}`
+              ? "text-primary"
+              : "text-muted-foreground"
+          }`}
+        >
+          <Home className="w-5 h-5" />
+          {t("nav.home")}
+        </Link>
+
+        {/* Parts */}
+        <Link
+          href="/parts"
+          className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-colors ${
+            pathname.includes("/parts")
+              ? "text-primary"
+              : "text-muted-foreground"
+          }`}
+        >
+          <Settings className="w-5 h-5" />
+          {t("nav.carParts")}
+        </Link>
+
+        {/* Cart — center feature button */}
+        <button
+          onClick={() => setCartOpen(true)}
+          className="flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold text-muted-foreground relative"
+          aria-label={t("nav.cart")}
+        >
+          <div className="relative -mt-5 w-12 h-12 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/30">
+            <ShoppingCart className="w-5 h-5 text-primary-foreground" />
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center px-[3px]">
+                {cartCount}
+              </span>
+            )}
+          </div>
+          <span className="mt-0.5">{t("nav.cartLabel")}</span>
+        </button>
+
+        {/* Services */}
+        <Link
+          href="/services"
+          className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-colors ${
+            pathname.includes("/services")
+              ? "text-primary"
+              : "text-muted-foreground"
+          }`}
+        >
+          <Wrench className="w-5 h-5" />
+          {t("nav.services")}
+        </Link>
+
+        {/* More */}
+        <button
+          onClick={() => setMoreSheetOpen(true)}
+          className="flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold text-muted-foreground"
+        >
+          <MoreHorizontal className="w-5 h-5" />
+          {t("nav.more")}
+        </button>
+      </nav>
+
+      {/* ── More Sheet (mobile) ── */}
+      <Sheet
+        open={moreSheetOpen}
+        onOpenChange={(v) => !v && setMoreSheetOpen(false)}
+      >
+        <SheetContent
+          side="bottom"
+          className="sm:hidden rounded-t-2xl p-0 max-h-[92dvh] flex flex-col"
+        >
+          <SheetTitle className="sr-only">{t("nav.more")}</SheetTitle>
+          {/* Handle bar */}
+          <div className="flex justify-center pt-3 pb-1 shrink-0">
+            <div className="w-10 h-1 rounded-full bg-muted-foreground/25" />
+          </div>
+
+          {/* Auth Card */}
+          <div className="px-4 pb-3 border-b shrink-0">
+            {isAuthenticated ? (
+              <div className="flex items-center gap-3 py-2">
+                <Avatar className="w-11 h-11">
+                  <AvatarFallback className="bg-primary text-primary-foreground text-sm font-black">
+                    {(user?.full_name ?? user?.email ?? "U")[0].toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-sm truncate">
+                    {user?.full_name ?? user?.email}
+                  </p>
+                  <p className="text-xs text-muted-foreground capitalize">
+                    {role}
+                  </p>
+                </div>
+                <Link
+                  href="/profile"
+                  onClick={() => setMoreSheetOpen(false)}
+                  className="text-xs text-primary font-semibold flex items-center gap-0.5"
+                >
+                  {t("nav.myAccount")} <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            ) : (
+              <div className="py-2">
+                <p className="text-sm font-semibold text-muted-foreground mb-2">
+                  {t("nav.signInPrompt")}
+                </p>
+                <Button asChild className="w-full font-bold" size="lg">
+                  <Link
+                    href="/auth/login"
+                    onClick={() => setMoreSheetOpen(false)}
+                  >
+                    {t("nav.signIn")} / {t("nav.signUp")}
+                  </Link>
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Scrollable list */}
+          <div className="overflow-y-auto flex-1 px-2 py-2">
+            {/* Mobile Search */}
+            <div className="px-2 pb-3">
+              <SearchBox className="w-full" />
+            </div>
+            {/* Main links grid */}
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              {[
+                {
+                  href: "/garage",
+                  icon: <Car className="w-6 h-6" />,
+                  tKey: "nav.myGarage",
+                  color: "text-blue-500 bg-blue-50 dark:bg-blue-950/40",
+                },
+                {
+                  href: "/bookings",
+                  icon: <CalendarDays className="w-6 h-6" />,
+                  tKey: "nav.myBookings",
+                  color: "text-purple-500 bg-purple-50 dark:bg-purple-950/40",
+                },
+                {
+                  href: "/orders",
+                  icon: <ShoppingBag className="w-6 h-6" />,
+                  tKey: "nav.myOrders",
+                  color: "text-green-500 bg-green-50 dark:bg-green-950/40",
+                },
+                {
+                  href: "/vendor/apply",
+                  icon: <Store className="w-6 h-6" />,
+                  tKey: "nav.becomeVendor",
+                  color: "text-primary bg-primary/10",
+                },
+                ...(role === "vendor"
+                  ? [
+                      {
+                        href: "/vendor/dashboard",
+                        icon: <LayoutDashboard className="w-6 h-6" />,
+                        tKey: "nav.vendorDashboard",
+                        color: "text-primary bg-primary/10",
+                      },
+                    ]
+                  : []),
+                ...(role === "admin"
+                  ? [
+                      {
+                        href: "/admin/dashboard",
+                        icon: <ShieldCheck className="w-6 h-6" />,
+                        tKey: "nav.admin",
+                        color: "text-red-500 bg-red-50 dark:bg-red-950/40",
+                      },
+                    ]
+                  : []),
+                ...(role === "manager" && (managedBranchId || authLoading)
+                  ? [
+                      {
+                        href: managedBranchId
+                          ? `/branch/${managedBranchId}`
+                          : "#",
+                        icon: <Store className="w-6 h-6" />,
+                        tKey: "nav.branchManagement" as const,
+                        color: "text-primary bg-primary/10",
+                      },
+                    ]
+                  : []),
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMoreSheetOpen(false)}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+                >
+                  <div
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${item.color}`}
+                  >
+                    {item.icon}
+                  </div>
+                  <span className="text-sm font-semibold leading-snug">
+                    {t(item.tKey)}
+                  </span>
+                </Link>
+              ))}
+            </div>
+
+            <Separator className="my-2" />
+
+            {/* Language */}
+            <div className="mb-3">
+              <p className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                {t("nav.language")}
+              </p>
+              <div className="flex gap-2 px-2 py-1">
+                {LANGUAGES.map((l) => (
+                  <button
+                    key={l.code}
+                    onClick={() => {
+                      setLocale(l.code);
+                      setMoreSheetOpen(false);
+                    }}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border transition-colors ${
+                      locale === l.code
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "border-border text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    <span className="text-base">{l.flag}</span>
+                    {l.code === "en" ? "English" : "العربية"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Sign out */}
+            {isAuthenticated && (
+              <button
+                onClick={async () => {
+                  await signOut();
+                  setMoreSheetOpen(false);
+                  router.refresh();
+                  router.push(localePath("/"));
+                }}
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-destructive hover:bg-destructive/10 transition-colors"
+              >
+                <LogOut className="w-5 h-5" />
+                {t("nav.signOut")}
+              </button>
+            )}
+          </div>
+
+          {/* Bottom safe area padding */}
+          <div className="h-4 shrink-0" />
+        </SheetContent>
+      </Sheet>
     </>
   );
 }

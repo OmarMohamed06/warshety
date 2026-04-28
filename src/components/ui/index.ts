@@ -1,28 +1,14 @@
 /**
- * @garage/ui — design-system primitives
+ * @garage/ui — design-system primitives (shadcn)
  *
- * Import everything from this barrel:
- *
- *   import { Button, Input, Select, Badge, Modal, ConfirmModal } from "@/components/ui";
- *   import type { ButtonVariant, BadgeVariant, SelectOption } from "@/components/ui";
+ * Import directly from each component:
+ *   import { Button } from "@/components/ui/button";
+ *   import { Badge } from "@/components/ui/badge";
  */
 
-// Button
-export { Button } from "./Button";
-export type { ButtonProps, ButtonVariant, ButtonSize } from "./Button";
-
-// Input
-export { Input } from "./Input";
-export type { InputProps } from "./Input";
-
-// Select
-export { Select } from "./Select";
-export type { SelectProps, SelectOption } from "./Select";
-
-// Badge
-export { Badge, statusVariant } from "./Badge";
-export type { BadgeProps, BadgeVariant, BadgeSize } from "./Badge";
-
-// Modal
-export { Modal, ConfirmModal } from "./Modal";
-export type { ModalProps, ModalSize, ConfirmModalProps } from "./Modal";
+// Re-exports for convenience
+export { Button } from "./button";
+export { Badge } from "./badge";
+export { Input } from "./input";
+export { Card, CardContent, CardHeader, CardTitle, CardFooter } from "./card";
+export { Modal, ConfirmModal } from "./modal";
