@@ -10,7 +10,7 @@ export default function Footer() {
   const { t } = useLanguage();
   return (
     <footer className="bg-slate-950 border-t border-slate-800">
-      <div className="max-w-7xl mx-auto px-6 pt-16 pb-8">
+      <div className="max-w-7xl mx-auto px-6 pt-16 pb-[78px] sm:pb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
           <div className="space-y-4">

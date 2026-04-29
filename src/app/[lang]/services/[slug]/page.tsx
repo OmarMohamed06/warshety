@@ -479,8 +479,6 @@ export default async function ServiceCenterPage({ params }: Props) {
               </Card>
             )}
 
-            {/* Reviews */}
-            <ReviewsSection vendorId={center.id} initialReviews={reviews} />
           </div>
 
           {/* Booking sidebar */}
@@ -492,6 +490,11 @@ export default async function ServiceCenterPage({ params }: Props) {
               branches={branches}
             />
           </div>
+        </div>
+
+        {/* Reviews — full width below booking so it appears after booking on mobile */}
+        <div className="mt-8">
+          <ReviewsSection vendorId={center.id} initialReviews={reviews} />
         </div>
       </div>
     </div>
