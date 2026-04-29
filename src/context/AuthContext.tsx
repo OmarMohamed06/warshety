@@ -48,9 +48,46 @@ export interface AuthContextValue {
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
+// Fallback value when Supabase env vars are not configured
+const NULL_AUTH: AuthContextValue = {
+  session: null,
+  user: null,
+  vendor: null,
+  isLoading: false,
+  isAuthenticated: false,
+  role: null,
+  vendorType: null,
+  managedBranchId: null,
+  signIn: async () => "Authentication not configured — missing env vars.",
+  signUp: async () => "Authentication not configured — missing env vars.",
+  signInWithGoogle: async () =>
+    "Authentication not configured — missing env vars.",
+  signOut: async () => {},
+  refreshProfile: async () => {},
+};
+
 // ── Provider ──────────────────────────────────────────────────────────────────
 
+/** Outer wrapper — renders a no-op shell if Supabase env vars are absent. */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const configured =
+    !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!configured) {
+    console.error(
+      "[AuthProvider] NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are not set. " +
+        "Add them to your Vercel project environment variables and redeploy.",
+    );
+    return (
+      <AuthContext.Provider value={NULL_AUTH}>{children}</AuthContext.Provider>
+    );
+  }
+
+  return <AuthProviderInner>{children}</AuthProviderInner>;
+}
+
+function AuthProviderInner({ children }: { children: React.ReactNode }) {
   // Stable client — same reference for the lifetime of the provider.
   // createBrowserClient is a singleton per URL+key, but referential stability
   // prevents loadProfile / loadVendors from being recreated on every render.

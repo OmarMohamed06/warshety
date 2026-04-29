@@ -7,8 +7,15 @@ import type { Database } from "@/types/database";
  * Creates one instance per module load (singleton pattern).
  */
 export function createClient() {
-  return createBrowserClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!url || !key) {
+    throw new Error(
+      "[Supabase] NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set. " +
+        "Add them to your Vercel project environment variables and redeploy.",
+    );
+  }
+
+  return createBrowserClient<Database>(url, key);
 }
