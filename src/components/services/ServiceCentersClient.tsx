@@ -34,6 +34,7 @@ import { createClient } from "@/lib/supabase/client";
 
 export interface ServiceCenterDisplay {
   id: string;
+  slug: string | null;
   name: string;
   badge: string | null;
   governorate: string;
@@ -662,7 +663,7 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                     </div>
                     <div className="mt-3 pt-3 border-t flex items-center justify-end">
                       <Button size="sm" className="h-7 text-xs" asChild>
-                        <Link href={`/services/${sc.id}`}>
+                        <Link href={`/services/${sc.slug ?? sc.id}`}>
                           {t("services.bookNow")}
                         </Link>
                       </Button>

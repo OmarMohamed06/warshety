@@ -20,6 +20,7 @@
 
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createClient as createAdminSupabaseClient } from "@supabase/supabase-js";
+import { generateSlugEn, generateSlugAr } from "@/utils/seo";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -202,6 +203,25 @@ export async function approveVendorApplication(
       .maybeSingle();
 
     if (!existingVendor) {
+      // Generate a URL slug from the business name
+      const baseSlug =
+        generateSlugEn(app.business_name) ||
+        generateSlugAr(app.business_name) ||
+        app.id;
+      // Ensure uniqueness by checking DB and appending counter if needed
+      let finalSlug = baseSlug;
+      let counter = 1;
+      while (true) {
+        const { data: existing } = await admin
+          .from("vendors")
+          .select("id")
+          .eq("slug", finalSlug)
+          .maybeSingle();
+        if (!existing) break;
+        counter++;
+        finalSlug = `${baseSlug}-${counter}`;
+      }
+
       const { data: newVendor, error: vendorErr } = await admin
         .from("vendors")
         .insert({
@@ -209,6 +229,7 @@ export async function approveVendorApplication(
           business_name: app.business_name,
           vendor_type: app.vendor_type,
           status: "approved",
+          slug: finalSlug,
           phone: app.phone ?? null,
           email: app.email,
           address: app.address ?? null,

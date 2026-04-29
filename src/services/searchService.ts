@@ -76,7 +76,7 @@ export async function globalSearch(
   if (type === "all" || type === "vendor") {
     let query = supabase
       .from("vendors")
-      .select("id, business_name, city, rating, cover_image_url, vendor_type")
+      .select("id, slug, business_name, city, rating, cover_image_url, vendor_type")
       .eq("status", "approved");
 
     if (filters.city) query = query.ilike("city", `%${filters.city}%`);
@@ -95,7 +95,7 @@ export async function globalSearch(
         subtitle: `${v.vendor_type === "service_center" ? "Service Center" : "Parts Seller"} · ${v.city ?? "Egypt"}`,
         href:
           v.vendor_type === "service_center"
-            ? `/services/${v.id}`
+            ? `/services/${(v.slug as string | null) ?? v.id}`
             : `/parts?vendor=${v.id}`,
         image: (v.cover_image_url as string) ?? null,
         relevanceScore: score,
@@ -108,7 +108,7 @@ export async function globalSearch(
     const { data: services } = await supabase
       .from("services")
       .select(
-        "id, name, description, price, vendor_id, vendor:vendors(business_name, city)",
+        "id, name, description, price, vendor_id, vendor:vendors(business_name, city, slug)",
       )
       .ilike("name", `%${k}%`)
       .eq("active", true)
@@ -118,6 +118,7 @@ export async function globalSearch(
       const vendor = s.vendor as unknown as {
         business_name: string;
         city: string;
+        slug: string | null;
       } | null;
       const score = bestScore(
         [s.name as string, (s.description as string) ?? ""],
@@ -130,7 +131,7 @@ export async function globalSearch(
         subtitle: vendor
           ? `${vendor.business_name} · ${vendor.city ?? "Egypt"}`
           : "Service",
-        href: `/services/${s.vendor_id}`,
+        href: `/services/${vendor?.slug ?? s.vendor_id}`,
         image: null,
         relevanceScore: score,
       });

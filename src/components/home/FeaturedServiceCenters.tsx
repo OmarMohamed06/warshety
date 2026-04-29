@@ -16,6 +16,7 @@ import { useLanguage } from "@/context/LanguageContext";
 
 interface ServiceCenter {
   id: string;
+  slug: string | null;
   name: string;
   city: string | null;
   rating: number;
@@ -28,6 +29,7 @@ interface ServiceCenter {
 /** Raw DB row shape (subset of vendors table columns we select) */
 export interface RawVendor {
   id: string;
+  slug?: string | null;
   business_name: string;
   city: string | null;
   rating: number | null;
@@ -40,6 +42,7 @@ export interface RawVendor {
 function mapRawVendors(data: RawVendor[]): ServiceCenter[] {
   return data.map((v) => ({
     id: v.id,
+    slug: v.slug ?? null,
     name: v.business_name,
     city: v.city,
     rating: Number(v.rating) || 0,
@@ -75,7 +78,7 @@ export default function FeaturedServiceCenters({ initialData }: Props = {}) {
     supabase
       .from("vendors")
       .select(
-        "id, business_name, city, rating, total_reviews, cover_image_url, supported_makes, completed_bookings",
+        "id, slug, business_name, city, rating, total_reviews, cover_image_url, supported_makes, completed_bookings",
       )
       .in("status", ["approved", "pending"])
       .eq("vendor_type", "service_center")
@@ -135,7 +138,7 @@ export default function FeaturedServiceCenters({ initialData }: Props = {}) {
               : centers.map((center) => (
                   <Link
                     key={center.id}
-                    href={`/services/${center.id}`}
+                    href={`/services/${center.slug ?? center.id}`}
                     className="group flex-none w-[220px] rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden hover:shadow-lg hover:border-[#FF4B19]/60 transition-all duration-200 flex flex-col"
                   >
                     {/* Cover image / placeholder */}

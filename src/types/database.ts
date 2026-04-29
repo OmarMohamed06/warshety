@@ -367,6 +367,7 @@ export type Database = {
           completed_bookings: number;
           specializations: string[];
           supported_makes: string[];
+          slug: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -398,6 +399,7 @@ export type Database = {
           completed_bookings?: number;
           specializations?: string[];
           supported_makes?: string[];
+          slug?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -429,6 +431,7 @@ export type Database = {
           completed_bookings?: number;
           specializations?: string[];
           supported_makes?: string[];
+          slug?: string | null;
           created_at?: string;
           updated_at?: string;
         };

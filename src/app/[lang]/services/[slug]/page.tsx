@@ -89,6 +89,9 @@ function formatWorkingHours(hours: any[], locale: Locale): string | null {
     .join("\n");
 }
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { lang, slug } = await params;
   const locale = (lang === "ar" ? "ar" : "en") as Locale;
@@ -96,7 +99,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { data: vendor } = await supabase
     .from("vendors")
     .select("business_name, business_name_ar, city, city_ar")
-    .eq("id", slug)
+    .eq(UUID_RE.test(slug) ? "id" : "slug", slug)
     .single();
   const name = vendor
     ? pick(vendor, "business_name", locale)
@@ -120,6 +123,16 @@ export default async function ServiceCenterPage({ params }: Props) {
   let completedBookingsCount = 0;
 
   try {
+    // Resolve slug or UUID to vendor ID
+    const { data: vendorLookup } = await supabase
+      .from("vendors")
+      .select("id")
+      .eq(UUID_RE.test(slug) ? "id" : "slug", slug)
+      .eq("vendor_type", "service_center")
+      .maybeSingle();
+    if (!vendorLookup) { notFound(); return; }
+    const vendorId = vendorLookup.id;
+
     const [
       { data: v },
       { data: rev },
@@ -130,30 +143,29 @@ export default async function ServiceCenterPage({ params }: Props) {
       supabase
         .from("vendors")
         .select("*")
-        .eq("id", slug)
-        .eq("vendor_type", "service_center")
+        .eq("id", vendorId)
         .single(),
       supabase
         .from("reviews")
         .select("*, user:users(full_name, avatar_url)")
-        .eq("vendor_id", slug)
+        .eq("vendor_id", vendorId)
         .order("created_at", { ascending: false }),
       (supabase as any)
         .from("vendor_branches")
         .select("*")
-        .eq("vendor_id", slug)
+        .eq("vendor_id", vendorId)
         .eq("status", "active")
         .order("is_main", { ascending: false })
         .order("created_at"),
       supabase
         .from("vendor_working_hours")
         .select("*")
-        .eq("vendor_id", slug)
+        .eq("vendor_id", vendorId)
         .order("day_of_week"),
       supabase
         .from("bookings")
         .select("id", { count: "exact", head: true })
-        .eq("vendor_id", slug)
+        .eq("vendor_id", vendorId)
         .eq("status", "completed"),
     ]);
     vendorData = v;
@@ -176,7 +188,7 @@ export default async function ServiceCenterPage({ params }: Props) {
   const { data: rawServices } = await supabase
     .from("services")
     .select("*")
-    .eq("vendor_id", slug)
+    .eq("vendor_id", vendor.id)
     .eq("active", true)
     .order("name");
   const services: DbService[] = (rawServices ?? []) as unknown as DbService[];
