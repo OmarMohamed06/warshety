@@ -12,7 +12,7 @@ import type { Metadata } from "next";
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const BASE_URL =
-  process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? "https://garage.eg";
+  process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? "https://warshety.com";
 export const SITE_NAME_AR = "ورشتي";
 export const SITE_NAME_EN = "Warshety";
 export const SITE_TAGLINE_AR = "قطع غيار سيارات في مصر";
