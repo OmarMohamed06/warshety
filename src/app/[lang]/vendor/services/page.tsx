@@ -167,8 +167,8 @@ export default function VendorServicesPage() {
     const matched =
       allSlugs.find(
         (slug) =>
-          resolveMsg("en", `services.services.${slug}`) === s.name ||
-          resolveMsg("ar", `services.services.${slug}`) === s.name_ar,
+          resolveMsg("en", `home.services.${slug}`) === s.name ||
+          resolveMsg("ar", `home.services.${slug}`) === s.name_ar,
       ) ?? "";
     // null branch_id means vendor-wide (main branch) — resolve to the synthetic main sentinel
     const mainId = branches.find((b) => b.is_main)?.id ?? branches[0]?.id ?? "";
@@ -192,8 +192,8 @@ export default function VendorServicesPage() {
     setSaving(true);
     setError(null);
     const basePayload = {
-      name: resolveMsg("en", `services.services.${form.serviceKey}`),
-      name_ar: resolveMsg("ar", `services.services.${form.serviceKey}`),
+      name: resolveMsg("en", `home.services.${form.serviceKey}`),
+      name_ar: resolveMsg("ar", `home.services.${form.serviceKey}`),
       description: form.description || null,
       duration_minutes: form.duration_minutes
         ? parseInt(form.duration_minutes)
@@ -387,16 +387,11 @@ export default function VendorServicesPage() {
                                 );
                                 const slug = allSlugs.find(
                                   (sl) =>
-                                    resolveMsg(
-                                      "en",
-                                      `services.services.${sl}`,
-                                    ) === s.name,
+                                    resolveMsg("en", `home.services.${sl}`) ===
+                                    s.name,
                                 );
                                 return slug
-                                  ? resolveMsg(
-                                      "ar",
-                                      `services.services.${slug}`,
-                                    )
+                                  ? resolveMsg("ar", `home.services.${slug}`)
                                   : s.name;
                               })()
                             : s.name}

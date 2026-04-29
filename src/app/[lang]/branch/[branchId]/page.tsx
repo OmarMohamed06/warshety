@@ -671,11 +671,15 @@ function BookingsTab({
                     </TableCell>
                     <TableCell>
                       {b.service_key
-                        ? t(`services.services.${b.service_key}`) !==
-                          `services.services.${b.service_key}`
-                          ? t(`services.services.${b.service_key}`)
+                        ? t(`home.services.${b.service_key}`) !==
+                          `home.services.${b.service_key}`
+                          ? t(`home.services.${b.service_key}`)
                           : b.service_key.replace(/-/g, " ")
-                        : (b.booking_type?.replace(/_/g, " ") ?? "—")}
+                        : b.booking_type === "routine_maintenance"
+                          ? t("vendor.routineMaintenance")
+                          : b.booking_type === "inspection"
+                            ? t("vendor.inspection")
+                            : (b.booking_type ?? "—")}
                     </TableCell>
                     <TableCell>
                       {b.vehicle
@@ -727,11 +731,15 @@ function BookingsTab({
               <p className="text-sm text-muted-foreground">
                 {selected.user?.full_name} —{" "}
                 {selected.service_key
-                  ? t(`services.services.${selected.service_key}`) !==
-                    `services.services.${selected.service_key}`
-                    ? t(`services.services.${selected.service_key}`)
+                  ? t(`home.services.${selected.service_key}`) !==
+                    `home.services.${selected.service_key}`
+                    ? t(`home.services.${selected.service_key}`)
                     : selected.service_key.replace(/-/g, " ")
-                  : selected.booking_type?.replace(/_/g, " ")}{" "}
+                  : selected.booking_type === "routine_maintenance"
+                    ? t("vendor.routineMaintenance")
+                    : selected.booking_type === "inspection"
+                      ? t("vendor.inspection")
+                      : (selected.booking_type ?? "")}{" "}
                 · {selected.booking_date}
               </p>
               <div className="grid grid-cols-2 gap-2">
@@ -2290,9 +2298,12 @@ function CustomersTab({
                       >
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold truncate">
-                            {b.service_key ??
-                              b.booking_type?.replace(/_/g, " ") ??
-                              "—"}
+                            {(b.service_key ??
+                            b.booking_type === "routine_maintenance")
+                              ? t("vendor.routineMaintenance")
+                              : b.booking_type === "inspection"
+                                ? t("vendor.inspection")
+                                : (b.booking_type ?? "—")}
                           </p>
                           <p className="text-xs text-muted-foreground">
                             {b.booking_date}

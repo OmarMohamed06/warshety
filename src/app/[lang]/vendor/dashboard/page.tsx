@@ -712,8 +712,11 @@ export default function VendorDashboardPage() {
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {b.service_key ??
-                          b.booking_type?.replace(/_/g, " ") ??
-                          "—"}
+                          (b.booking_type === "routine_maintenance"
+                            ? t("vendor.routineMaintenance")
+                            : b.booking_type === "inspection"
+                              ? t("vendor.inspection")
+                              : (b.booking_type ?? "—"))}
                       </TableCell>
                       <TableCell className="text-muted-foreground text-sm">
                         {b.booking_date}

@@ -253,7 +253,9 @@ export default function AdminBookingsPage() {
                       </td>
                       <td className="px-4 py-3">
                         <span className="inline-flex px-2 py-0.5 text-xs font-bold rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 capitalize">
-                          {b.booking_type.replace(/_/g, " ")}
+                          {b.booking_type === "routine_maintenance"
+                            ? t("vendor.routineMaintenance")
+                            : t("vendor.inspection")}
                         </span>
                       </td>
                       <td className="px-4 py-3">
@@ -396,12 +398,17 @@ export default function AdminBookingsPage() {
                     label: "Service",
                     value:
                       selected.services?.name ??
-                      selected.booking_type.replace(/_/g, " "),
+                      (selected.booking_type === "routine_maintenance"
+                        ? t("vendor.routineMaintenance")
+                        : t("vendor.inspection")),
                   },
                   { label: "Date", value: selected.booking_date },
                   {
                     label: "Type",
-                    value: selected.booking_type.replace(/_/g, " "),
+                    value:
+                      selected.booking_type === "routine_maintenance"
+                        ? t("vendor.routineMaintenance")
+                        : t("vendor.inspection"),
                   },
                   {
                     label: "Mileage",

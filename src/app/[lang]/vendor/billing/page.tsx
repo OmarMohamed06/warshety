@@ -649,8 +649,11 @@ export default function VendorBillingPage() {
                         </td>
                         <td className="px-3 py-2.5 text-muted-foreground">
                           {b.service_key ??
-                            b.booking_type?.replace(/_/g, " ") ??
-                            "—"}
+                            (b.booking_type === "routine_maintenance"
+                              ? t("vendor.routineMaintenance")
+                              : b.booking_type === "inspection"
+                                ? t("vendor.inspection")
+                                : (b.booking_type ?? "—"))}
                         </td>
                         <td className="px-3 py-2.5 font-semibold text-emerald-700 dark:text-emerald-400 whitespace-nowrap">
                           {egp(detailPeriod?.fee ?? 75)}

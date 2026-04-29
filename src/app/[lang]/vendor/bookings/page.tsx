@@ -365,11 +365,15 @@ export default function VendorBookingsPage() {
                       </TableCell>
                       <TableCell>
                         {b.service_key
-                          ? t(`services.services.${b.service_key}`) !==
-                            `services.services.${b.service_key}`
-                            ? t(`services.services.${b.service_key}`)
+                          ? t(`home.services.${b.service_key}`) !==
+                            `home.services.${b.service_key}`
+                            ? t(`home.services.${b.service_key}`)
                             : b.service_key.replace(/-/g, " ")
-                          : (b.booking_type?.replace(/_/g, " ") ?? "—")}
+                          : b.booking_type === "routine_maintenance"
+                            ? t("vendor.routineMaintenance")
+                            : b.booking_type === "inspection"
+                              ? t("vendor.inspection")
+                              : (b.booking_type ?? "—")}
                       </TableCell>
                       <TableCell>
                         {b.booking_date}
@@ -492,11 +496,15 @@ export default function VendorBookingsPage() {
                   <Wrench className="h-3.5 w-3.5 shrink-0" />
                   <span>
                     {viewBooking.service_key
-                      ? t(`services.services.${viewBooking.service_key}`) !==
-                        `services.services.${viewBooking.service_key}`
-                        ? t(`services.services.${viewBooking.service_key}`)
+                      ? t(`home.services.${viewBooking.service_key}`) !==
+                        `home.services.${viewBooking.service_key}`
+                        ? t(`home.services.${viewBooking.service_key}`)
                         : viewBooking.service_key.replace(/-/g, " ")
-                      : (viewBooking.booking_type?.replace(/_/g, " ") ?? "—")}
+                      : viewBooking.booking_type === "routine_maintenance"
+                        ? t("vendor.routineMaintenance")
+                        : viewBooking.booking_type === "inspection"
+                          ? t("vendor.inspection")
+                          : (viewBooking.booking_type ?? "—")}
                   </span>
                 </div>
               </div>
@@ -601,11 +609,15 @@ export default function VendorBookingsPage() {
               <p className="text-sm text-muted-foreground">
                 {selected.user?.full_name} —{" "}
                 {selected.service_key
-                  ? t(`services.services.${selected.service_key}`) !==
-                    `services.services.${selected.service_key}`
-                    ? t(`services.services.${selected.service_key}`)
+                  ? t(`home.services.${selected.service_key}`) !==
+                    `home.services.${selected.service_key}`
+                    ? t(`home.services.${selected.service_key}`)
                     : selected.service_key.replace(/-/g, " ")
-                  : selected.booking_type?.replace(/_/g, " ")}{" "}
+                  : selected.booking_type === "routine_maintenance"
+                    ? t("vendor.routineMaintenance")
+                    : selected.booking_type === "inspection"
+                      ? t("vendor.inspection")
+                      : (selected.booking_type ?? "")}{" "}
                 {selected.booking_date}
               </p>
 

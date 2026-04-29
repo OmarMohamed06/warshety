@@ -254,9 +254,9 @@ export default function MyBookingsPage() {
                               home_repair_service
                             </span>
                             <span className="truncate">
-                              {t(`services.services.${b.service_key}`) !==
-                              `services.services.${b.service_key}`
-                                ? t(`services.services.${b.service_key}`)
+                              {t(`home.services.${b.service_key}`) !==
+                              `home.services.${b.service_key}`
+                                ? t(`home.services.${b.service_key}`)
                                 : b.service_key.replace(/-/g, " ")}
                             </span>
                           </div>

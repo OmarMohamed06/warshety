@@ -340,7 +340,9 @@ export default function BookingDetailPage({
             <p className="font-bold">
               {service?.name
                 ? String(service.name)
-                : String(booking.booking_type).replace(/_/g, " ")}
+                : booking.booking_type === "routine_maintenance"
+                  ? t("vendor.routineMaintenance")
+                  : t("vendor.inspection")}
             </p>
           </div>
           <div>
@@ -358,7 +360,9 @@ export default function BookingDetailPage({
           <div>
             <p className="text-slate-400 text-xs">{t("admin.type")}</p>
             <p className="font-bold capitalize">
-              {String(booking.booking_type).replace(/_/g, " ")}
+              {booking.booking_type === "routine_maintenance"
+                ? t("vendor.routineMaintenance")
+                : t("vendor.inspection")}
             </p>
           </div>
         </div>
