@@ -478,7 +478,6 @@ export default async function ServiceCenterPage({ params }: Props) {
                 </CardContent>
               </Card>
             )}
-
           </div>
 
           {/* Booking sidebar */}

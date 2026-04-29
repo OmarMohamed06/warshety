@@ -3,7 +3,6 @@ import { Figtree, Cairo } from "next/font/google";
 import { headers } from "next/headers";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { BASE_URL } from "@/utils/seo";
 import type { Locale } from "@/context/LanguageContext";
 
 const figtree = Figtree({
@@ -27,7 +26,7 @@ export const metadata: Metadata = {
   },
   description:
     "Egypt's #1 automotive marketplace. Buy compatible spare parts, book trusted service centers, and shop from verified vendors. قطع غيار سيارات ومراكز خدمة موثوقة في مصر.",
-  metadataBase: new URL(BASE_URL),
+  metadataBase: new URL("https://warshety.com"),
   keywords: [
     "spare parts Egypt",
     "قطع غيار",
