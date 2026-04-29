@@ -74,7 +74,7 @@ export default function ProductCard({
     : null;
 
   const href = localePath(
-    `/parts/${categorySlug}/${subcategorySlug}/${part.id}`,
+    `/parts/${categorySlug}/${subcategorySlug}/${part.slug ?? part.id}`,
   );
 
   function handleAddToCart(e: React.MouseEvent) {

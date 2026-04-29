@@ -5,6 +5,7 @@ import { servicePageSeo, pick } from "@/utils/seo";
 import { createClient } from "@/lib/supabase/server";
 import BookingSidebar from "@/components/services/BookingSidebar";
 import ReviewsSection from "@/components/services/ReviewsSection";
+import { SERVICE_CATEGORIES } from "@/lib/serviceCategories";
 import type { DbService } from "@/types/database";
 import type { DbReview } from "@/services/reviewService";
 import enMessages from "../../../../../messages/en.json";
@@ -113,7 +114,6 @@ export default async function ServiceCenterPage({ params }: Props) {
   const supabase = await createClient();
 
   let vendorData: any = null;
-  let rawServices: any[] | null = null;
   let rawReviews: any[] | null = null;
   let rawBranches: any[] | null = null;
   let rawHours: any[] | null = null;
@@ -122,7 +122,6 @@ export default async function ServiceCenterPage({ params }: Props) {
   try {
     const [
       { data: v },
-      { data: s },
       { data: rev },
       { data: br },
       { data: wh },
@@ -134,12 +133,6 @@ export default async function ServiceCenterPage({ params }: Props) {
         .eq("id", slug)
         .eq("vendor_type", "service_center")
         .single(),
-      supabase
-        .from("services")
-        .select("*")
-        .eq("vendor_id", slug)
-        .eq("active", true)
-        .order("name"),
       supabase
         .from("reviews")
         .select("*, user:users(full_name, avatar_url)")
@@ -164,7 +157,6 @@ export default async function ServiceCenterPage({ params }: Props) {
         .eq("status", "completed"),
     ]);
     vendorData = v;
-    rawServices = s;
     rawReviews = rev;
     rawBranches = br;
     rawHours = wh;
@@ -178,8 +170,16 @@ export default async function ServiceCenterPage({ params }: Props) {
   }
 
   const vendor = vendorData;
-  const services: DbService[] = rawServices ?? [];
   const reviews: DbReview[] = (rawReviews ?? []) as unknown as DbReview[];
+
+  // Fetch bookable services for the sidebar (separate from display which uses specializations)
+  const { data: rawServices } = await supabase
+    .from("services")
+    .select("*")
+    .eq("vendor_id", slug)
+    .eq("active", true)
+    .order("name");
+  const services: DbService[] = (rawServices ?? []) as unknown as DbService[];
 
   // Always include the vendor's own location as the main branch at the top.
   // DB branches (vendor_branches) are secondary locations only.
@@ -225,6 +225,7 @@ export default async function ServiceCenterPage({ params }: Props) {
     address: vendor.address ?? null,
     city: pick(vendor, "city", locale) || vendor.city || null,
     governorate: vendor.governorate ?? null,
+    district: vendor.district ?? null,
     phone: vendor.phone ?? null,
     email: vendor.email ?? null,
     rating: realRating,
@@ -281,7 +282,7 @@ export default async function ServiceCenterPage({ params }: Props) {
                 <span>·</span>
                 <span className="flex items-center gap-1">
                   <MapPin className="w-4 h-4" />
-                  {[center.governorate, center.city]
+                  {[center.governorate, center.district, center.city]
                     .filter(Boolean)
                     .join(" · ")}
                 </span>
@@ -324,7 +325,7 @@ export default async function ServiceCenterPage({ params }: Props) {
                     <div>
                       <p className="font-semibold">{sc.address}</p>
                       <p className="text-muted-foreground">
-                        {[center.address, center.city, center.governorate]
+                        {[center.address, center.district, center.city, center.governorate]
                           .filter(Boolean)
                           .join(", ") ||
                           (locale === "ar" ? "القاهرة، مصر" : "Cairo, Egypt")}
@@ -414,44 +415,45 @@ export default async function ServiceCenterPage({ params }: Props) {
                 <CardTitle>{sc.servicesOffered}</CardTitle>
               </CardHeader>
               <CardContent>
-                {services.length === 0 ? (
+                {(vendor.specializations ?? []).length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Wrench className="w-10 h-10 mx-auto mb-2 opacity-30" />
                     <p className="text-sm">{sc.noServices}</p>
                   </div>
                 ) : (
-                  <div className="space-y-2.5">
-                    {services.map((svc) => (
-                      <div
-                        key={svc.id}
-                        className="flex items-center justify-between p-4 bg-muted/50 rounded-xl hover:bg-muted transition-colors"
-                      >
-                        <div className="flex items-center gap-3 flex-wrap">
-                          <p className="font-bold text-sm">
-                            {locale === "ar"
-                              ? svc.name_ar || svc.name
-                              : svc.name}
+                  <div className="space-y-4">
+                    {(vendor.specializations as string[]).map((catKey) => {
+                      const cat = SERVICE_CATEGORIES.find(
+                        (c) => c.key === catKey
+                      );
+                      if (!cat) return null;
+                      const catName =
+                        (msgs as any).home?.serviceCategories?.[catKey] ??
+                        catKey;
+                      return (
+                        <div key={catKey}>
+                          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                            {catName}
                           </p>
-                          {svc.duration_minutes && (
-                            <Badge variant="secondary" className="text-[10px]">
-                              {svc.duration_minutes} {sc.min}
-                            </Badge>
-                          )}
-                          {(svc.description || svc.description_ar) && (
-                            <p className="text-xs text-muted-foreground hidden sm:block">
-                              {locale === "ar"
-                                ? svc.description_ar || svc.description
-                                : svc.description}
-                            </p>
-                          )}
+                          <div className="flex flex-wrap gap-1.5">
+                            {cat.services.map((svcSlug) => {
+                              const svcName =
+                                (msgs as any).home?.services?.[svcSlug] ??
+                                svcSlug;
+                              return (
+                                <Badge
+                                  key={svcSlug}
+                                  variant="secondary"
+                                  className="text-xs"
+                                >
+                                  {svcName}
+                                </Badge>
+                              );
+                            })}
+                          </div>
                         </div>
-                        {svc.price != null && svc.price > 0 && (
-                          <span className="text-sm font-black text-primary shrink-0">
-                            EGP {svc.price.toLocaleString()}
-                          </span>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </CardContent>

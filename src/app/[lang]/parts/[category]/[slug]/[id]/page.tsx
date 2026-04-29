@@ -21,7 +21,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Star, Package, Truck, CheckCircle2, Car, Wrench } from "lucide-react";
+import { Star, Package, Truck, Car, Wrench } from "lucide-react";
 import { ImageGallery } from "@/components/parts/ImageGallery";
 
 interface Props {
@@ -34,10 +34,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id, lang } = await params;
   const locale = (lang === "ar" ? "ar" : "en") as "ar" | "en";
   const supabase = await createClient();
-  const { data: product } = await supabase
+  const supabaseAny2 = supabase as any;
+  const { data: product } = await supabaseAny2
     .from("products")
     .select("name, brand, image_url")
-    .eq("id", id)
+    .or(`id.eq.${id},slug.eq.${id}`)
     .single();
   if (!product) {
     return {
@@ -74,58 +75,256 @@ export default async function PartDetailPage({ params }: Props) {
     suspension: "نظام التعليق",
     steering: "نظام التوجيه",
     "wipers-washers": "المساحات والغسيل",
+    // engine variants
+    engine: "قطع المحرك",
     "engine-parts": "قطع المحرك",
-    "fuel-system": "نظام الوقود",
-    "exhaust-system": "نظام العادم",
+    // electrical variants
+    electrical: "النظام الكهربائي",
     "electric-system": "النظام الكهربائي",
+    // exhaust variants
+    exhaust: "نظام العادم",
+    "exhaust-system": "نظام العادم",
+    // cooling variants
+    cooling: "تبريد المحرك",
     "engine-cooling": "تبريد المحرك",
-    "heating-ventilation": "التدفئة والتهوية",
+    // transmission variants
+    transmission: "ناقل الحركة والكلتش",
     "transmission-clutch": "ناقل الحركة والكلتش",
+    // body variants
+    "body-parts": "هيكل السيارة والداخلية",
     "car-body-interior": "هيكل السيارة والداخلية",
+    "heating-ventilation": "التدفئة والتهوية",
     lighting: "الإضاءة",
     "oils-fluids": "الزيوت والسوائل",
+    "fuel-system": "نظام الوقود",
     "accessories-equipment": "الإكسسوارات والمعدات",
   };
 
   const SUBCATEGORY_NAMES_AR: Record<string, string> = {
+    // Brakes
     "brake-pads": "تيل الفرامل",
     "brake-discs": "أقراص الفرامل",
     "brake-calipers": "قلاوظات الفرامل",
     "brake-drums": "طبول الفرامل",
     "brake-shoes": "أحذية الفرامل",
+    "abs-sensors": "حساسات ABS",
+    "brake-master-cylinders": "أسطوانة الفرامل الرئيسية",
+    "brake-hoses": "خراطيم الفرامل",
+    "brake-boosters": "معززات الفرامل",
+    "brake-lines": "خطوط الفرامل",
+    "parking-brake-cables": "كابلات فرامل الانتظار",
+    "handbrake-parts": "أجزاء فرامل اليد",
+    "splash-guards": "واقيات الرذاذ",
+    "brake-system-accessories": "إكسسوارات الفرامل",
+    "brake-pad-wear-indicators": "مؤشرات تآكل الفرامل",
+    "caliper-parts": "أجزاء قلاوظ الفرامل",
+    "wheel-brake-cylinders": "أسطوانات فرامل العجلة",
+    "drum-brake-parts": "أجزاء فرامل الطبل",
+    "brake-line-fittings": "تركيبات خطوط الفرامل",
+    "brake-power-regulator": "منظم قوة الفرامل",
+    "brake-vacuum-pumps": "مضخات تفريغ الفرامل",
+    // Filters
     "oil-filters": "فلاتر الزيت",
     "air-filters": "فلاتر الهواء",
     "cabin-air-filters": "فلاتر هواء الكابينة",
     "fuel-filters": "فلاتر الوقود",
+    "filter-sets": "مجموعات الفلاتر",
+    "hydraulic-filters": "فلاتر هيدروليكية",
+    "coolant-filters": "فلاتر سائل التبريد",
+    "power-steering-filters": "فلاتر التوجيه المعزز",
+    // Suspension
     "shock-absorbers": "مساعدات",
     "coil-springs": "زنبركات",
     "wheel-bearings": "تحميل العجلة",
+    "wheel-hubs": "مراكز العجلة",
     "control-arms": "ذراع التعليق",
     "ball-joints": "كرة التوجيه",
+    "suspension-bushings": "بوشيات التعليق",
+    "strut-bearings": "تحميل الدعامة",
+    "strut-boots": "أغطية الدعامة",
+    "sway-bar-links": "وصلات بار الاستقرار",
+    "air-springs": "وسادات هوائية",
+    "leaf-springs": "زنبرك ورقي",
+    "wheel-nuts-bolts": "صواميل وبراغي العجلة",
+    stabilizers: "أجهزة تثبيت",
+    "spring-caps": "أغطية الزنبرك",
+    "pitman-arms": "ذراع بيتمان",
+    "steering-knuckles": "مفصل التوجيه",
+    "stub-axles": "محاور قصيرة",
+    "suspension-repair-kits": "طقم إصلاح التعليق",
+    "wheel-spacers": "فواصل العجلات",
+    // Steering
+    "tie-rod-ends": "نهايات ذراع التوجيه",
+    "tie-rod-assemblies": "تجميعات ذراع التوجيه",
+    "steering-racks": "رف التوجيه",
+    "power-steering-pumps": "مضخة التوجيه المعزز",
+    "rack-bellows": "أغطية رف التوجيه",
+    "steering-arms": "أذرعة التوجيه",
+    "steering-hoses": "خراطيم التوجيه",
+    "steering-columns": "عمود التوجيه",
+    "steering-dampers": "مخففات التوجيه",
+    "power-steering-tanks": "خزان التوجيه المعزز",
+    "steering-locks": "قفل التوجيه",
+    "rack-mountings": "تثبيت رف التوجيه",
+    // Wipers
+    "wiper-blades": "أوراق المساحات",
+    "wiper-motors": "موتور المساحة",
+    "washer-pumps": "مضخة غسيل الزجاج",
+    "wiper-linkage": "تجميعة رابط المساحة",
+    "headlight-washers": "مضخات غسيل المصابيح",
+    "wiper-arms": "أذرعة المساحات",
+    "washer-nozzles": "فوهات سائل الغسيل",
+    "washer-tanks": "خزانات سائل الغسيل",
+    // Engine
     "timing-belt-kits": "طقم سير التوقيت",
     "gaskets-seals": "جوانات وأختام المحرك",
     "timing-chain-sets": "طقم سلسلة التوقيت",
+    "throttle-bodies": "جسم الخانق",
+    "engine-belts-chains": "سيور وسلاسل المحرك",
+    "tensioners-pulleys": "شادات وبكرات",
     turbochargers: "تيربو",
+    "turbo-hoses": "خراطيم التيربو",
+    "turbo-parts": "أجزاء التيربو",
+    "cylinder-head-parts": "أجزاء رأس الأسطوانة",
+    "engine-block": "كتلة المحرك والعمود المرفقي",
+    "engine-lubrication": "تشحيم المحرك",
+    "egr-system": "نظام EGR",
+    "intake-manifolds": "مشعب السحب",
+    "air-supply-hoses": "خراطيم إمداد الهواء",
+    "engine-mountings": "تثبيتات المحرك",
+    "accelerator-cables": "كابلات الوقود",
+    "idle-control-valves": "صمامات التحكم في الخمول",
+    // Electrical
     alternators: "دينامو",
     starters: "مارش",
     "spark-plugs": "بوجيهات",
+    "glow-plugs": "شمعات التسخين",
     "ignition-coils": "ملفات الإشعال",
     sensors: "حساسات",
+    switches: "مفاتيح",
+    "control-units": "وحدات التحكم",
+    "alternator-clutches": "كلتش الدينامو",
+    "spark-plug-wires": "أسلاك البوجيه",
+    "ignition-distributor": "أجزاء الدلكو",
+    "alternator-parts": "أجزاء الدينامو",
+    "alternator-regulators": "منظمات الدينامو",
+    "starter-parts": "أجزاء المارش",
+    "solenoid-switches": "مفاتيح سولينويد",
+    "air-horns": "أبواق هوائية",
+    harnesses: "أحزمة الكابلات",
+    "airbag-clock-springs": "زنبركات ساعة الوسادة الهوائية",
+    // Exhaust
     silencers: "كاتم الصوت",
     "exhaust-pipes": "ماسورة العادم",
     "catalytic-converters": "محول حفاز",
+    "exhaust-manifolds": "مشعب العادم",
+    dpf: "فلتر الجسيمات الديزل",
+    "lambda-sensors": "حساسات لامبدا",
+    "exhaust-gaskets": "جوانات العادم",
+    "exhaust-mountings": "تثبيتات العادم",
+    "exhaust-sensors": "حساسات نظام العادم",
+    "exhaust-valves": "صمامات نظام العادم",
+    // Cooling
     "water-pumps": "طلمبات الماء",
     radiators: "رادياتير",
     thermostats: "ترموستات",
+    "radiator-hoses": "خراطيم الرادياتير",
+    "radiator-fans": "مراوح الرادياتير",
+    intercoolers: "انتركولر",
+    "expansion-tanks": "خزانات تمدد سائل التبريد",
+    antifreeze: "سائل مضاد للتجمد",
+    "cooling-sensors": "حساسات نظام التبريد",
+    "radiator-mountings": "تثبيتات الرادياتير",
+    "oil-cooler": "مبرد الزيت",
+    "coolant-flanges": "فلنجات سائل التبريد",
+    "cooling-gaskets": "جوانات نظام التبريد",
+    "water-pump-pulleys": "بكرات طلمبة الماء",
+    // HVAC
+    "ac-compressors": "ضاغط التكييف",
+    "ac-condensers": "مكثف التكييف",
+    "ac-dryers": "مجفف التكييف",
+    "blower-motors": "موتور مروحة التدفئة",
+    "heater-cores": "قلب المدفأة",
+    "heater-hoses": "خراطيم المدفأة",
+    "parking-heaters": "سخانات الانتظار",
+    evaporators: "مبخر التكييف",
+    "ac-hoses-pipes": "خراطيم وأنابيب التكييف",
+    "ac-relays": "ريليهات التكييف",
+    "ac-switches": "مفاتيح ومحركات التكييف",
+    "temp-sensors": "حساسات الحرارة",
+    "ac-control-units": "وحدات تحكم التكييف",
+    "heater-control-units": "وحدات تحكم التدفئة",
+    // Transmission
     "clutch-kits": "طقم الكلتش",
     "drive-shafts": "أعمدة الدفع",
+    flywheels: "عجلة الحدافة",
     "cv-joints": "مفاصل CV",
-    "tie-rod-ends": "نهايات ذراع التوجيه",
-    "steering-racks": "رف التوجيه",
-    "fuel-pumps": "مضخات الوقود",
-    "injector-nozzles": "فوهات الحاقن",
-    headlights: "مصابيح أمامية",
+    "cv-boots": "أغطية CV",
+    "clutch-parts": "أجزاء الكلتش المفردة",
+    "transmission-oil-kits": "طقم تغيير زيت ناقل الحركة",
+    "universal-joints": "مفاصل عالمية ومرنة",
+    "transmission-gaskets": "جوانات وأختام ناقل الحركة",
+    propshafts: "أعمدة الإدارة",
+    "propshaft-bearings": "تحميل منتصف عمود الإدارة",
+    "clutch-master-cylinders": "أسطوانة الكلتش الرئيسية",
+    "gear-selector-rods": "قضبان اختيار التروس",
+    "transmission-mountings": "تثبيتات ناقل الحركة",
+    "transmission-oil-coolers": "مبردات زيت ناقل الحركة",
+    "differential-parts": "أجزاء الديفرنسيال",
+    // Body
+    "door-handles-locks": "مقابض وأقفال الأبواب",
+    "window-lifts": "رافعات الزجاج",
+    "gas-springs": "زنبركات غازية",
+    "bumper-parts": "أجزاء البامبر",
+    fenders: "رفرفات",
+    mirrors: "مرايا",
+    mudguards: "واقيات الطين",
+    "interior-parts": "أجزاء الداخلية",
+    "front-grilles": "شبكات أمامية",
+    "door-parts": "أجزاء الباب",
+    "bonnet-parts": "كبوت وأجزاؤه",
+    "tailgate-lift-motor": "موتور رفع الصندوق الخلفي",
+    "trim-strips": "أشرطة زينة وحماية",
+    "floor-panels": "ألواح الأرضية",
+    "window-seals": "أختام النوافذ",
+    "license-plate-holders": "حوامل لوحات الترخيص",
+    "engine-covers": "أغطية المحرك",
+    "seat-adjustment-parts": "أجزاء ضبط المقاعد",
+    antennas: "هوائيات",
+    // Lighting
     "tail-lights": "مصابيح خلفية",
+    headlights: "مصابيح أمامية",
+    "headlight-parts": "أجزاء المصابيح الأمامية",
+    "tail-light-parts": "أجزاء المصابيح الخلفية",
+    "car-bulbs": "لمبات السيارة",
+    "turn-signal-lights": "مصابيح الإشارة",
+    "lighting-switches": "مفاتيح الإضاءة",
+    "front-fog-lights": "مصابيح الضباب الأمامية",
+    "rear-fog-lights": "مصابيح الضباب الخلفية",
+    "license-plate-lights": "مصابيح لوحة الترخيص",
+    "reverse-lights": "مصابيح الرجوع",
+    "daytime-running-lights": "مصابيح النهار",
+    "stop-lights": "مصابيح الوقوف",
+    // Oils & Fluids
+    "engine-oil": "زيت المحرك",
+    "coolant-antifreeze": "سائل تبريد / مضاد تجمد",
+    "brake-fluid": "سائل الفرامل",
+    "transmission-fluid": "سائل ناقل الحركة",
+    "power-steering-fluid": "سائل التوجيه المعزز",
+    "washer-fluid": "سائل غسيل الزجاج",
+    // Fuel System
+    "injector-nozzles": "فوهات الحاقن",
+    "injector-parts": "أجزاء الحاقن",
+    "fuel-pumps": "مضخات الوقود",
+    "fuel-gaskets": "جوانات نظام الوقود",
+    "fuel-tanks": "خزانات الوقود",
+    "high-pressure-pumps": "مضخات ضغط عالي",
+    "fuel-lines-hoses": "خطوط وخراطيم الوقود",
+    "fuel-valves": "صمامات نظام الوقود",
+    "fuel-pressure-regulators": "منظمات ضغط الوقود",
+    "carburettor-parts": "أجزاء الكاربريتر",
+    "water-in-fuel-sensors": "حساسات الماء في الوقود",
+    "air-injection-pumps": "مضخات حقن هواء ثانوي",
   };
 
   const categoryDisplayEn = category
@@ -153,7 +352,7 @@ export default async function PartDetailPage({ params }: Props) {
   const { data: rawProduct } = (await supabaseAny
     .from("products")
     .select("*, vendor:vendors(id, business_name, rating, total_reviews, city)")
-    .eq("id", id)
+    .or(`id.eq.${id},slug.eq.${id}`)
     .single()) as {
     data:
       | (Record<string, unknown> & {
@@ -177,7 +376,6 @@ export default async function PartDetailPage({ params }: Props) {
           stock: number;
           image_url: string | null;
           images: string[];
-          compatible_vehicles: string[];
           vendor: unknown;
         })
       | null;
@@ -243,7 +441,15 @@ export default async function PartDetailPage({ params }: Props) {
             ? [rawProduct.image_url]
             : [],
     description: rawProduct.description ?? "",
-    compatibleVehicles: rawProduct.compatible_vehicles ?? [],
+    compatibleVehicles: compatibleVehicles.map((v) =>
+      [
+        v.make,
+        v.model,
+        v.year_from && v.year_to ? `(${v.year_from}\u2013${v.year_to})` : "",
+      ]
+        .filter(Boolean)
+        .join(" "),
+    ),
     vendorName: vendor?.business_name ?? "",
     vendorRating: vendor?.rating ?? 0,
     vendorReviewCount: vendor?.total_reviews ?? 0,
@@ -516,7 +722,11 @@ export default async function PartDetailPage({ params }: Props) {
               price={part.price}
               image={part.images?.[0]}
               stock={part.stock}
-              compatible={part.compatibleVehicles?.[0]}
+              compatible={
+                compatibleVehicles[0]
+                  ? `${compatibleVehicles[0].make} ${compatibleVehicles[0].model}`
+                  : undefined
+              }
               installationAvailable={part.installationAvailable}
             />
 
@@ -553,28 +763,6 @@ export default async function PartDetailPage({ params }: Props) {
               productLabel={`${part.brand} ${part.oemNumber ?? part.name}`}
             />
           </div>
-        ) : part.compatibleVehicles.length > 0 ? (
-          <Card className="mt-12">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Car className="w-5 h-5 text-primary" />
-                {t("parts.compatibleVehicles")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {part.compatibleVehicles.map((v) => (
-                  <div
-                    key={v}
-                    className="flex items-center gap-2 p-3 bg-muted/50 rounded-xl"
-                  >
-                    <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
-                    <span className="text-sm font-medium">{v}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
         ) : null}
 
         {/* OE / Cross-reference Numbers */}

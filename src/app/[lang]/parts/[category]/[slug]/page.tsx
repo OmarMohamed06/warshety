@@ -34,7 +34,7 @@ type ProductWithVendor = DbProduct & {
 function mapProductToPart(p: ProductWithVendor): Part {
   return {
     id: p.id,
-    slug: p.id,
+    slug: p.slug ?? p.id,
     name: p.name,
     brand: p.brand ?? "",
     price: p.price,
@@ -53,18 +53,15 @@ function mapProductToPart(p: ProductWithVendor): Part {
         : p.image_url
           ? [p.image_url]
           : [],
-    compatibleVehicles:
-      (p.product_vehicles ?? []).length > 0
-        ? (p.product_vehicles ?? []).map((v) =>
-            [
-              v.make,
-              v.model,
-              v.year_from && v.year_to ? `(${v.year_from}–${v.year_to})` : "",
-            ]
-              .filter(Boolean)
-              .join(" "),
-          )
-        : (p.compatible_vehicles ?? []),
+    compatibleVehicles: (p.product_vehicles ?? []).map((v) =>
+      [
+        v.make,
+        v.model,
+        v.year_from && v.year_to ? `(${v.year_from}–${v.year_to})` : "",
+      ]
+        .filter(Boolean)
+        .join(" "),
+    ),
     vendorId: p.vendor_id,
     vendorName: p.vendor?.business_name ?? "",
     vendorRating: p.vendor?.rating ?? 0,

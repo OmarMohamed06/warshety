@@ -46,7 +46,6 @@ export interface CreateProductInput {
   stock: number;
   imageUrl?: string;
   images?: string[];
-  compatibleVehicles?: string[];
 }
 
 export interface UpdateProductInput {
@@ -58,7 +57,6 @@ export interface UpdateProductInput {
   active?: boolean;
   imageUrl?: string;
   images?: string[];
-  compatibleVehicles?: string[];
 }
 
 // ── Service (Workshop Service) CRUD ──────────────────────────────────────────
@@ -158,7 +156,6 @@ export async function createProduct(
       stock: input.stock,
       image_url: input.imageUrl ?? null,
       images: input.images ?? [],
-      compatible_vehicles: input.compatibleVehicles ?? [],
       // Rule: if stock = 0 → product starts as inactive
       active: input.stock > 0,
     })
@@ -192,9 +189,6 @@ export async function updateProduct(
   if (updates.active !== undefined) patch.active = updates.active;
   if (updates.imageUrl !== undefined) patch.image_url = updates.imageUrl;
   if (updates.images !== undefined) patch.images = updates.images;
-  if (updates.compatibleVehicles !== undefined)
-    patch.compatible_vehicles = updates.compatibleVehicles;
-
   patch.updated_at = new Date().toISOString();
 
   const { error } = await supabase

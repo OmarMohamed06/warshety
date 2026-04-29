@@ -3,7 +3,10 @@ import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import ServiceCentersClient from "@/components/services/ServiceCentersClient";
 import type { ServiceCenterDisplay } from "@/components/services/ServiceCentersClient";
+import { SERVICE_CATEGORIES } from "@/lib/serviceCategories";
 import { generateSeoMeta } from "@/utils/seo";
+import enMessages from "@/../messages/en.json";
+import arMessages from "@/../messages/ar.json";
 
 interface ServicePageProps {
   params: Promise<{ lang: string }>;
@@ -26,7 +29,12 @@ export async function generateMetadata({
   });
 }
 
-export default async function AllServiceCentersPage() {
+export default async function AllServiceCentersPage({
+  params,
+}: ServicePageProps) {
+  const { lang } = await params;
+  const isAr = lang === "ar";
+  const msgs = isAr ? arMessages : enMessages;
   let centers: ServiceCenterDisplay[] = [];
 
   try {
@@ -36,24 +44,19 @@ export default async function AllServiceCentersPage() {
     // due to an RLS recursion on order_items → orders → order_items.
     const [
       { data: vendors },
-      { data: allServices },
       { data: completedBookingsRaw },
       { data: allBranches },
     ] = await Promise.all([
       (supabase as any)
         .from("vendors")
         .select(
-          "id, business_name, city, governorate, district, latitude, longitude, featured, featured_priority, rating, total_reviews, cover_image_url, status",
+          "id, business_name, city, governorate, district, latitude, longitude, featured, featured_priority, rating, total_reviews, cover_image_url, status, specializations",
         )
         .eq("vendor_type", "service_center")
         .in("status", ["approved", "pending"])
         .order("featured", { ascending: false })
         .order("featured_priority", { ascending: false })
         .order("rating", { ascending: false }),
-      supabase
-        .from("services")
-        .select("id, vendor_id, name")
-        .eq("active", true),
       supabase.from("bookings").select("vendor_id").eq("status", "completed"),
       // Fetch active branch locations so governorate filter can match branches
       (supabase as any)
@@ -61,14 +64,6 @@ export default async function AllServiceCentersPage() {
         .select("vendor_id, city, governorate")
         .eq("status", "active"),
     ]);
-
-    // Group services by vendor_id for quick lookup
-    const servicesByVendor = new Map<string, string[]>();
-    for (const svc of allServices ?? []) {
-      const list = servicesByVendor.get(svc.vendor_id) ?? [];
-      list.push(svc.name);
-      servicesByVendor.set(svc.vendor_id, list);
-    }
 
     // Count completed bookings per vendor from real booking data
     const bookingCountByVendor = new Map<string, number>();
@@ -108,7 +103,14 @@ export default async function AllServiceCentersPage() {
       reviewCount: v.total_reviews ?? 0,
       completedBookings: bookingCountByVendor.get(v.id) ?? 0,
       specializations: ["All Makes"],
-      services: servicesByVendor.get(v.id) ?? [],
+      services: ((v.specializations ?? []) as string[]).flatMap((catKey) => {
+        const cat = SERVICE_CATEGORIES.find((c) => c.key === catKey);
+        if (!cat) return [];
+        return cat.services.map(
+          (svcSlug) =>
+            (msgs as any).home?.services?.[svcSlug] ?? svcSlug,
+        );
+      }),
       availableToday: v.status === "approved",
       image: v.cover_image_url,
       branchLocations: branchesByVendor.get(v.id) ?? [],

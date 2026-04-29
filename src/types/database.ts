@@ -215,6 +215,7 @@ export interface DbBookingStatusHistory {
 
 export interface DbProduct {
   id: string;
+  slug: string | null;
   vendor_id: string;
   name: string;
   description: string | null;
@@ -237,7 +238,6 @@ export interface DbProduct {
   image_url: string | null;
   images: string[];
   active: boolean;
-  compatible_vehicles: string[];
   created_at: string;
   updated_at: string;
   // Joined
@@ -621,7 +621,6 @@ export type Database = {
           image_url: string | null;
           images: string[];
           active: boolean;
-          compatible_vehicles: string[];
           created_at: string;
           updated_at: string;
         };
@@ -642,7 +641,6 @@ export type Database = {
           image_url?: string | null;
           images?: string[];
           active?: boolean;
-          compatible_vehicles?: string[];
           created_at?: string;
           updated_at?: string;
         };
@@ -663,7 +661,6 @@ export type Database = {
           image_url?: string | null;
           images?: string[];
           active?: boolean;
-          compatible_vehicles?: string[];
           created_at?: string;
           updated_at?: string;
         };
