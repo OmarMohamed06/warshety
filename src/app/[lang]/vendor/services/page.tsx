@@ -116,6 +116,8 @@ export default function VendorServicesPage() {
         city: vendor.city ?? null,
         city_ar: null,
         governorate: null,
+        latitude: null,
+        longitude: null,
         maps_link: null,
         phone: vendor.phone ?? null,
         status: "active",

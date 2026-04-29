@@ -114,6 +114,8 @@ export interface DbBranch {
   city: string | null;
   city_ar: string | null;
   governorate: string | null;
+  latitude: number | null;
+  longitude: number | null;
   maps_link: string | null;
   phone: string | null;
   status: "active" | "inactive";

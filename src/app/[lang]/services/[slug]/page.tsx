@@ -196,6 +196,7 @@ export default async function ServiceCenterPage({ params }: Props) {
     governorate: vendor.governorate ?? null,
     latitude: vendor.latitude ?? null,
     longitude: vendor.longitude ?? null,
+    maps_link: null,
     phone: vendor.phone ?? null,
     status: "active",
     is_main: true,
