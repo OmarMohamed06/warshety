@@ -159,7 +159,8 @@ function LoginForm({
             {/* Email not confirmed */}
             {emailNotConfirmed && (
               <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 text-amber-800 dark:text-amber-300 rounded-lg px-3 py-2 text-sm">
-                Please check your inbox and confirm your email address before signing in.
+                Please check your inbox and confirm your email address before
+                signing in.
               </div>
             )}
 
