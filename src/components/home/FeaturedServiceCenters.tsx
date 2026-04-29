@@ -25,49 +25,6 @@ interface ServiceCenter {
   completedBookings: number;
 }
 
-const FALLBACK_CENTERS: ServiceCenter[] = [
-  {
-    id: "f1",
-    name: "Elite Auto Haus",
-    city: "New Cairo",
-    rating: 4.9,
-    reviews: 312,
-    makes: ["BMW", "Mercedes", "Audi"],
-    image: null,
-    completedBookings: 0,
-  },
-  {
-    id: "f2",
-    name: "Speedy Motors Service",
-    city: "Giza",
-    rating: 4.7,
-    reviews: 188,
-    makes: ["Toyota", "Hyundai", "Kia"],
-    image: null,
-    completedBookings: 0,
-  },
-  {
-    id: "f3",
-    name: "AutoCare Plus",
-    city: "Cairo",
-    rating: 4.8,
-    reviews: 245,
-    makes: ["All Makes"],
-    image: null,
-    completedBookings: 0,
-  },
-  {
-    id: "f4",
-    name: "ProTech Garage",
-    city: "Alexandria",
-    rating: 4.6,
-    reviews: 132,
-    makes: ["Nissan", "Mitsubishi"],
-    image: null,
-    completedBookings: 0,
-  },
-];
-
 /** Raw DB row shape (subset of vendors table columns we select) */
 export interface RawVendor {
   id: string;
