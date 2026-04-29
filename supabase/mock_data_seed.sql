@@ -352,38 +352,38 @@ INSERT INTO public.bookings (
 ) VALUES
 
   -- ── Maadi Speed Center ───────────────────────────────────────────────────
-  ('b0002-001-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000002', 'bbbbbbbb-0000-0000-0000-000000000002', '2026-01-08', '09:00', 'completed', 'routine_maintenance', '2026-01-07 17:00:00+00'),
-  ('b0002-001-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000004', 'bbbbbbbb-0000-0000-0000-000000000002', '2026-01-22', '11:00', 'completed', 'routine_maintenance', '2026-01-21 10:00:00+00'),
-  ('b0002-001-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000003', 'bbbbbbbb-0000-0000-0000-000000000002', '2026-02-10', '14:00', 'completed', 'inspection',          '2026-02-09 12:00:00+00'),
-  ('b0002-001-0000-0000-000000000004', 'aaaaaaaa-0000-0000-0000-000000000005', 'bbbbbbbb-0000-0000-0000-000000000002', '2026-02-25', '10:00', 'completed', 'routine_maintenance', '2026-02-24 09:00:00+00'),
-  ('b0002-001-0000-0000-000000000005', 'aaaaaaaa-0000-0000-0000-000000000006', 'bbbbbbbb-0000-0000-0000-000000000002', '2026-03-12', '09:30', 'completed', 'inspection',          '2026-03-11 18:00:00+00'),
-  ('b0002-001-0000-0000-000000000006', 'aaaaaaaa-0000-0000-0000-000000000002', 'bbbbbbbb-0000-0000-0000-000000000002', '2026-04-05', '11:00', 'booked',    'routine_maintenance', '2026-04-04 14:00:00+00'),
+  ('b0002001-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000002', 'bbbbbbbb-0000-0000-0000-000000000002', '2026-01-08', '09:00', 'completed', 'routine_maintenance', '2026-01-07 17:00:00+00'),
+  ('b0002001-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000004', 'bbbbbbbb-0000-0000-0000-000000000002', '2026-01-22', '11:00', 'completed', 'routine_maintenance', '2026-01-21 10:00:00+00'),
+  ('b0002001-0000-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000003', 'bbbbbbbb-0000-0000-0000-000000000002', '2026-02-10', '14:00', 'completed', 'inspection',          '2026-02-09 12:00:00+00'),
+  ('b0002001-0000-0000-0000-000000000004', 'aaaaaaaa-0000-0000-0000-000000000005', 'bbbbbbbb-0000-0000-0000-000000000002', '2026-02-25', '10:00', 'completed', 'routine_maintenance', '2026-02-24 09:00:00+00'),
+  ('b0002001-0000-0000-0000-000000000005', 'aaaaaaaa-0000-0000-0000-000000000006', 'bbbbbbbb-0000-0000-0000-000000000002', '2026-03-12', '09:30', 'completed', 'inspection',          '2026-03-11 18:00:00+00'),
+  ('b0002001-0000-0000-0000-000000000006', 'aaaaaaaa-0000-0000-0000-000000000002', 'bbbbbbbb-0000-0000-0000-000000000002', '2026-04-05', '11:00', 'booked',    'routine_maintenance', '2026-04-04 14:00:00+00'),
 
   -- ── Giza Tech Motors ─────────────────────────────────────────────────────
-  ('b0003-001-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000003', 'bbbbbbbb-0000-0000-0000-000000000003', '2026-01-14', '10:00', 'completed', 'inspection',          '2026-01-13 16:00:00+00'),
-  ('b0003-001-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000004', 'bbbbbbbb-0000-0000-0000-000000000003', '2026-01-28', '09:00', 'completed', 'routine_maintenance', '2026-01-27 11:00:00+00'),
-  ('b0003-001-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000005', 'bbbbbbbb-0000-0000-0000-000000000003', '2026-02-06', '14:30', 'completed', 'inspection',          '2026-02-05 09:00:00+00'),
-  ('b0003-001-0000-0000-000000000004', 'aaaaaaaa-0000-0000-0000-000000000002', 'bbbbbbbb-0000-0000-0000-000000000003', '2026-02-19', '11:00', 'completed', 'routine_maintenance', '2026-02-18 17:00:00+00'),
-  ('b0003-001-0000-0000-000000000005', 'aaaaaaaa-0000-0000-0000-000000000006', 'bbbbbbbb-0000-0000-0000-000000000003', '2026-03-05', '09:00', 'completed', 'inspection',          '2026-03-04 13:00:00+00'),
-  ('b0003-001-0000-0000-000000000006', 'aaaaaaaa-0000-0000-0000-000000000003', 'bbbbbbbb-0000-0000-0000-000000000003', '2026-04-10', '10:30', 'booked',    'routine_maintenance', '2026-04-09 08:00:00+00'),
+  ('b0003001-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000003', 'bbbbbbbb-0000-0000-0000-000000000003', '2026-01-14', '10:00', 'completed', 'inspection',          '2026-01-13 16:00:00+00'),
+  ('b0003001-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000004', 'bbbbbbbb-0000-0000-0000-000000000003', '2026-01-28', '09:00', 'completed', 'routine_maintenance', '2026-01-27 11:00:00+00'),
+  ('b0003001-0000-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000005', 'bbbbbbbb-0000-0000-0000-000000000003', '2026-02-06', '14:30', 'completed', 'inspection',          '2026-02-05 09:00:00+00'),
+  ('b0003001-0000-0000-0000-000000000004', 'aaaaaaaa-0000-0000-0000-000000000002', 'bbbbbbbb-0000-0000-0000-000000000003', '2026-02-19', '11:00', 'completed', 'routine_maintenance', '2026-02-18 17:00:00+00'),
+  ('b0003001-0000-0000-0000-000000000005', 'aaaaaaaa-0000-0000-0000-000000000006', 'bbbbbbbb-0000-0000-0000-000000000003', '2026-03-05', '09:00', 'completed', 'inspection',          '2026-03-04 13:00:00+00'),
+  ('b0003001-0000-0000-0000-000000000006', 'aaaaaaaa-0000-0000-0000-000000000003', 'bbbbbbbb-0000-0000-0000-000000000003', '2026-04-10', '10:30', 'booked',    'routine_maintenance', '2026-04-09 08:00:00+00'),
 
   -- ── Alexandria Auto Pro ───────────────────────────────────────────────────
-  ('b0004-001-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000005', 'bbbbbbbb-0000-0000-0000-000000000004', '2026-02-03', '10:00', 'completed', 'routine_maintenance', '2026-02-02 15:00:00+00'),
-  ('b0004-001-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000006', 'bbbbbbbb-0000-0000-0000-000000000004', '2026-02-17', '13:00', 'completed', 'inspection',          '2026-02-16 10:00:00+00'),
-  ('b0004-001-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000004', 'bbbbbbbb-0000-0000-0000-000000000004', '2026-03-20', '09:00', 'completed', 'routine_maintenance', '2026-03-19 18:00:00+00'),
+  ('b0004001-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000005', 'bbbbbbbb-0000-0000-0000-000000000004', '2026-02-03', '10:00', 'completed', 'routine_maintenance', '2026-02-02 15:00:00+00'),
+  ('b0004001-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000006', 'bbbbbbbb-0000-0000-0000-000000000004', '2026-02-17', '13:00', 'completed', 'inspection',          '2026-02-16 10:00:00+00'),
+  ('b0004001-0000-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000004', 'bbbbbbbb-0000-0000-0000-000000000004', '2026-03-20', '09:00', 'completed', 'routine_maintenance', '2026-03-19 18:00:00+00'),
 
   -- ── Heliopolis Motors ─────────────────────────────────────────────────────
-  ('b0005-001-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000002', 'bbbbbbbb-0000-0000-0000-000000000005', '2026-01-06', '09:30', 'completed', 'routine_maintenance', '2026-01-05 12:00:00+00'),
-  ('b0005-001-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000004', 'bbbbbbbb-0000-0000-0000-000000000005', '2026-01-20', '11:00', 'completed', 'inspection',          '2026-01-19 09:00:00+00'),
-  ('b0005-001-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000005', 'bbbbbbbb-0000-0000-0000-000000000005', '2026-02-09', '14:00', 'completed', 'routine_maintenance', '2026-02-08 16:00:00+00'),
-  ('b0005-001-0000-0000-000000000004', 'aaaaaaaa-0000-0000-0000-000000000006', 'bbbbbbbb-0000-0000-0000-000000000005', '2026-02-23', '10:00', 'completed', 'inspection',          '2026-02-22 11:00:00+00'),
-  ('b0005-001-0000-0000-000000000005', 'aaaaaaaa-0000-0000-0000-000000000003', 'bbbbbbbb-0000-0000-0000-000000000005', '2026-03-17', '09:00', 'completed', 'routine_maintenance', '2026-03-16 14:00:00+00'),
-  ('b0005-001-0000-0000-000000000006', 'aaaaaaaa-0000-0000-0000-000000000002', 'bbbbbbbb-0000-0000-0000-000000000005', '2026-04-14', '11:30', 'booked',    'routine_maintenance', '2026-04-13 09:00:00+00'),
+  ('b0005001-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000002', 'bbbbbbbb-0000-0000-0000-000000000005', '2026-01-06', '09:30', 'completed', 'routine_maintenance', '2026-01-05 12:00:00+00'),
+  ('b0005001-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000004', 'bbbbbbbb-0000-0000-0000-000000000005', '2026-01-20', '11:00', 'completed', 'inspection',          '2026-01-19 09:00:00+00'),
+  ('b0005001-0000-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000005', 'bbbbbbbb-0000-0000-0000-000000000005', '2026-02-09', '14:00', 'completed', 'routine_maintenance', '2026-02-08 16:00:00+00'),
+  ('b0005001-0000-0000-0000-000000000004', 'aaaaaaaa-0000-0000-0000-000000000006', 'bbbbbbbb-0000-0000-0000-000000000005', '2026-02-23', '10:00', 'completed', 'inspection',          '2026-02-22 11:00:00+00'),
+  ('b0005001-0000-0000-0000-000000000005', 'aaaaaaaa-0000-0000-0000-000000000003', 'bbbbbbbb-0000-0000-0000-000000000005', '2026-03-17', '09:00', 'completed', 'routine_maintenance', '2026-03-16 14:00:00+00'),
+  ('b0005001-0000-0000-0000-000000000006', 'aaaaaaaa-0000-0000-0000-000000000002', 'bbbbbbbb-0000-0000-0000-000000000005', '2026-04-14', '11:30', 'booked',    'routine_maintenance', '2026-04-13 09:00:00+00'),
 
   -- ── Nasr City Auto ────────────────────────────────────────────────────────
-  ('b0006-001-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000006', 'bbbbbbbb-0000-0000-0000-000000000006', '2026-03-04', '10:00', 'completed', 'routine_maintenance', '2026-03-03 15:00:00+00'),
-  ('b0006-001-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000004', 'bbbbbbbb-0000-0000-0000-000000000006', '2026-03-18', '09:00', 'completed', 'inspection',          '2026-03-17 12:00:00+00'),
-  ('b0006-001-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000005', 'bbbbbbbb-0000-0000-0000-000000000006', '2026-04-08', '11:00', 'booked',    'routine_maintenance', '2026-04-07 17:00:00+00')
+  ('b0006001-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000006', 'bbbbbbbb-0000-0000-0000-000000000006', '2026-03-04', '10:00', 'completed', 'routine_maintenance', '2026-03-03 15:00:00+00'),
+  ('b0006001-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000004', 'bbbbbbbb-0000-0000-0000-000000000006', '2026-03-18', '09:00', 'completed', 'inspection',          '2026-03-17 12:00:00+00'),
+  ('b0006001-0000-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000005', 'bbbbbbbb-0000-0000-0000-000000000006', '2026-04-08', '11:00', 'booked',    'routine_maintenance', '2026-04-07 17:00:00+00')
 
 ON CONFLICT (id) DO NOTHING;
 
@@ -401,7 +401,7 @@ INSERT INTO public.reviews (
   -- ── Maadi Speed Center ───────────────────────────────────────────────────
   (
     'eeeeeeee-0002-0001-0000-000000000001',
-    'b0002-001-0000-0000-000000000001',
+    'b0002001-0000-0000-0000-000000000001',
     'bbbbbbbb-0000-0000-0000-000000000002',
     'aaaaaaaa-0000-0000-0000-000000000002',
     5, 'Great service, quick oil change and they topped up all my fluids without being asked. Will definitely return.',
@@ -409,7 +409,7 @@ INSERT INTO public.reviews (
   ),
   (
     'eeeeeeee-0002-0001-0000-000000000002',
-    'b0002-001-0000-0000-000000000002',
+    'b0002001-0000-0000-0000-000000000002',
     'bbbbbbbb-0000-0000-0000-000000000002',
     'aaaaaaaa-0000-0000-0000-000000000004',
     4, 'Solid tyre shop. Fitting was fast, alignment report was detailed. Waiting area could use better seating.',
@@ -417,7 +417,7 @@ INSERT INTO public.reviews (
   ),
   (
     'eeeeeeee-0002-0001-0000-000000000003',
-    'b0002-001-0000-0000-000000000003',
+    'b0002001-0000-0000-0000-000000000003',
     'bbbbbbbb-0000-0000-0000-000000000002',
     'aaaaaaaa-0000-0000-0000-000000000003',
     5, 'Best alignment shop in Maadi. The technician explained every reading clearly. Car drives straight now.',
@@ -425,7 +425,7 @@ INSERT INTO public.reviews (
   ),
   (
     'eeeeeeee-0002-0001-0000-000000000004',
-    'b0002-001-0000-0000-000000000004',
+    'b0002001-0000-0000-0000-000000000004',
     'bbbbbbbb-0000-0000-0000-000000000002',
     'aaaaaaaa-0000-0000-0000-000000000005',
     4, 'Good prices and friendly staff. The brake inspection found a minor issue I wasn''t aware of.',
@@ -433,7 +433,7 @@ INSERT INTO public.reviews (
   ),
   (
     'eeeeeeee-0002-0001-0000-000000000005',
-    'b0002-001-0000-0000-000000000005',
+    'b0002001-0000-0000-0000-000000000005',
     'bbbbbbbb-0000-0000-0000-000000000002',
     'aaaaaaaa-0000-0000-0000-000000000006',
     5, 'Efficient and professional. The car passed inspection with full marks. Would recommend to friends.',
@@ -443,7 +443,7 @@ INSERT INTO public.reviews (
   -- ── Giza Tech Motors ─────────────────────────────────────────────────────
   (
     'eeeeeeee-0003-0001-0000-000000000001',
-    'b0003-001-0000-0000-000000000001',
+    'b0003001-0000-0000-0000-000000000001',
     'bbbbbbbb-0000-0000-0000-000000000003',
     'aaaaaaaa-0000-0000-0000-000000000003',
     5, 'They found a fault code that two other garages missed. Fixed in the same day. Absolutely brilliant.',
@@ -451,7 +451,7 @@ INSERT INTO public.reviews (
   ),
   (
     'eeeeeeee-0003-0001-0000-000000000002',
-    'b0003-001-0000-0000-000000000002',
+    'b0003001-0000-0000-0000-000000000003',
     'bbbbbbbb-0000-0000-0000-000000000003',
     'aaaaaaaa-0000-0000-0000-000000000004',
     5, 'AC went cold immediately after recharge. Leak was fixed properly, not just topped up like other places.',
@@ -459,7 +459,7 @@ INSERT INTO public.reviews (
   ),
   (
     'eeeeeeee-0003-0001-0000-000000000003',
-    'b0003-001-0000-0000-000000000003',
+    'b0003001-0000-0000-0000-000000000003',
     'bbbbbbbb-0000-0000-0000-000000000003',
     'aaaaaaaa-0000-0000-0000-000000000005',
     5, 'Very thorough inspection, got a PDF report with photos. The team is knowledgeable and honest.',
@@ -467,7 +467,7 @@ INSERT INTO public.reviews (
   ),
   (
     'eeeeeeee-0003-0001-0000-000000000004',
-    'b0003-001-0000-0000-000000000004',
+    'b0003001-0000-0000-0000-000000000004',
     'bbbbbbbb-0000-0000-0000-000000000003',
     'aaaaaaaa-0000-0000-0000-000000000002',
     4, 'Good specialists. The diagnostic was accurate but the wait time was a bit long. Still worth it.',
@@ -475,7 +475,7 @@ INSERT INTO public.reviews (
   ),
   (
     'eeeeeeee-0003-0001-0000-000000000005',
-    'b0003-001-0000-0000-000000000005',
+    'b0003001-0000-0000-0000-000000000005',
     'bbbbbbbb-0000-0000-0000-000000000003',
     'aaaaaaaa-0000-0000-0000-000000000006',
     5, 'Professional team, clean workshop. My BMW runs perfectly since the electrical repair.',
@@ -485,7 +485,7 @@ INSERT INTO public.reviews (
   -- ── Alexandria Auto Pro ───────────────────────────────────────────────────
   (
     'eeeeeeee-0004-0001-0000-000000000001',
-    'b0004-001-0000-0000-000000000001',
+    'b0004001-0000-0000-0000-000000000001',
     'bbbbbbbb-0000-0000-0000-000000000004',
     'aaaaaaaa-0000-0000-0000-000000000005',
     5, 'Incredible PDR work. My door dent is completely gone, and you can''t tell there was ever any damage.',
@@ -493,7 +493,7 @@ INSERT INTO public.reviews (
   ),
   (
     'eeeeeeee-0004-0001-0000-000000000002',
-    'b0004-001-0000-0000-000000000002',
+    'b0004001-0000-0000-0000-000000000002',
     'bbbbbbbb-0000-0000-0000-000000000004',
     'aaaaaaaa-0000-0000-0000-000000000006',
     4, 'Good paint work on my bumper. Color match was very close. Took a bit longer than quoted.',
@@ -501,7 +501,7 @@ INSERT INTO public.reviews (
   ),
   (
     'eeeeeeee-0004-0001-0000-000000000003',
-    'b0004-001-0000-0000-000000000003',
+    'b0004001-0000-0000-0000-000000000003',
     'bbbbbbbb-0000-0000-0000-000000000004',
     'aaaaaaaa-0000-0000-0000-000000000004',
     4, 'Car wash and detail was excellent. Paint correction made the car look brand new. Fair pricing.',
@@ -511,7 +511,7 @@ INSERT INTO public.reviews (
   -- ── Heliopolis Motors ─────────────────────────────────────────────────────
   (
     'eeeeeeee-0005-0001-0000-000000000001',
-    'b0005-001-0000-0000-000000000001',
+    'b0005001-0000-0000-0000-000000000001',
     'bbbbbbbb-0000-0000-0000-000000000005',
     'aaaaaaaa-0000-0000-0000-000000000002',
     5, 'Fast and efficient oil change. They checked everything and told me my air filter needed replacing — honest advice.',
@@ -519,7 +519,7 @@ INSERT INTO public.reviews (
   ),
   (
     'eeeeeeee-0005-0001-0000-000000000002',
-    'b0005-001-0000-0000-000000000002',
+    'b0005001-0000-0000-0000-000000000002',
     'bbbbbbbb-0000-0000-0000-000000000005',
     'aaaaaaaa-0000-0000-0000-000000000004',
     5, 'Best routine service I''ve had. They documented everything and sent me a WhatsApp summary after.',
@@ -527,7 +527,7 @@ INSERT INTO public.reviews (
   ),
   (
     'eeeeeeee-0005-0001-0000-000000000003',
-    'b0005-001-0000-0000-000000000003',
+    'b0005001-0000-0000-0000-000000000003',
     'bbbbbbbb-0000-0000-0000-000000000005',
     'aaaaaaaa-0000-0000-0000-000000000005',
     4, 'Good workshop. Battery test was accurate and the new battery is performing well. Nice staff.',
@@ -535,7 +535,7 @@ INSERT INTO public.reviews (
   ),
   (
     'eeeeeeee-0005-0001-0000-000000000004',
-    'b0005-001-0000-0000-000000000004',
+    'b0005001-0000-0000-0000-000000000004',
     'bbbbbbbb-0000-0000-0000-000000000005',
     'aaaaaaaa-0000-0000-0000-000000000006',
     5, 'Impressed by the level of detail in their inspection report. Transparent about costs before starting work.',
@@ -543,7 +543,7 @@ INSERT INTO public.reviews (
   ),
   (
     'eeeeeeee-0005-0001-0000-000000000005',
-    'b0005-001-0000-0000-000000000005',
+    'b0005001-0000-0000-0000-000000000005',
     'bbbbbbbb-0000-0000-0000-000000000005',
     'aaaaaaaa-0000-0000-0000-000000000003',
     5, 'Very reliable garage. I bring all three of my family cars here. Never had a problem.',
@@ -553,7 +553,7 @@ INSERT INTO public.reviews (
   -- ── Nasr City Auto ────────────────────────────────────────────────────────
   (
     'eeeeeeee-0006-0001-0000-000000000001',
-    'b0006-001-0000-0000-000000000001',
+    'b0006001-0000-0000-0000-000000000001',
     'bbbbbbbb-0000-0000-0000-000000000006',
     'aaaaaaaa-0000-0000-0000-000000000006',
     4, 'Fast tyre change and balancing. Good value for money, no upselling. The waiting area is basic but ok.',
@@ -561,7 +561,7 @@ INSERT INTO public.reviews (
   ),
   (
     'eeeeeeee-0006-0001-0000-000000000002',
-    'b0006-001-0000-0000-000000000002',
+    'b0006001-0000-0000-0000-000000000002',
     'bbbbbbbb-0000-0000-0000-000000000006',
     'aaaaaaaa-0000-0000-0000-000000000004',
     4, 'Quick oil change and wheel balance. They had my tyre size in stock, no waiting. Would come back.',
@@ -584,10 +584,10 @@ INSERT INTO public.products (
   name, description,
   price, original_price,
   category, subcategory,
-  brand, sku, oem_number,
+  brand, part_number, oem_number,
   condition, stock,
   image_url, images,
-  active
+  slug, active
 ) VALUES
 
   -- Bosch Front Brake Discs (pair)
@@ -601,7 +601,7 @@ INSERT INTO public.products (
     'new', 8,
     'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800&q=80',
     ARRAY['https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800&q=80'],
-    true
+    'bosch-front-brake-disc-pair', true
   ),
 
   -- NGK Iridium Spark Plugs (set of 4)
@@ -615,7 +615,7 @@ INSERT INTO public.products (
     'new', 30,
     'https://images.unsplash.com/photo-1504222490345-c075b7d25daa?w=800&q=80',
     ARRAY['https://images.unsplash.com/photo-1504222490345-c075b7d25daa?w=800&q=80'],
-    true
+    'ngk-iridium-spark-plugs-set-4', true
   ),
 
   -- Bilstein B4 Front Shock Absorber
@@ -629,7 +629,7 @@ INSERT INTO public.products (
     'new', 5,
     'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=800&q=80',
     ARRAY['https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=800&q=80'],
-    true
+    'bilstein-b4-front-shock-absorber', true
   ),
 
   -- Denso Cabin Air Filter
@@ -643,7 +643,7 @@ INSERT INTO public.products (
     'new', 22,
     'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80',
     ARRAY['https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80'],
-    true
+    'denso-cabin-air-filter-dcf032', true
   ),
 
   -- Valeo Alternator
@@ -657,7 +657,7 @@ INSERT INTO public.products (
     'refurbished', 3,
     'https://images.unsplash.com/photo-1625047509248-ec889cbff17f?w=800&q=80',
     ARRAY['https://images.unsplash.com/photo-1625047509248-ec889cbff17f?w=800&q=80'],
-    true
+    'valeo-alternator-90a-remanufactured', true
   ),
 
   -- Continental Water Pump + Timing Belt Kit
@@ -671,7 +671,7 @@ INSERT INTO public.products (
     'new', 7,
     'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80',
     ARRAY['https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80'],
-    true
+    'continental-timing-belt-kit-water-pump', true
   ),
 
   -- Moog Control Arm + Ball Joint
@@ -685,7 +685,7 @@ INSERT INTO public.products (
     'new', 6,
     'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=800&q=80',
     ARRAY['https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=800&q=80'],
-    true
+    'moog-front-control-arm-complete', true
   ),
 
   -- Bosch Air Filter
@@ -699,7 +699,7 @@ INSERT INTO public.products (
     'new', 18,
     'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80',
     ARRAY['https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80'],
-    true
+    'bosch-air-filter-s0027', true
   ),
 
   -- LUK Clutch Kit
@@ -713,7 +713,7 @@ INSERT INTO public.products (
     'new', 4,
     'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80',
     ARRAY['https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80'],
-    true
+    'luk-clutch-kit-3-piece', true
   ),
 
   -- Beru Glow Plugs (set of 4)
@@ -727,7 +727,7 @@ INSERT INTO public.products (
     'new', 11,
     'https://images.unsplash.com/photo-1504222490345-c075b7d25daa?w=800&q=80',
     ARRAY['https://images.unsplash.com/photo-1504222490345-c075b7d25daa?w=800&q=80'],
-    true
+    'beru-glow-plugs-set-4', true
   )
 
 ON CONFLICT (id) DO NOTHING;
