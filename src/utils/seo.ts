@@ -11,7 +11,8 @@ import type { Metadata } from "next";
 // CONSTANTS
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const BASE_URL = "https://garage.eg";
+export const BASE_URL =
+  process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? "https://garage.eg";
 export const SITE_NAME_AR = "ورشتي";
 export const SITE_NAME_EN = "Warshety";
 export const SITE_TAGLINE_AR = "قطع غيار سيارات في مصر";
