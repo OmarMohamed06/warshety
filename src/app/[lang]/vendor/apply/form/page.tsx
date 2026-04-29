@@ -88,6 +88,7 @@ export default function VendorApplyFormPage() {
       vendor_type: form.vendor_type,
       phone: form.phone,
       city: form.city,
+      governorate,
     });
 
     if (result.error || !result.applicationId) {

@@ -130,7 +130,10 @@ export default async function ServiceCenterPage({ params }: Props) {
       .eq(UUID_RE.test(slug) ? "id" : "slug", slug)
       .eq("vendor_type", "service_center")
       .maybeSingle();
-    if (!vendorLookup) { notFound(); return; }
+    if (!vendorLookup) {
+      notFound();
+      return;
+    }
     const vendorId = vendorLookup.id;
 
     const [
@@ -140,11 +143,7 @@ export default async function ServiceCenterPage({ params }: Props) {
       { data: wh },
       { count: cbCount },
     ] = await Promise.all([
-      supabase
-        .from("vendors")
-        .select("*")
-        .eq("id", vendorId)
-        .single(),
+      supabase.from("vendors").select("*").eq("id", vendorId).single(),
       supabase
         .from("reviews")
         .select("*, user:users(full_name, avatar_url)")

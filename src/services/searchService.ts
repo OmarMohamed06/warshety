@@ -76,7 +76,9 @@ export async function globalSearch(
   if (type === "all" || type === "vendor") {
     let query = supabase
       .from("vendors")
-      .select("id, slug, business_name, city, rating, cover_image_url, vendor_type")
+      .select(
+        "id, slug, business_name, city, rating, cover_image_url, vendor_type",
+      )
       .eq("status", "approved");
 
     if (filters.city) query = query.ilike("city", `%${filters.city}%`);

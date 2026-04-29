@@ -86,6 +86,7 @@ export async function createVendorApplicationWithAccount(params: {
   vendor_type: string;
   phone: string;
   city: string;
+  governorate: string;
 }): Promise<{ applicationId: string | null; error: string | null }> {
   const admin = adminClient();
 
@@ -130,6 +131,7 @@ export async function createVendorApplicationWithAccount(params: {
       email: params.email,
       phone: params.phone,
       city: params.city,
+      governorate: params.governorate,
       step_completed: 1,
       status: "pending",
     })

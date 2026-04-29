@@ -211,7 +211,9 @@ export default function ServiceCenterDetailPage({
                   </div>
                   <div>
                     <p className="text-slate-400 text-xs">Governorate</p>
-                    <p className="font-bold">{String(data.governorate ?? "—")}</p>
+                    <p className="font-bold">
+                      {String(data.governorate ?? "—")}
+                    </p>
                   </div>
                   <div>
                     <p className="text-slate-400 text-xs">Area / District</p>
@@ -390,58 +392,91 @@ export default function ServiceCenterDetailPage({
           {/* Service center fields */}
           {String(data.vendor_type ?? "") === "service_center" && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-sm">
-              {Array.isArray(data.working_days) && (data.working_days as string[]).length > 0 && (
-                <div>
-                  <p className="text-slate-400 text-xs mb-1">Working Days</p>
-                  <div className="flex flex-wrap gap-1">
-                    {(data.working_days as string[]).map((d) => (
-                      <span key={d} className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded-full text-xs font-medium">{d}</span>
-                    ))}
+              {Array.isArray(data.working_days) &&
+                (data.working_days as string[]).length > 0 && (
+                  <div>
+                    <p className="text-slate-400 text-xs mb-1">Working Days</p>
+                    <div className="flex flex-wrap gap-1">
+                      {(data.working_days as string[]).map((d) => (
+                        <span
+                          key={d}
+                          className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded-full text-xs font-medium"
+                        >
+                          {d}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
               {!!(data.open_time || data.close_time) && (
                 <div>
                   <p className="text-slate-400 text-xs mb-1">Working Hours</p>
-                  <p className="font-bold">{String(data.open_time ?? "—")} – {String(data.close_time ?? "—")}</p>
+                  <p className="font-bold">
+                    {String(data.open_time ?? "—")} –{" "}
+                    {String(data.close_time ?? "—")}
+                  </p>
                 </div>
               )}
-              {Array.isArray(data.specializations) && (data.specializations as string[]).length > 0 && (
-                <div className="col-span-2">
-                  <p className="text-slate-400 text-xs mb-1">Specializations</p>
-                  <div className="flex flex-wrap gap-1">
-                    {(data.specializations as string[]).map((s) => (
-                      <span key={s} className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-medium">{s}</span>
-                    ))}
+              {Array.isArray(data.specializations) &&
+                (data.specializations as string[]).length > 0 && (
+                  <div className="col-span-2">
+                    <p className="text-slate-400 text-xs mb-1">
+                      Specializations
+                    </p>
+                    <div className="flex flex-wrap gap-1">
+                      {(data.specializations as string[]).map((s) => (
+                        <span
+                          key={s}
+                          className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-medium"
+                        >
+                          {s}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
-              {Array.isArray(data.supported_makes) && (data.supported_makes as string[]).length > 0 && (
-                <div className="col-span-2">
-                  <p className="text-slate-400 text-xs mb-1">Supported Car Makes</p>
-                  <div className="flex flex-wrap gap-1">
-                    {(data.supported_makes as string[]).map((m) => (
-                      <span key={m} className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded-full text-xs font-medium">{m}</span>
-                    ))}
+                )}
+              {Array.isArray(data.supported_makes) &&
+                (data.supported_makes as string[]).length > 0 && (
+                  <div className="col-span-2">
+                    <p className="text-slate-400 text-xs mb-1">
+                      Supported Car Makes
+                    </p>
+                    <div className="flex flex-wrap gap-1">
+                      {(data.supported_makes as string[]).map((m) => (
+                        <span
+                          key={m}
+                          className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded-full text-xs font-medium"
+                        >
+                          {m}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
           )}
 
           {/* Parts seller fields */}
           {String(data.vendor_type ?? "") === "parts_seller" && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-sm">
-              {Array.isArray(data.delivery_options) && (data.delivery_options as string[]).length > 0 && (
-                <div>
-                  <p className="text-slate-400 text-xs mb-1">Delivery Options</p>
-                  <div className="flex flex-wrap gap-1">
-                    {(data.delivery_options as string[]).map((d) => (
-                      <span key={d} className="px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded-full text-xs font-medium capitalize">{d}</span>
-                    ))}
+              {Array.isArray(data.delivery_options) &&
+                (data.delivery_options as string[]).length > 0 && (
+                  <div>
+                    <p className="text-slate-400 text-xs mb-1">
+                      Delivery Options
+                    </p>
+                    <div className="flex flex-wrap gap-1">
+                      {(data.delivery_options as string[]).map((d) => (
+                        <span
+                          key={d}
+                          className="px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded-full text-xs font-medium capitalize"
+                        >
+                          {d}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
               {!!data.return_policy && (
                 <div>
                   <p className="text-slate-400 text-xs mb-1">Return Policy</p>
@@ -451,14 +486,47 @@ export default function ServiceCenterDetailPage({
             </div>
           )}
 
-              {!!(data.bank_name || data.account_name || data.account_number || data.iban) && (
+          {!!(
+            data.bank_name ||
+            data.account_name ||
+            data.account_number ||
+            data.iban
+          ) && (
             <div>
               <p className="text-slate-400 text-xs mb-2">Bank Details</p>
               <div className="grid grid-cols-2 gap-3 text-sm bg-slate-50 dark:bg-slate-900/50 rounded-xl p-4">
-                {!!data.bank_name && <div><span className="text-slate-400 text-xs block">Bank</span><span className="font-bold">{String(data.bank_name)}</span></div>}
-                {!!data.account_name && <div><span className="text-slate-400 text-xs block">Account Name</span><span className="font-bold">{String(data.account_name)}</span></div>}
-                {!!data.account_number && <div><span className="text-slate-400 text-xs block">Account Number</span><span className="font-bold">{String(data.account_number)}</span></div>}
-                {!!data.iban && <div><span className="text-slate-400 text-xs block">IBAN</span><span className="font-bold">{String(data.iban)}</span></div>}
+                {!!data.bank_name && (
+                  <div>
+                    <span className="text-slate-400 text-xs block">Bank</span>
+                    <span className="font-bold">{String(data.bank_name)}</span>
+                  </div>
+                )}
+                {!!data.account_name && (
+                  <div>
+                    <span className="text-slate-400 text-xs block">
+                      Account Name
+                    </span>
+                    <span className="font-bold">
+                      {String(data.account_name)}
+                    </span>
+                  </div>
+                )}
+                {!!data.account_number && (
+                  <div>
+                    <span className="text-slate-400 text-xs block">
+                      Account Number
+                    </span>
+                    <span className="font-bold">
+                      {String(data.account_number)}
+                    </span>
+                  </div>
+                )}
+                {!!data.iban && (
+                  <div>
+                    <span className="text-slate-400 text-xs block">IBAN</span>
+                    <span className="font-bold">{String(data.iban)}</span>
+                  </div>
+                )}
               </div>
             </div>
           )}

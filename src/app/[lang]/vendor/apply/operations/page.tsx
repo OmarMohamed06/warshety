@@ -229,7 +229,7 @@ export default function VendorOperationsPage() {
 
     const updatePayload: Record<string, unknown> = {
       terms_accepted: true,
-      step_completed: 3,
+      step_completed: isServiceCenter ? 3 : 4,
     };
 
     if (isServiceCenter) {
