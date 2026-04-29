@@ -147,8 +147,10 @@ export default function VendorOperationsPage() {
         if (data.open_time) setOpenTime(data.open_time);
         if (data.close_time) setCloseTime(data.close_time);
         if (data.specializations?.length) setSpecs(data.specializations);
-        if (data.supported_makes?.length) setSupportedMakes(data.supported_makes);
-        if (data.delivery_options?.length) setDeliveryOpts(data.delivery_options);
+        if (data.supported_makes?.length)
+          setSupportedMakes(data.supported_makes);
+        if (data.delivery_options?.length)
+          setDeliveryOpts(data.delivery_options);
         if (data.return_policy) setReturnPolicy(data.return_policy);
         if (data.governorate) setGovernorate(data.governorate);
         if (data.city) setArea(data.city);

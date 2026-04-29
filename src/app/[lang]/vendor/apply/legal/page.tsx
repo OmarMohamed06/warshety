@@ -167,8 +167,13 @@ export default function VendorLegalPage() {
           {/* Already uploaded indicator */}
           {existingUrl && !file && (
             <div className="mb-4 flex items-center gap-3 px-4 py-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl text-sm text-green-700 dark:text-green-400">
-              <span className="material-symbols-outlined text-base">check_circle</span>
-              <span>{t("vendor.applyPages.legalAlreadyUploaded") ?? "Document already uploaded. You can continue or replace it."}</span>
+              <span className="material-symbols-outlined text-base">
+                check_circle
+              </span>
+              <span>
+                {t("vendor.applyPages.legalAlreadyUploaded") ??
+                  "Document already uploaded. You can continue or replace it."}
+              </span>
             </div>
           )}
 
@@ -186,8 +191,15 @@ export default function VendorLegalPage() {
             </span>
             <div className="text-center">
               <p className="font-bold text-sm">
-                {file ? file.name : existingUrl ? t("vendor.applyPages.legalUploadChange") ?? "Replace document" : t("vendor.applyPages.legalUploadLabel")}
-                {!file && !existingUrl && <span className="text-red-500 ml-1">*</span>}
+                {file
+                  ? file.name
+                  : existingUrl
+                    ? (t("vendor.applyPages.legalUploadChange") ??
+                      "Replace document")
+                    : t("vendor.applyPages.legalUploadLabel")}
+                {!file && !existingUrl && (
+                  <span className="text-red-500 ml-1">*</span>
+                )}
               </p>
               <p className="text-xs text-slate-400 mt-1">
                 {file
