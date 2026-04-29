@@ -1742,7 +1742,9 @@
     "errorProblem": "Please describe the problem or issue.",
     "errorSelectBranch": "Please select a branch location.",
     "selectBranch": "Select Branch",
-    "mainBranch": "Main"
+    "mainBranch": "Main",
+    "phoneNumber": "Phone Number",
+    "phoneHint": "Used for booking confirmation and updates via SMS."
   },
   "filterSidebar": {
     "vehicleCompatibility": "Vehicle Compatibility",

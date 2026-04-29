@@ -1743,7 +1743,9 @@
     "errorProblem": "يرجى وصف المشكلة أو العطل.",
     "errorSelectBranch": "يرجى اختيار فرع المركز.",
     "selectBranch": "اختر الفرع",
-    "mainBranch": "رئيسي"
+    "mainBranch": "رئيسي",
+    "phoneNumber": "رقم الهاتف",
+    "phoneHint": "يُستخدم لتأكيد الحجز وإرسال التحديثات عبر الرسائل القصيرة."
   },
   "filterSidebar": {
     "vehicleCompatibility": "توافق المركبة",
