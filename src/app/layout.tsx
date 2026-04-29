@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Figtree, Cairo } from "next/font/google";
 import { headers } from "next/headers";
-// @ts-ignore
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import type { Locale } from "@/context/LanguageContext";

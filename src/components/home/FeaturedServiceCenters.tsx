@@ -104,9 +104,7 @@ export default function FeaturedServiceCenters({ initialData }: Props = {}) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [centers, setCenters] = useState<ServiceCenter[]>(() => {
     if (initialData !== undefined) {
-      return initialData.length > 0
-        ? mapRawVendors(initialData)
-        : [];
+      return initialData.length > 0 ? mapRawVendors(initialData) : [];
     }
     return [];
   });
@@ -127,9 +125,7 @@ export default function FeaturedServiceCenters({ initialData }: Props = {}) {
       .order("completed_bookings", { ascending: false })
       .limit(8)
       .then(({ data }) => {
-        setCenters(
-          data && data.length > 0 ? mapRawVendors(data) : [],
-        );
+        setCenters(data && data.length > 0 ? mapRawVendors(data) : []);
         setLoading(false);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps

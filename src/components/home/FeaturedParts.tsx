@@ -214,9 +214,7 @@ export default function FeaturedParts({ initialData }: Props = {}) {
 
   const [parts, setParts] = useState<FeaturedPart[]>(() => {
     if (initialData !== undefined) {
-      return initialData.length > 0
-        ? mapRawProducts(initialData)
-        : [];
+      return initialData.length > 0 ? mapRawProducts(initialData) : [];
     }
     return [];
   });
@@ -257,11 +255,7 @@ export default function FeaturedParts({ initialData }: Props = {}) {
         sold_count: soldMap[p.id] ?? 0,
       }));
       withSold.sort((a, b) => (b.sold_count ?? 0) - (a.sold_count ?? 0));
-      setParts(
-        withSold.length > 0
-          ? mapRawProducts(withSold.slice(0, 8))
-          : [],
-      );
+      setParts(withSold.length > 0 ? mapRawProducts(withSold.slice(0, 8)) : []);
       setLoading(false);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
