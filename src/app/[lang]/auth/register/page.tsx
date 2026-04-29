@@ -6,30 +6,102 @@ import { useLanguage } from "@/context/LanguageContext";
 import { LocaleLink as Link } from "@/components/ui/locale-link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Eye, EyeOff } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function RegisterPage() {
-  const { signInWithGoogle } = useAuth();
+  const { signUp, signInWithGoogle } = useAuth();
   const { t } = useLanguage();
+
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+    setLoading(true);
+    const err = await signUp(email, password, fullName);
+    setLoading(false);
+    if (err) {
+      setError(err);
+      return;
+    }
+    setSuccess(true);
+  };
 
   const handleGoogle = async () => {
     setError(null);
-    setLoading(true);
+    setGoogleLoading(true);
     const err = await signInWithGoogle();
     if (err) {
       setError(err);
-      setLoading(false);
+      setGoogleLoading(false);
     }
   };
+
+  if (success) {
+    return (
+      <div className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-10">
+        <div className="w-full max-w-md">
+          <Card className="overflow-hidden p-0">
+            <CardContent className="p-0">
+              <div className="p-6 md:p-8 flex flex-col items-center gap-4 text-center">
+                <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                  <svg
+                    className="w-6 h-6 text-green-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+                <h1 className="text-2xl font-bold">{t("auth.checkEmail")}</h1>
+                <p className="text-sm text-muted-foreground">
+                  {t("auth.checkEmailDesc")}
+                </p>
+                <Link
+                  href="/auth/login"
+                  className="text-sm underline underline-offset-4 hover:text-primary"
+                >
+                  {t("auth.goToLogin")}
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-10">
       <div className="w-full max-w-md">
-        <div className="flex flex-col gap-6">
+        <div className={cn("flex flex-col gap-6")}>
           <Card className="overflow-hidden p-0">
             <CardContent className="p-0">
-              <div className="p-6 md:p-8 flex flex-col gap-6">
+              <form
+                className="p-6 md:p-8 flex flex-col gap-6"
+                onSubmit={handleSubmit}
+              >
                 {/* Heading */}
                 <div className="flex flex-col items-center gap-2 text-center">
                   <h1 className="text-2xl font-bold">
@@ -47,15 +119,101 @@ export default function RegisterPage() {
                   </div>
                 )}
 
-                {/* Google sign-up */}
+                {/* Full Name */}
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="fullName">{t("auth.fullName")}</Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    autoComplete="name"
+                    placeholder="John Doe"
+                    required
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                  />
+                </div>
+
+                {/* Email */}
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="email">{t("auth.email")}</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    dir="ltr"
+                    autoComplete="email"
+                    placeholder="you@example.com"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+
+                {/* Password */}
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="password">{t("auth.password")}</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="new-password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="pe-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute inset-y-0 end-0 flex items-center pe-3 text-muted-foreground hover:text-foreground transition-colors"
+                      tabIndex={-1}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {t("auth.passwordNote")}
+                  </p>
+                </div>
+
+                {/* Submit */}
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={loading || googleLoading}
+                >
+                  {loading ? (
+                    <span className="flex items-center gap-2">
+                      <span className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin" />
+                      {t("auth.creatingAccount")}
+                    </span>
+                  ) : (
+                    t("auth.create")
+                  )}
+                </Button>
+
+                {/* Divider */}
+                <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
+                  <span className="relative z-10 bg-card px-2 text-muted-foreground">
+                    {t("auth.orContinueWith")}
+                  </span>
+                </div>
+
+                {/* Google */}
                 <Button
                   variant="outline"
                   type="button"
                   className="w-full flex items-center gap-2"
                   onClick={handleGoogle}
-                  disabled={loading}
+                  disabled={loading || googleLoading}
                 >
-                  {loading ? (
+                  {googleLoading ? (
                     <span className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin" />
                   ) : (
                     <svg
@@ -69,7 +227,7 @@ export default function RegisterPage() {
                       />
                     </svg>
                   )}
-                  {loading ? t("auth.signingIn") : "Continue with Google"}
+                  Continue with Google
                 </Button>
 
                 {/* Sign in link */}
@@ -82,7 +240,7 @@ export default function RegisterPage() {
                     {t("auth.signIn")}
                   </Link>
                 </p>
-              </div>
+              </form>
             </CardContent>
           </Card>
 
