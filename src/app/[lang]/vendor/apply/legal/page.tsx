@@ -13,6 +13,7 @@ export default function VendorLegalPage() {
   const { t, localePath } = useLanguage();
 
   const [file, setFile] = useState<File | null>(null);
+  const [existingUrl, setExistingUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -22,6 +23,23 @@ export default function VendorLegalPage() {
     if (typeof window !== "undefined") {
       setIsPartsSeller(localStorage.getItem("vendorType") === "parts_seller");
     }
+  }, []);
+
+  // Load saved national_id_url from DB on mount
+  useEffect(() => {
+    const applicationId =
+      typeof window !== "undefined"
+        ? localStorage.getItem("vendorApplicationId")
+        : null;
+    if (!applicationId) return;
+    supabase
+      .from("vendor_applications")
+      .select("national_id_url")
+      .eq("id", applicationId)
+      .single()
+      .then(({ data }) => {
+        if (data?.national_id_url) setExistingUrl(data.national_id_url);
+      });
   }, []);
 
   async function handleContinue() {
@@ -35,8 +53,18 @@ export default function VendorLegalPage() {
       return;
     }
 
-    if (!file) {
+    if (!file && !existingUrl) {
       setError(t("vendor.applyPages.legalErrorNoFile"));
+      return;
+    }
+
+    // If no new file selected but we already have one saved, just advance
+    if (!file && existingUrl) {
+      router.push(
+        localePath(
+          isPartsSeller ? "/vendor/apply/bank" : "/vendor/apply/operations",
+        ),
+      );
       return;
     }
 
@@ -54,11 +82,11 @@ export default function VendorLegalPage() {
     setError(null);
 
     // Upload file to Supabase Storage
-    const ext = file.name.split(".").pop();
+    const ext = file!.name.split(".").pop();
     const path = `national-ids/${applicationId}.${ext}`;
     const { error: uploadErr } = await supabase.storage
       .from("vendor-documents")
-      .upload(path, file, { upsert: true });
+      .upload(path, file!, { upsert: true });
 
     if (uploadErr) {
       setError(uploadErr.message ?? t("vendor.applyPages.legalErrorUpload"));
@@ -135,22 +163,31 @@ export default function VendorLegalPage() {
               setError(null);
             }}
           />
+
+          {/* Already uploaded indicator */}
+          {existingUrl && !file && (
+            <div className="mb-4 flex items-center gap-3 px-4 py-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl text-sm text-green-700 dark:text-green-400">
+              <span className="material-symbols-outlined text-base">check_circle</span>
+              <span>{t("vendor.applyPages.legalAlreadyUploaded") ?? "Document already uploaded. You can continue or replace it."}</span>
+            </div>
+          )}
+
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             className={`w-full border-2 border-dashed rounded-2xl p-8 flex flex-col items-center gap-3 transition-all ${
-              file
+              file || existingUrl
                 ? "border-[#FF4B19] bg-[#FF4B19]/5"
                 : "border-slate-200 dark:border-slate-700 hover:border-[#FF4B19]/60"
             }`}
           >
             <span className="material-symbols-outlined text-4xl text-slate-400">
-              {file ? "check_circle" : "upload_file"}
+              {file || existingUrl ? "check_circle" : "upload_file"}
             </span>
             <div className="text-center">
               <p className="font-bold text-sm">
-                {file ? file.name : t("vendor.applyPages.legalUploadLabel")}
-                <span className="text-red-500 ml-1">*</span>
+                {file ? file.name : existingUrl ? t("vendor.applyPages.legalUploadChange") ?? "Replace document" : t("vendor.applyPages.legalUploadLabel")}
+                {!file && !existingUrl && <span className="text-red-500 ml-1">*</span>}
               </p>
               <p className="text-xs text-slate-400 mt-1">
                 {file

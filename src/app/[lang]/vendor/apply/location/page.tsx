@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { LocaleLink as Link } from "@/components/ui/locale-link";
 import { useRouter } from "next/navigation";
@@ -91,6 +91,29 @@ export default function VendorLocationPage() {
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Load saved draft from DB on mount
+  useEffect(() => {
+    const applicationId =
+      typeof window !== "undefined"
+        ? localStorage.getItem("vendorApplicationId")
+        : null;
+    if (!applicationId) return;
+    supabase
+      .from("vendor_applications")
+      .select("governorate, city, address, maps_link")
+      .eq("id", applicationId)
+      .single()
+      .then(({ data }) => {
+        if (!data) return;
+        setForm({
+          governorate: data.governorate ?? "",
+          city: data.city ?? "",
+          address: data.address ?? "",
+          maps_link: data.maps_link ?? "",
+        });
+      });
+  }, []);
 
   const set = (key: keyof typeof form, value: string) =>
     setForm((f) => ({ ...f, [key]: value }));

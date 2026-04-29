@@ -127,6 +127,35 @@ export default function VendorOperationsPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Load saved draft from DB on mount
+  useEffect(() => {
+    const applicationId =
+      typeof window !== "undefined"
+        ? localStorage.getItem("vendorApplicationId")
+        : null;
+    if (!applicationId) return;
+    supabase
+      .from("vendor_applications")
+      .select(
+        "working_days, open_time, close_time, specializations, supported_makes, delivery_options, return_policy, governorate, city, address",
+      )
+      .eq("id", applicationId)
+      .single()
+      .then(({ data }) => {
+        if (!data) return;
+        if (data.working_days?.length) setWorkingDays(data.working_days);
+        if (data.open_time) setOpenTime(data.open_time);
+        if (data.close_time) setCloseTime(data.close_time);
+        if (data.specializations?.length) setSpecs(data.specializations);
+        if (data.supported_makes?.length) setSupportedMakes(data.supported_makes);
+        if (data.delivery_options?.length) setDeliveryOpts(data.delivery_options);
+        if (data.return_policy) setReturnPolicy(data.return_policy);
+        if (data.governorate) setGovernorate(data.governorate);
+        if (data.city) setArea(data.city);
+        if (data.address) setAddress(data.address);
+      });
+  }, []);
+
   function toggleDay(day: string) {
     setWorkingDays((prev) =>
       prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day],

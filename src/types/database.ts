@@ -793,12 +793,33 @@ export type Database = {
           commercial_reg_no: string | null;
           tax_id: string | null;
           description: string | null;
+          legal_name: string | null;
+          entity_type: string | null;
           step_completed: number;
           status: VendorStatus;
           submitted_at: string | null;
           reviewed_at: string | null;
           reviewed_by: string | null;
           created_at: string;
+          // Step 2 — legal
+          national_id_url: string | null;
+          // Step 3 — operations (service center)
+          working_days: string[] | null;
+          open_time: string | null;
+          close_time: string | null;
+          specializations: string[] | null;
+          supported_makes: string[];
+          terms_accepted: boolean | null;
+          // Step 3 — operations (parts seller)
+          delivery_options: string[] | null;
+          return_policy: string | null;
+          // Step 4 — bank
+          bank_name: string | null;
+          account_name: string | null;
+          account_number: string | null;
+          iban: string | null;
+          // Step 5 — location / photos
+          shop_photos: string[] | null;
         };
         Insert: {
           id?: string;
@@ -817,12 +838,28 @@ export type Database = {
           commercial_reg_no?: string | null;
           tax_id?: string | null;
           description?: string | null;
+          legal_name?: string | null;
+          entity_type?: string | null;
           step_completed?: number;
           status?: VendorStatus;
           submitted_at?: string | null;
           reviewed_at?: string | null;
           reviewed_by?: string | null;
           created_at?: string;
+          national_id_url?: string | null;
+          working_days?: string[] | null;
+          open_time?: string | null;
+          close_time?: string | null;
+          specializations?: string[] | null;
+          supported_makes?: string[];
+          terms_accepted?: boolean | null;
+          delivery_options?: string[] | null;
+          return_policy?: string | null;
+          bank_name?: string | null;
+          account_name?: string | null;
+          account_number?: string | null;
+          iban?: string | null;
+          shop_photos?: string[] | null;
         };
         Update: {
           id?: string;
@@ -841,12 +878,28 @@ export type Database = {
           commercial_reg_no?: string | null;
           tax_id?: string | null;
           description?: string | null;
+          legal_name?: string | null;
+          entity_type?: string | null;
           step_completed?: number;
           status?: VendorStatus;
           submitted_at?: string | null;
           reviewed_at?: string | null;
           reviewed_by?: string | null;
           created_at?: string;
+          national_id_url?: string | null;
+          working_days?: string[] | null;
+          open_time?: string | null;
+          close_time?: string | null;
+          specializations?: string[] | null;
+          supported_makes?: string[];
+          terms_accepted?: boolean | null;
+          delivery_options?: string[] | null;
+          return_policy?: string | null;
+          bank_name?: string | null;
+          account_name?: string | null;
+          account_number?: string | null;
+          iban?: string | null;
+          shop_photos?: string[] | null;
         };
         Relationships: [];
       };

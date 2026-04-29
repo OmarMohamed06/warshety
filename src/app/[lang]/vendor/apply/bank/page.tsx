@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import OnboardingProgress from "@/components/vendor/OnboardingProgress";
 import { createClient } from "@/lib/supabase/client";
@@ -20,6 +20,27 @@ export default function VendorBankPage() {
   const [iban, setIban] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Load saved draft from DB on mount
+  useEffect(() => {
+    const applicationId =
+      typeof window !== "undefined"
+        ? localStorage.getItem("vendorApplicationId")
+        : null;
+    if (!applicationId) return;
+    supabase
+      .from("vendor_applications")
+      .select("bank_name, account_name, account_number, iban")
+      .eq("id", applicationId)
+      .single()
+      .then(({ data }) => {
+        if (!data) return;
+        if (data.bank_name) setBankName(data.bank_name);
+        if (data.account_name) setAccountName(data.account_name);
+        if (data.account_number) setAccountNumber(data.account_number);
+        if (data.iban) setIban(data.iban);
+      });
+  }, []);
 
   async function handleContinue() {
     if (!bankName.trim()) {
