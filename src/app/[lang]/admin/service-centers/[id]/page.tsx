@@ -210,7 +210,11 @@ export default function ServiceCenterDetailPage({
                     <p className="font-bold">{String(data.phone ?? "—")}</p>
                   </div>
                   <div>
-                    <p className="text-slate-400 text-xs">{t("admin.city")}</p>
+                    <p className="text-slate-400 text-xs">Governorate</p>
+                    <p className="font-bold">{String(data.governorate ?? "—")}</p>
+                  </div>
+                  <div>
+                    <p className="text-slate-400 text-xs">Area / District</p>
                     <p className="font-bold">{String(data.city ?? "—")}</p>
                   </div>
                   <div>
