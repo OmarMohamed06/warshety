@@ -21,7 +21,10 @@ INSERT INTO auth.users (
   email, encrypted_password, email_confirmed_at,
   aud, role,
   created_at, updated_at,
-  raw_app_meta_data, raw_user_meta_data
+  raw_app_meta_data, raw_user_meta_data,
+  confirmation_token, recovery_token,
+  email_change, email_change_token_new, email_change_token_current,
+  phone_change, reauthentication_token
 ) VALUES
   -- New customers
   (
@@ -31,7 +34,8 @@ INSERT INTO auth.users (
     crypt('GarageDemo!1', gen_salt('bf')),
     now(), 'authenticated', 'authenticated', now(), now(),
     '{"provider":"email","providers":["email"]}',
-    '{"full_name":"Khaled Ibrahim","role":"customer"}'
+    '{"full_name":"Khaled Ibrahim","role":"customer"}',
+    '', '', '', '', '', '', ''
   ),
   (
     'aaaaaaaa-0000-0000-0000-000000000005',
@@ -40,7 +44,8 @@ INSERT INTO auth.users (
     crypt('GarageDemo!1', gen_salt('bf')),
     now(), 'authenticated', 'authenticated', now(), now(),
     '{"provider":"email","providers":["email"]}',
-    '{"full_name":"Nour Salah","role":"customer"}'
+    '{"full_name":"Nour Salah","role":"customer"}',
+    '', '', '', '', '', '', ''
   ),
   (
     'aaaaaaaa-0000-0000-0000-000000000006',
@@ -49,7 +54,8 @@ INSERT INTO auth.users (
     crypt('GarageDemo!1', gen_salt('bf')),
     now(), 'authenticated', 'authenticated', now(), now(),
     '{"provider":"email","providers":["email"]}',
-    '{"full_name":"Mariam Fathy","role":"customer"}'
+    '{"full_name":"Mariam Fathy","role":"customer"}',
+    '', '', '', '', '', '', ''
   ),
   -- New vendor owners
   (
@@ -59,7 +65,8 @@ INSERT INTO auth.users (
     crypt('GarageDemo!1', gen_salt('bf')),
     now(), 'authenticated', 'authenticated', now(), now(),
     '{"provider":"email","providers":["email"]}',
-    '{"full_name":"Maadi Speed Center Owner","role":"vendor"}'
+    '{"full_name":"Maadi Speed Center Owner","role":"vendor"}',
+    '', '', '', '', '', '', ''
   ),
   (
     'aaaaaaaa-0000-0000-0000-000000000012',
@@ -68,7 +75,8 @@ INSERT INTO auth.users (
     crypt('GarageDemo!1', gen_salt('bf')),
     now(), 'authenticated', 'authenticated', now(), now(),
     '{"provider":"email","providers":["email"]}',
-    '{"full_name":"Giza Tech Motors Owner","role":"vendor"}'
+    '{"full_name":"Giza Tech Motors Owner","role":"vendor"}',
+    '', '', '', '', '', '', ''
   ),
   (
     'aaaaaaaa-0000-0000-0000-000000000013',
@@ -77,7 +85,8 @@ INSERT INTO auth.users (
     crypt('GarageDemo!1', gen_salt('bf')),
     now(), 'authenticated', 'authenticated', now(), now(),
     '{"provider":"email","providers":["email"]}',
-    '{"full_name":"Alexandria Auto Pro Owner","role":"vendor"}'
+    '{"full_name":"Alexandria Auto Pro Owner","role":"vendor"}',
+    '', '', '', '', '', '', ''
   ),
   (
     'aaaaaaaa-0000-0000-0000-000000000014',
@@ -86,7 +95,8 @@ INSERT INTO auth.users (
     crypt('GarageDemo!1', gen_salt('bf')),
     now(), 'authenticated', 'authenticated', now(), now(),
     '{"provider":"email","providers":["email"]}',
-    '{"full_name":"Heliopolis Motors Owner","role":"vendor"}'
+    '{"full_name":"Heliopolis Motors Owner","role":"vendor"}',
+    '', '', '', '', '', '', ''
   ),
   (
     'aaaaaaaa-0000-0000-0000-000000000015',
@@ -95,7 +105,8 @@ INSERT INTO auth.users (
     crypt('GarageDemo!1', gen_salt('bf')),
     now(), 'authenticated', 'authenticated', now(), now(),
     '{"provider":"email","providers":["email"]}',
-    '{"full_name":"Nasr City Auto Owner","role":"vendor"}'
+    '{"full_name":"Nasr City Auto Owner","role":"vendor"}',
+    '', '', '', '', '', '', ''
   )
 ON CONFLICT (id) DO NOTHING;
 
