@@ -519,6 +519,7 @@ export default function BookingSidebar({
           </label>
           <input
             type="tel"
+            dir="ltr"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="+20 1XX XXX XXXX"
