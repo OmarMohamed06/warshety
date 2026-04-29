@@ -107,8 +107,7 @@ export default async function AllServiceCentersPage({
         const cat = SERVICE_CATEGORIES.find((c) => c.key === catKey);
         if (!cat) return [];
         return cat.services.map(
-          (svcSlug) =>
-            (msgs as any).home?.services?.[svcSlug] ?? svcSlug,
+          (svcSlug) => (msgs as any).home?.services?.[svcSlug] ?? svcSlug,
         );
       }),
       availableToday: v.status === "approved",

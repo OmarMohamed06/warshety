@@ -325,7 +325,12 @@ export default async function ServiceCenterPage({ params }: Props) {
                     <div>
                       <p className="font-semibold">{sc.address}</p>
                       <p className="text-muted-foreground">
-                        {[center.address, center.district, center.city, center.governorate]
+                        {[
+                          center.address,
+                          center.district,
+                          center.city,
+                          center.governorate,
+                        ]
                           .filter(Boolean)
                           .join(", ") ||
                           (locale === "ar" ? "القاهرة، مصر" : "Cairo, Egypt")}
@@ -424,7 +429,7 @@ export default async function ServiceCenterPage({ params }: Props) {
                   <div className="space-y-4">
                     {(vendor.specializations as string[]).map((catKey) => {
                       const cat = SERVICE_CATEGORIES.find(
-                        (c) => c.key === catKey
+                        (c) => c.key === catKey,
                       );
                       if (!cat) return null;
                       const catName =

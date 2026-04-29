@@ -122,7 +122,9 @@ export default function Footer() {
                   >
                     phone
                   </span>
-                  <span dir="ltr" style={{ unicodeBidi: "embed" }}>+20 102 211 6644</span>
+                  <span dir="ltr" style={{ unicodeBidi: "embed" }}>
+                    +20 102 211 6644
+                  </span>
                 </a>
               </li>
             </ul>
