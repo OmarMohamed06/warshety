@@ -55,6 +55,16 @@ const VENDOR_AUTH_ROUTES = ["/vendor/login", "/auth/vendor-setup"];
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function middleware(request: NextRequest) {
+  try {
+    return await middlewareInner(request);
+  } catch (err) {
+    console.error("[middleware] Unhandled error:", err);
+    // Pass through rather than returning a 500
+    return NextResponse.next();
+  }
+}
+
+async function middlewareInner(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // ── Step 1: detect locale prefix in URL ───────────────────────────────────
