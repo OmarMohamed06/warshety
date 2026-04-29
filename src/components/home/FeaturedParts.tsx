@@ -216,7 +216,7 @@ export default function FeaturedParts({ initialData }: Props = {}) {
     if (initialData !== undefined) {
       return initialData.length > 0
         ? mapRawProducts(initialData)
-        : FALLBACK_PARTS;
+        : [];
     }
     return [];
   });
@@ -260,7 +260,7 @@ export default function FeaturedParts({ initialData }: Props = {}) {
       setParts(
         withSold.length > 0
           ? mapRawProducts(withSold.slice(0, 8))
-          : FALLBACK_PARTS,
+          : [],
       );
       setLoading(false);
     });

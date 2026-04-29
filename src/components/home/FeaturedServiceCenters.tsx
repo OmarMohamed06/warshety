@@ -106,7 +106,7 @@ export default function FeaturedServiceCenters({ initialData }: Props = {}) {
     if (initialData !== undefined) {
       return initialData.length > 0
         ? mapRawVendors(initialData)
-        : FALLBACK_CENTERS;
+        : [];
     }
     return [];
   });
@@ -128,7 +128,7 @@ export default function FeaturedServiceCenters({ initialData }: Props = {}) {
       .limit(8)
       .then(({ data }) => {
         setCenters(
-          data && data.length > 0 ? mapRawVendors(data) : FALLBACK_CENTERS,
+          data && data.length > 0 ? mapRawVendors(data) : [],
         );
         setLoading(false);
       });
