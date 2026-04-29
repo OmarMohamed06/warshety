@@ -248,7 +248,16 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
         email,
         password,
       });
-      return error?.message ?? null;
+      if (error) {
+        if (
+          error.message.toLowerCase().includes("email not confirmed") ||
+          error.message.toLowerCase().includes("email_not_confirmed")
+        ) {
+          return "__email_not_confirmed__";
+        }
+        return error.message;
+      }
+      return null;
     },
     [supabase],
   );

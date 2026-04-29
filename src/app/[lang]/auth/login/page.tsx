@@ -29,6 +29,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [emailNotConfirmed, setEmailNotConfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pendingRedirect, setPendingRedirect] = useState(false);
 
@@ -67,7 +68,13 @@ export default function LoginPage() {
     setLoading(false);
 
     if (err) {
-      setError(err);
+      if (err === "__email_not_confirmed__") {
+        setEmailNotConfirmed(true);
+        setError(null);
+      } else {
+        setEmailNotConfirmed(false);
+        setError(err);
+      }
       return;
     }
 
@@ -88,6 +95,7 @@ export default function LoginPage() {
           email={email}
           password={password}
           error={error}
+          emailNotConfirmed={emailNotConfirmed}
           loading={loading || pendingRedirect}
           onEmailChange={setEmail}
           onPasswordChange={setPassword}
@@ -103,6 +111,7 @@ interface LoginFormProps {
   email: string;
   password: string;
   error: string | null;
+  emailNotConfirmed: boolean;
   loading: boolean;
   onEmailChange: (v: string) => void;
   onPasswordChange: (v: string) => void;
@@ -114,6 +123,7 @@ function LoginForm({
   email,
   password,
   error,
+  emailNotConfirmed,
   loading,
   onEmailChange,
   onPasswordChange,
@@ -143,6 +153,13 @@ function LoginForm({
             {error && (
               <div className="bg-destructive/10 border border-destructive/30 text-destructive rounded-lg px-3 py-2 text-sm">
                 {error}
+              </div>
+            )}
+
+            {/* Email not confirmed */}
+            {emailNotConfirmed && (
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 text-amber-800 dark:text-amber-300 rounded-lg px-3 py-2 text-sm">
+                Please check your inbox and confirm your email address before signing in.
               </div>
             )}
 
