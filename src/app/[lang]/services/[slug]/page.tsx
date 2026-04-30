@@ -290,7 +290,7 @@ export default async function ServiceCenterPage({ params }: Props) {
             )}
             {(center.governorate || center.city) && (
               <>
-                <span>·</span>
+                {center.reviewCount > 0 && <span>·</span>}
                 <span className="flex items-center gap-1">
                   <MapPin className="w-4 h-4" />
                   {[center.governorate, center.district, center.city]
@@ -301,7 +301,9 @@ export default async function ServiceCenterPage({ params }: Props) {
             )}
             {center.completedBookings > 0 && (
               <>
-                <span>·</span>
+                {(center.reviewCount > 0 ||
+                  center.governorate ||
+                  center.city) && <span>·</span>}
                 <span className="flex items-center gap-1">
                   <CheckCircle2 className="w-4 h-4" />
                   {center.completedBookings.toLocaleString(

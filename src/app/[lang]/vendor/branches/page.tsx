@@ -52,6 +52,7 @@ import {
   Users,
 } from "lucide-react";
 import { LocaleLink } from "@/components/ui/locale-link";
+import { GOVERNORATES, getAreas, tGov, tArea } from "@/lib/locationData";
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -59,8 +60,8 @@ const EMPTY_FORM: BranchFormData = {
   name: "",
   name_ar: "",
   address: "",
+  governorate: "",
   city: "",
-  city_ar: "",
   phone: "",
   status: "active",
   is_main: false,
@@ -437,7 +438,7 @@ function MainWorkingHoursDialog({
 
 export default function VendorBranchesPage() {
   const { vendor, vendorType } = useAuth();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
 
   const [branches, setBranches] = useState<DbBranch[]>([]);
   const [loading, setLoading] = useState(true);
@@ -488,8 +489,8 @@ export default function VendorBranchesPage() {
       name: b.name,
       name_ar: b.name_ar ?? "",
       address: b.address ?? "",
+      governorate: b.governorate ?? "",
       city: b.city ?? "",
-      city_ar: b.city_ar ?? "",
       phone: b.phone ?? "",
       status: b.status,
       is_main: b.is_main,
@@ -516,8 +517,8 @@ export default function VendorBranchesPage() {
       name: form.name.trim(),
       name_ar: form.name_ar?.trim() || undefined,
       address: form.address?.trim() || undefined,
+      governorate: form.governorate?.trim() || undefined,
       city: form.city?.trim() || undefined,
-      city_ar: form.city_ar?.trim() || undefined,
       phone: form.phone?.trim() || undefined,
       status: form.status,
       is_main: form.is_main,
@@ -755,23 +756,40 @@ export default function VendorBranchesPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label htmlFor="b-city">{t("vendor.city")}</Label>
-                <Input
-                  id="b-city"
-                  placeholder="Cairo"
-                  value={form.city}
-                  onChange={(e) => set("city", e.target.value)}
-                />
+                <Label>{t("vendor.governorate")}</Label>
+                <select
+                  className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-input/30"
+                  value={form.governorate ?? ""}
+                  onChange={(e) => {
+                    set("governorate", e.target.value);
+                    set("city", "");
+                  }}
+                >
+                  <option value="">
+                    {t("vendor.applyPages.selectGovernorate")}
+                  </option>
+                  {GOVERNORATES.map((g) => (
+                    <option key={g} value={g}>
+                      {tGov(g, locale)}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="b-city-ar">{t("vendor.cityAr")}</Label>
-                <Input
-                  id="b-city-ar"
-                  placeholder="القاهرة"
-                  dir="rtl"
-                  value={form.city_ar}
-                  onChange={(e) => set("city_ar", e.target.value)}
-                />
+                <Label>{t("vendor.city")}</Label>
+                <select
+                  className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-input/30"
+                  value={form.city ?? ""}
+                  onChange={(e) => set("city", e.target.value)}
+                  disabled={!form.governorate}
+                >
+                  <option value="">{t("vendor.applyPages.selectCity")}</option>
+                  {getAreas(form.governorate ?? "").map((a) => (
+                    <option key={a} value={a}>
+                      {tArea(a, locale)}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
