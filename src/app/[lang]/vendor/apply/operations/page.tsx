@@ -4,11 +4,10 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import OnboardingProgress from "@/components/vendor/OnboardingProgress";
+import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/context/LanguageContext";
 import { SERVICE_CATEGORIES } from "@/lib/serviceCategories";
 import { GOVERNORATES, getAreas } from "@/lib/locationData";
-import { submitVendorApplication } from "@/app/actions/adminActions";
-import { createClient } from "@/lib/supabase/client";
 
 // ── localStorage draft helpers ─────────────────────────────────────────────
 function getDraft(): Record<string, unknown> {
@@ -66,7 +65,6 @@ export default function VendorOperationsPage() {
   const router = useRouter();
   const supabase = createClient();
   const { t, localePath } = useLanguage();
-  const [submitting, setSubmitting] = useState(false);
 
   const [vendorType, setVendorType] = useState<
     "service_center" | "parts_seller"
@@ -141,12 +139,12 @@ export default function VendorOperationsPage() {
   // Load saved draft from localStorage on mount
   useEffect(() => {
     const draft = getDraft();
-    if ((draft.working_days as string[] | undefined)?.length) setWorkingDays(draft.working_days as string[]);
+    if (draft.working_days && Array.isArray(draft.working_days)) setWorkingDays(draft.working_days as string[]);
     if (draft.open_time) setOpenTime(draft.open_time as string);
     if (draft.close_time) setCloseTime(draft.close_time as string);
-    if ((draft.specializations as string[] | undefined)?.length) setSpecs(draft.specializations as string[]);
-    if ((draft.supported_makes as string[] | undefined)?.length) setSupportedMakes(draft.supported_makes as string[]);
-    if ((draft.delivery_options as string[] | undefined)?.length) setDeliveryOpts(draft.delivery_options as string[]);
+    if (draft.specializations && Array.isArray(draft.specializations)) setSpecs(draft.specializations as string[]);
+    if (draft.supported_makes && Array.isArray(draft.supported_makes)) setSupportedMakes(draft.supported_makes as string[]);
+    if (draft.delivery_options && Array.isArray(draft.delivery_options)) setDeliveryOpts(draft.delivery_options as string[]);
     if (draft.return_policy) setReturnPolicy(draft.return_policy as string);
     if (draft.governorate) setGovernorate(draft.governorate as string);
     if (draft.city) setArea(draft.city as string);
@@ -177,13 +175,14 @@ export default function VendorOperationsPage() {
       prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
     );
   }
-  // Service centers go to location; parts sellers submit here and go to status
-  const scNextStep = localePath("/vendor/apply/location");
+  // Parts sellers go to account (final step); service centers go to location
+  const nextStep = isServiceCenter
+    ? localePath("/vendor/apply/location")
+    : localePath("/vendor/apply/account");
 
-  async function handleContinue() {
-    // ── DEV ONLY: bypass validation for quick testing ──────────────────────────
+  function handleContinue() {
     if (process.env.NEXT_PUBLIC_SKIP_APPLY_VALIDATION === "true") {
-      router.push(isServiceCenter ? scNextStep : localePath("/vendor/apply/status"));
+      router.push(nextStep);
       return;
     }
     if (isServiceCenter && workingDays.length === 0) {
@@ -207,66 +206,12 @@ export default function VendorOperationsPage() {
       return;
     }
 
-    setSaving(true);
-    setError(null);
-
     if (isServiceCenter) {
-      // SC: save to draft, proceed to location step
-      saveDraft({
-        working_days: workingDays,
-        open_time: openTime,
-        close_time: closeTime,
-        specializations,
-        supported_makes: supportedMakes,
-      });
-      setSaving(false);
-      router.push(scNextStep);
+      saveDraft({ working_days: workingDays, open_time: openTime, close_time: closeTime, specializations, supported_makes: supportedMakes });
     } else {
-      // PS: save to draft, then submit everything via server action
-      saveDraft({
-        delivery_options: deliveryOptions,
-        return_policy: returnPolicy,
-        governorate,
-        city: area,
-        address,
-      });
-
-      const draft = getDraft();
-      setSubmitting(true);
-      const { applicationId, error: submitError } = await submitVendorApplication({
-        email: draft.email as string,
-        password: draft.password as string,
-        business_name: draft.business_name as string,
-        owner_name: draft.owner_name as string,
-        vendor_type: draft.vendor_type as string,
-        phone: draft.phone as string,
-        governorate: draft.governorate as string | undefined,
-        city: draft.city as string | undefined,
-        national_id_url: draft.national_id_url as string | undefined,
-        bank_name: draft.bank_name as string | undefined,
-        account_name: draft.account_name as string | undefined,
-        account_number: draft.account_number as string | undefined,
-        iban: draft.iban as string | undefined,
-        delivery_options: draft.delivery_options as string[] | undefined,
-        return_policy: draft.return_policy as string | undefined,
-        address: draft.address as string | undefined,
-      });
-
-      if (submitError) {
-        setError(submitError);
-        setSaving(false);
-        setSubmitting(false);
-        return;
-      }
-
-      // Clear draft from localStorage after successful submission
-      localStorage.removeItem("vendorDraft");
-      if (applicationId) localStorage.setItem("vendorApplicationId", applicationId);
-
-      setSaving(false);
-      setSubmitting(false);
-      router.push(localePath("/vendor/apply/status"));
+      saveDraft({ delivery_options: deliveryOptions, return_policy: returnPolicy, governorate, city: area, address });
     }
+    router.push(nextStep);
   }
 
   return (
@@ -733,16 +678,14 @@ export default function VendorOperationsPage() {
             </Link>
             <button
               onClick={handleContinue}
-              disabled={saving || submitting}
+              disabled={saving}
               className="px-8 py-3 bg-[#FF4B19] text-white font-bold rounded-xl hover:opacity-90 transition-all flex items-center gap-2 shadow-lg shadow-[#FF4B19]/20 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {submitting
-                ? t("vendor.applyPages.submitting") ?? "Submitting..."
-                : saving
-                  ? t("vendor.applyPages.saving")
-                  : isServiceCenter
-                    ? t("vendor.applyPages.continueBtn")
-                    : t("vendor.applyPages.submitBtn")}
+              {saving
+                ? t("vendor.applyPages.saving")
+                : isServiceCenter
+                  ? t("vendor.applyPages.continueBtn")
+                  : t("vendor.applyPages.submitBtn")}
               <span className="material-symbols-outlined text-sm">
                 {isServiceCenter ? "arrow_forward" : "check_circle"}
               </span>

@@ -2,17 +2,19 @@ import React from "react";
 import Link from "next/link";
 
 const STEPS_SC = [
-  { id: 1, label: "Application", path: "/vendor/apply" },
+  { id: 1, label: "Application", path: "/vendor/apply/form" },
   { id: 2, label: "Legal & ID", path: "/vendor/apply/legal" },
   { id: 3, label: "Operations", path: "/vendor/apply/operations" },
   { id: 4, label: "Location", path: "/vendor/apply/location" },
+  { id: 5, label: "Account", path: "/vendor/apply/account" },
 ];
 
 const STEPS_PS = [
-  { id: 1, label: "Application", path: "/vendor/apply" },
+  { id: 1, label: "Application", path: "/vendor/apply/form" },
   { id: 2, label: "Legal & ID", path: "/vendor/apply/legal" },
   { id: 3, label: "Bank Details", path: "/vendor/apply/bank" },
   { id: 4, label: "Operations", path: "/vendor/apply/operations" },
+  { id: 5, label: "Account", path: "/vendor/apply/account" },
 ];
 
 export default function OnboardingProgress({

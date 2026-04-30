@@ -25,7 +25,6 @@ export default function VendorBankPage() {
   const [accountName, setAccountName] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
   const [iban, setIban] = useState("");
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Load saved draft from localStorage on mount
@@ -37,32 +36,17 @@ export default function VendorBankPage() {
     if (draft.iban) setIban(draft.iban as string);
   }, []);
 
-  async function handleContinue() {
-    if (!bankName.trim()) {
-      setError(t("vendor.applyPages.bankErrorName"));
-      return;
-    }
-    if (!accountName.trim()) {
-      setError(t("vendor.applyPages.bankErrorHolder"));
-      return;
-    }
-    if (!accountNumber.trim()) {
-      setError(t("vendor.applyPages.bankErrorNumber"));
-      return;
-    }
+  function handleContinue() {
+    if (!bankName.trim()) { setError(t("vendor.applyPages.bankErrorName")); return; }
+    if (!accountName.trim()) { setError(t("vendor.applyPages.bankErrorHolder")); return; }
+    if (!accountNumber.trim()) { setError(t("vendor.applyPages.bankErrorNumber")); return; }
 
-    setSaving(true);
-    setError(null);
-
-    // Save to localStorage draft — no DB write
     saveDraft({
       bank_name: bankName.trim(),
       account_name: accountName.trim(),
       account_number: accountNumber.trim(),
       iban: iban.trim() || null,
     });
-
-    setSaving(false);
     router.push(localePath("/vendor/apply/operations"));
   }
 
@@ -195,30 +179,12 @@ export default function VendorBankPage() {
             </button>
             <button
               onClick={handleContinue}
-              disabled={saving}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#FF4B19] hover:bg-[#e04416] text-white font-black rounded-xl transition-colors disabled:opacity-60"
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#FF4B19] hover:bg-[#e04416] text-white font-black rounded-xl transition-colors"
             >
-              {saving ? (
-                <>
-                  <span
-                    className="material-symbols-outlined animate-spin"
-                    style={{ fontSize: 18 }}
-                  >
-                    progress_activity
-                  </span>
-                  {t("vendor.applyPages.saving")}
-                </>
-              ) : (
-                <>
-                  {t("vendor.applyPages.continueBtn")}
-                  <span
-                    className="material-symbols-outlined"
-                    style={{ fontSize: 18 }}
-                  >
-                    arrow_forward
-                  </span>
-                </>
-              )}
+              {t("vendor.applyPages.continueBtn")}
+              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                arrow_forward
+              </span>
             </button>
           </div>
         </div>

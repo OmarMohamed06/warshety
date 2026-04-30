@@ -8,7 +8,6 @@ import OnboardingProgress from "@/components/vendor/OnboardingProgress";
 import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/context/LanguageContext";
 import { GOVERNORATES, getAreas, tGov, tArea } from "@/lib/locationData";
-import { submitVendorApplication } from "@/app/actions/adminActions";
 
 // ── localStorage draft helpers ─────────────────────────────────────────────
 function getDraft(): Record<string, unknown> {
@@ -24,11 +23,6 @@ const inputCls =
 
 const PHOTO_SLOTS = [
   { labelKey: "photoStorefront", required: true },
-  { labelKey: "photoWorkshop", required: true },
-  { labelKey: "photoInventory", required: true },
-  { labelKey: "photoTeam", required: false },
-  { labelKey: "photoEquipment", required: false },
-  { labelKey: "photoAdditional", required: false },
 ] as const;
 
 /** Canvas-based JPEG compression — same as product uploader */
@@ -94,9 +88,9 @@ export default function VendorLocationPage() {
     maps_link: "",
   });
   // One file per slot (index matches PHOTO_SLOTS)
-  const [photos, setPhotos] = useState<(File | null)[]>(Array(6).fill(null));
+  const [photos, setPhotos] = useState<(File | null)[]>(Array(1).fill(null));
   const [previews, setPreviews] = useState<(string | null)[]>(
-    Array(6).fill(null),
+    Array(1).fill(null),
   );
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [saving, setSaving] = useState(false);
@@ -111,10 +105,6 @@ export default function VendorLocationPage() {
       address: (draft.address as string) ?? "",
       maps_link: (draft.maps_link as string) ?? "",
     });
-    // Restore photo URLs from draft as previews (non-file, just URL strings)
-    if (Array.isArray(draft.shop_photos)) {
-      setPreviews((draft.shop_photos as string[]).map((u) => u || null));
-    }
   }, []);
 
   const set = (key: keyof typeof form, value: string) =>
@@ -138,19 +128,17 @@ export default function VendorLocationPage() {
 
   async function handleSubmit() {
     if (process.env.NEXT_PUBLIC_SKIP_APPLY_VALIDATION === "true") {
-      router.push(localePath("/vendor/apply/status"));
+      router.push(localePath("/vendor/apply/account"));
       return;
     }
     if (!form.governorate || !form.city || !form.address || !form.maps_link) {
       setError("Please fill in all required fields.");
       return;
     }
-    // Validate required photo slots (0=storefront, 1=workshop, 2=inventory)
-    const requiredMissing = PHOTO_SLOTS.slice(0, 3).some((_, i) => !photos[i] && !previews[i]);
-    if (requiredMissing) {
+    if (!photos[0]) {
       setError(
         t("vendor.applyPages.photoRequiredError") ??
-          "Please upload the 3 required shop photos.",
+          "Please upload a shop photo.",
       );
       return;
     }
@@ -158,7 +146,7 @@ export default function VendorLocationPage() {
     const draft = getDraft();
     const tempId = draft.tempId as string | undefined;
     if (!tempId) {
-      setError("Application not found. Please start from step 1.");
+      setError("Application draft not found. Please start from step 1.");
       return;
     }
 
@@ -170,8 +158,7 @@ export default function VendorLocationPage() {
     for (let i = 0; i < PHOTO_SLOTS.length; i++) {
       const file = photos[i];
       if (!file) {
-        // Reuse existing URL from draft if no new file selected
-        uploadedUrls.push((previews[i]) ?? "");
+        uploadedUrls.push("");
         continue;
       }
       const ext = file.name.split(".").pop() ?? "jpg";
@@ -190,7 +177,6 @@ export default function VendorLocationPage() {
       uploadedUrls.push(urlData.publicUrl);
     }
 
-    // Save final location data to draft, then submit everything
     saveDraft({
       governorate: form.governorate,
       city: form.city,
@@ -199,39 +185,8 @@ export default function VendorLocationPage() {
       shop_photos: uploadedUrls.filter(Boolean),
     });
 
-    const finalDraft = getDraft();
-    const { applicationId, error: submitError } = await submitVendorApplication({
-      email: finalDraft.email as string,
-      password: finalDraft.password as string,
-      business_name: finalDraft.business_name as string,
-      owner_name: finalDraft.owner_name as string,
-      vendor_type: finalDraft.vendor_type as string,
-      phone: finalDraft.phone as string,
-      governorate: finalDraft.governorate as string | undefined,
-      city: finalDraft.city as string | undefined,
-      national_id_url: finalDraft.national_id_url as string | undefined,
-      working_days: finalDraft.working_days as string[] | undefined,
-      open_time: finalDraft.open_time as string | undefined,
-      close_time: finalDraft.close_time as string | undefined,
-      specializations: finalDraft.specializations as string[] | undefined,
-      supported_makes: finalDraft.supported_makes as string[] | undefined,
-      address: finalDraft.address as string | undefined,
-      maps_link: finalDraft.maps_link as string | undefined,
-      shop_photos: finalDraft.shop_photos as string[] | undefined,
-    });
-
-    if (submitError) {
-      setError(submitError);
-      setSaving(false);
-      return;
-    }
-
-    // Clear draft on success
-    localStorage.removeItem("vendorDraft");
-    if (applicationId) localStorage.setItem("vendorApplicationId", applicationId);
-
     setSaving(false);
-    router.push(localePath("/vendor/apply/status"));
+    router.push(localePath("/vendor/apply/account"));
   }
 
   return (

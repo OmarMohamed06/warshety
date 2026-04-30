@@ -21,11 +21,14 @@ export default function VendorLegalPage() {
   const supabase = createClient();
   const { t, localePath } = useLanguage();
 
-  const [file, setFile] = useState<File | null>(null);
-  const [existingUrl, setExistingUrl] = useState<string | null>(null);
+  const [frontFile, setFrontFile] = useState<File | null>(null);
+  const [backFile, setBackFile] = useState<File | null>(null);
+  const [frontUrl, setFrontUrl] = useState<string | null>(null);
+  const [backUrl, setBackUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const frontInputRef = useRef<HTMLInputElement>(null);
+  const backInputRef = useRef<HTMLInputElement>(null);
   const [isPartsSeller, setIsPartsSeller] = useState(false);
 
   useEffect(() => {
@@ -34,41 +37,49 @@ export default function VendorLegalPage() {
     }
   }, []);
 
-  // Load saved national_id_url from localStorage draft on mount
+  // Load saved URLs from localStorage draft on mount
   useEffect(() => {
     const draft = getDraft();
-    if (draft.national_id_url) setExistingUrl(draft.national_id_url as string);
+    if (draft.national_id_front_url) setFrontUrl(draft.national_id_front_url as string);
+    if (draft.national_id_back_url) setBackUrl(draft.national_id_back_url as string);
   }, []);
 
+  async function uploadFile(file: File, slot: "front" | "back", tempId: string): Promise<string | null> {
+    const ext = file.name.split(".").pop() ?? "jpg";
+    const path = `national-ids/${tempId}-${slot}.${ext}`;
+    const { error: uploadErr } = await supabase.storage
+      .from("vendor-documents")
+      .upload(path, file, { upsert: true });
+    if (uploadErr) {
+      setError(uploadErr.message ?? t("vendor.applyPages.legalErrorUpload"));
+      return null;
+    }
+    const { data: urlData } = supabase.storage.from("vendor-documents").getPublicUrl(path);
+    return urlData.publicUrl;
+  }
+
   async function handleContinue() {
-    // ── DEV ONLY: bypass validation for quick testing ──────────────────────────
     if (process.env.NEXT_PUBLIC_SKIP_APPLY_VALIDATION === "true") {
-      router.push(
-        localePath(
-          isPartsSeller ? "/vendor/apply/bank" : "/vendor/apply/operations",
-        ),
-      );
+      router.push(localePath(isPartsSeller ? "/vendor/apply/bank" : "/vendor/apply/operations"));
       return;
     }
 
-    if (!file && !existingUrl) {
-      setError(t("vendor.applyPages.legalErrorNoFile"));
+    const hasFront = frontFile || frontUrl;
+    const hasBack = backFile || backUrl;
+
+    if (!hasFront || !hasBack) {
+      setError("Please upload both the front and back of your national ID.");
       return;
     }
 
-    // If no new file selected but we already have one saved, just advance
-    if (!file && existingUrl) {
-      router.push(
-        localePath(
-          isPartsSeller ? "/vendor/apply/bank" : "/vendor/apply/operations",
-        ),
-      );
+    // If no new files selected but both already saved, just advance
+    if (!frontFile && !backFile && frontUrl && backUrl) {
+      router.push(localePath(isPartsSeller ? "/vendor/apply/bank" : "/vendor/apply/operations"));
       return;
     }
 
     const draft = getDraft();
     const tempId = draft.tempId as string | undefined;
-
     if (!tempId) {
       setError(t("vendor.applyPages.legalErrorNotFound"));
       return;
@@ -77,31 +88,86 @@ export default function VendorLegalPage() {
     setSaving(true);
     setError(null);
 
-    // Upload file to Supabase Storage using tempId (no DB write yet)
-    const ext = file!.name.split(".").pop();
-    const path = `national-ids/${tempId}.${ext}`;
-    const { error: uploadErr } = await supabase.storage
-      .from("vendor-documents")
-      .upload(path, file!, { upsert: true });
+    let newFrontUrl = frontUrl;
+    let newBackUrl = backUrl;
 
-    if (uploadErr) {
-      setError(uploadErr.message ?? t("vendor.applyPages.legalErrorUpload"));
-      setSaving(false);
-      return;
+    if (frontFile) {
+      newFrontUrl = await uploadFile(frontFile, "front", tempId);
+      if (!newFrontUrl) { setSaving(false); return; }
+    }
+    if (backFile) {
+      newBackUrl = await uploadFile(backFile, "back", tempId);
+      if (!newBackUrl) { setSaving(false); return; }
     }
 
-    const { data: urlData } = supabase.storage
-      .from("vendor-documents")
-      .getPublicUrl(path);
-
-    // Save URL to localStorage draft — no DB write
-    saveDraft({ national_id_url: urlData.publicUrl });
+    saveDraft({ national_id_front_url: newFrontUrl, national_id_back_url: newBackUrl });
 
     setSaving(false);
-    router.push(
-      localePath(
-        isPartsSeller ? "/vendor/apply/bank" : "/vendor/apply/operations",
-      ),
+    router.push(localePath(isPartsSeller ? "/vendor/apply/bank" : "/vendor/apply/operations"));
+  }
+
+  function UploadSlot({
+    label,
+    file,
+    existingUrl,
+    inputRef,
+    slot,
+    onChange,
+  }: {
+    label: string;
+    file: File | null;
+    existingUrl: string | null;
+    inputRef: React.RefObject<HTMLInputElement | null>;
+    slot: string;
+    onChange: (f: File) => void;
+  }) {
+    const hasContent = file || existingUrl;
+    return (
+      <div className="flex-1">
+        <p className="text-xs font-bold uppercase text-slate-500 tracking-wider mb-2">
+          {label} <span className="text-red-500">*</span>
+        </p>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*,.pdf"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) { onChange(f); setError(null); }
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className={`w-full border-2 border-dashed rounded-2xl p-6 flex flex-col items-center gap-2 transition-all ${
+            hasContent
+              ? "border-[#FF4B19] bg-[#FF4B19]/5"
+              : "border-slate-200 dark:border-slate-700 hover:border-[#FF4B19]/60"
+          }`}
+        >
+          <span className="material-symbols-outlined text-3xl text-slate-400">
+            {hasContent ? "check_circle" : "upload_file"}
+          </span>
+          <div className="text-center">
+            <p className="font-bold text-xs">
+              {file
+                ? file.name
+                : existingUrl
+                  ? "Uploaded — click to replace"
+                  : "Click to upload"}
+            </p>
+            {file && (
+              <p className="text-xs text-slate-400 mt-0.5">
+                {(file.size / 1024).toFixed(0)} KB
+              </p>
+            )}
+            {!file && !existingUrl && (
+              <p className="text-xs text-slate-400 mt-0.5">JPG, PNG or PDF</p>
+            )}
+          </div>
+        </button>
+      </div>
     );
   }
 
@@ -136,63 +202,25 @@ export default function VendorLegalPage() {
             </div>
           )}
 
-          {/* National ID upload */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*,.pdf"
-            className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0] ?? null;
-              setFile(f);
-              setError(null);
-            }}
-          />
-
-          {/* Already uploaded indicator */}
-          {existingUrl && !file && (
-            <div className="mb-4 flex items-center gap-3 px-4 py-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl text-sm text-green-700 dark:text-green-400">
-              <span className="material-symbols-outlined text-base">
-                check_circle
-              </span>
-              <span>
-                {t("vendor.applyPages.legalAlreadyUploaded") ??
-                  "Document already uploaded. You can continue or replace it."}
-              </span>
-            </div>
-          )}
-
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className={`w-full border-2 border-dashed rounded-2xl p-8 flex flex-col items-center gap-3 transition-all ${
-              file || existingUrl
-                ? "border-[#FF4B19] bg-[#FF4B19]/5"
-                : "border-slate-200 dark:border-slate-700 hover:border-[#FF4B19]/60"
-            }`}
-          >
-            <span className="material-symbols-outlined text-4xl text-slate-400">
-              {file || existingUrl ? "check_circle" : "upload_file"}
-            </span>
-            <div className="text-center">
-              <p className="font-bold text-sm">
-                {file
-                  ? file.name
-                  : existingUrl
-                    ? (t("vendor.applyPages.legalUploadChange") ??
-                      "Replace document")
-                    : t("vendor.applyPages.legalUploadLabel")}
-                {!file && !existingUrl && (
-                  <span className="text-red-500 ml-1">*</span>
-                )}
-              </p>
-              <p className="text-xs text-slate-400 mt-1">
-                {file
-                  ? `${(file.size / 1024).toFixed(0)} KB — ${t("vendor.applyPages.legalUploadChange")}`
-                  : t("vendor.applyPages.legalUploadHint")}
-              </p>
-            </div>
-          </button>
+          {/* Front + Back ID upload */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <UploadSlot
+              label={t("vendor.applyPages.legalIdFront") ?? "Front of ID"}
+              file={frontFile}
+              existingUrl={frontUrl}
+              inputRef={frontInputRef}
+              slot="front"
+              onChange={setFrontFile}
+            />
+            <UploadSlot
+              label={t("vendor.applyPages.legalIdBack") ?? "Back of ID"}
+              file={backFile}
+              existingUrl={backUrl}
+              inputRef={backInputRef}
+              slot="back"
+              onChange={setBackFile}
+            />
+          </div>
 
           <div className="mt-8 flex items-center justify-between">
             <Link

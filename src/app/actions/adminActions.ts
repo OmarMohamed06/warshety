@@ -151,13 +151,9 @@ export async function createVendorApplicationWithAccount(params: {
 }
 
 /**
- * Final submission of a vendor application.
- *
- * Called from the last apply step (location for SC, operations for PS).
- * Creates the auth account and inserts the full vendor_applications row
- * in one shot — nothing is written to the DB during earlier steps.
- *
- * All prior steps persist their data only in localStorage (vendorDraft).
+ * Submit a complete vendor application atomically.
+ * Called from the final "Account" step after all other info is collected in localStorage.
+ * Creates the auth user + inserts the full vendor_applications row at once.
  */
 export async function submitVendorApplication(params: {
   email: string;
@@ -186,7 +182,6 @@ export async function submitVendorApplication(params: {
 }): Promise<{ applicationId: string | null; error: string | null }> {
   const admin = adminClient();
 
-  // Create auth user — email not confirmed, so they cannot sign in yet
   const { data: authData, error: authErr } = await admin.auth.admin.createUser({
     email: params.email,
     password: params.password,
@@ -208,7 +203,7 @@ export async function submitVendorApplication(params: {
       return {
         applicationId: null,
         error:
-          "This email is already registered. Please choose a different email for your vendor account.",
+          "This email is already registered. Please use a different email for your vendor account.",
       };
     }
     return { applicationId: null, error: authErr.message };
@@ -243,9 +238,9 @@ export async function submitVendorApplication(params: {
       maps_link: params.maps_link ?? null,
       shop_photos: params.shop_photos ?? null,
       terms_accepted: true,
-      step_completed: params.vendor_type === "service_center" ? 4 : 4,
-      status: "pending",
       submitted_at: new Date().toISOString(),
+      step_completed: 5,
+      status: "pending",
     })
     .select("id")
     .single();
