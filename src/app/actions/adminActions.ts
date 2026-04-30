@@ -21,6 +21,8 @@
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createClient as createAdminSupabaseClient } from "@supabase/supabase-js";
 import { generateSlugEn, generateSlugAr } from "@/utils/seo";
+import enMessages from "@/../messages/en.json";
+import arMessages from "@/../messages/ar.json";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -403,6 +405,22 @@ export async function approveVendorApplication(
           status: "active",
           is_main: true,
         });
+      }
+
+      // ── Auto-seed services table from specializations ────────────────────
+      if (app.specializations?.length) {
+        const enServices = ((enMessages as unknown) as Record<string, Record<string, Record<string, string>>>)
+          ?.home?.services ?? {};
+        const arServices = ((arMessages as unknown) as Record<string, Record<string, Record<string, string>>>)
+          ?.home?.services ?? {};
+        const serviceRows = (app.specializations as string[]).map((slug) => ({
+          vendor_id: newVendor.id,
+          branch_id: null,
+          name: enServices[slug] ?? slug,
+          name_ar: arServices[slug] ?? null,
+          active: true,
+        }));
+        await admin.from("services").insert(serviceRows);
       }
     }
 
