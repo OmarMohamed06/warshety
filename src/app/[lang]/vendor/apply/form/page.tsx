@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import OnboardingProgress from "@/components/vendor/OnboardingProgress";
 import { createVendorApplicationWithAccount } from "@/app/actions/adminActions";
+import { createClient } from "@/lib/supabase/client";
 import type { VendorType } from "@/types/database";
 import { useLanguage } from "@/context/LanguageContext";
 import { GOVERNORATES, getAreas, tGov, tArea } from "@/lib/locationData";
@@ -42,6 +43,43 @@ export default function VendorApplyFormPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPass, setShowPass] = useState(false);
+  // true when resuming an existing application (draft was saved)
+  const [isExisting, setIsExisting] = useState(false);
+
+  // Load saved draft from DB on mount
+  useEffect(() => {
+    const applicationId =
+      typeof window !== "undefined"
+        ? localStorage.getItem("vendorApplicationId")
+        : null;
+    if (!applicationId || applicationId === "test-app-id") return;
+
+    const supabase = createClient();
+    supabase
+      .from("vendor_applications")
+      .select(
+        "business_name, owner_name, email, phone, vendor_type, city, governorate",
+      )
+      .eq("id", applicationId)
+      .single()
+      .then(({ data }) => {
+        if (!data) return;
+        setIsExisting(true);
+        setForm((f) => ({
+          ...f,
+          business_name: data.business_name ?? "",
+          owner_name: data.owner_name ?? "",
+          email: data.email ?? "",
+          phone: data.phone ?? "",
+          vendor_type: (data.vendor_type as VendorType) ?? "service_center",
+          city: data.city ?? "",
+        }));
+        if (data.governorate) setGovernorate(data.governorate);
+        if (typeof window !== "undefined" && data.vendor_type) {
+          localStorage.setItem("vendorType", data.vendor_type);
+        }
+      });
+  }, []);
 
   const set = (key: keyof typeof form, value: string) =>
     setForm((f) => ({ ...f, [key]: value }));
@@ -69,6 +107,46 @@ export default function VendorApplyFormPage() {
       setError(t("vendor.applyPages.errorRequiredFields"));
       return;
     }
+
+    // ── Resuming an existing application — just update the row ──────────────
+    if (isExisting) {
+      const applicationId =
+        typeof window !== "undefined"
+          ? localStorage.getItem("vendorApplicationId")
+          : null;
+      if (!applicationId) {
+        setError("Application not found. Please start from step 1.");
+        return;
+      }
+      setSaving(true);
+      setError(null);
+      const supabase = createClient();
+      const { error: dbError } = await supabase
+        .from("vendor_applications")
+        .update({
+          business_name: form.business_name,
+          owner_name: form.owner_name,
+          phone: form.phone,
+          vendor_type: form.vendor_type,
+          city: form.city,
+          governorate,
+        })
+        .eq("id", applicationId);
+      setSaving(false);
+      if (dbError) {
+        setError(dbError.message ?? "Failed to save. Please try again.");
+        return;
+      }
+      if (typeof window !== "undefined") {
+        localStorage.setItem("vendorType", form.vendor_type);
+      }
+      startTransition(() => {
+        router.push(localePath("/vendor/apply/legal"));
+      });
+      return;
+    }
+
+    // ── New application ────────────────────────────────────────────────────
     if (form.vendor_password.length < 8) {
       setError(t("vendor.applyPages.errorPasswordLength"));
       return;
@@ -284,84 +362,87 @@ export default function VendorApplyFormPage() {
                 value={form.email}
                 onChange={(e) => set("email", e.target.value)}
                 autoComplete="new-password"
+                readOnly={isExisting}
               />
               <p className="mt-1.5 text-xs text-slate-400">
                 {t("vendor.applyPages.businessEmailHint")}
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label className="text-xs font-bold uppercase text-slate-500 tracking-wider block mb-2">
-                  {t("vendor.applyPages.passwordLabel")} *
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPass ? "text" : "password"}
-                    className={inputCls + " pr-10"}
-                    placeholder={t("vendor.applyPages.passwordPlaceholder")}
-                    value={form.vendor_password}
-                    onChange={(e) => set("vendor_password", e.target.value)}
-                    autoComplete="new-password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPass((p) => !p)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                    tabIndex={-1}
-                  >
-                    <span
-                      className="material-symbols-outlined"
-                      style={{ fontSize: 18 }}
+            {!isExisting && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label className="text-xs font-bold uppercase text-slate-500 tracking-wider block mb-2">
+                    {t("vendor.applyPages.passwordLabel")} *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPass ? "text" : "password"}
+                      className={inputCls + " pr-10"}
+                      placeholder={t("vendor.applyPages.passwordPlaceholder")}
+                      value={form.vendor_password}
+                      onChange={(e) => set("vendor_password", e.target.value)}
+                      autoComplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPass((p) => !p)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                      tabIndex={-1}
                     >
-                      {showPass ? "visibility_off" : "visibility"}
-                    </span>
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label className="text-xs font-bold uppercase text-slate-500 tracking-wider block mb-2">
-                  {t("vendor.applyPages.confirmPassword")} *
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPass ? "text" : "password"}
-                    className={
-                      inputCls +
-                      " pr-10" +
-                      (form.confirm_password &&
-                      form.confirm_password !== form.vendor_password
-                        ? " border-red-400 focus:ring-red-300"
-                        : "")
-                    }
-                    placeholder={t(
-                      "vendor.applyPages.confirmPasswordPlaceholder",
-                    )}
-                    value={form.confirm_password}
-                    onChange={(e) => set("confirm_password", e.target.value)}
-                    autoComplete="new-password"
-                  />
-                  {form.confirm_password &&
-                    form.confirm_password !== form.vendor_password && (
                       <span
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 material-symbols-outlined"
+                        className="material-symbols-outlined"
                         style={{ fontSize: 18 }}
                       >
-                        error
+                        {showPass ? "visibility_off" : "visibility"}
                       </span>
-                    )}
-                  {form.confirm_password &&
-                    form.confirm_password === form.vendor_password && (
-                      <span
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500 material-symbols-outlined"
-                        style={{ fontSize: 18 }}
-                      >
-                        check_circle
-                      </span>
-                    )}
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase text-slate-500 tracking-wider block mb-2">
+                    {t("vendor.applyPages.confirmPassword")} *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPass ? "text" : "password"}
+                      className={
+                        inputCls +
+                        " pr-10" +
+                        (form.confirm_password &&
+                        form.confirm_password !== form.vendor_password
+                          ? " border-red-400 focus:ring-red-300"
+                          : "")
+                      }
+                      placeholder={t(
+                        "vendor.applyPages.confirmPasswordPlaceholder",
+                      )}
+                      value={form.confirm_password}
+                      onChange={(e) => set("confirm_password", e.target.value)}
+                      autoComplete="new-password"
+                    />
+                    {form.confirm_password &&
+                      form.confirm_password !== form.vendor_password && (
+                        <span
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 material-symbols-outlined"
+                          style={{ fontSize: 18 }}
+                        >
+                          error
+                        </span>
+                      )}
+                    {form.confirm_password &&
+                      form.confirm_password === form.vendor_password && (
+                        <span
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500 material-symbols-outlined"
+                          style={{ fontSize: 18 }}
+                        >
+                          check_circle
+                        </span>
+                      )}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="mt-8 flex items-center justify-between">
