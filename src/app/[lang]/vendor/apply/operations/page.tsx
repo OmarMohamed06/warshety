@@ -12,10 +12,17 @@ import { GOVERNORATES, getAreas } from "@/lib/locationData";
 // ── localStorage draft helpers ─────────────────────────────────────────────
 function getDraft(): Record<string, unknown> {
   if (typeof window === "undefined") return {};
-  try { return JSON.parse(localStorage.getItem("vendorDraft") ?? "{}"); } catch { return {}; }
+  try {
+    return JSON.parse(localStorage.getItem("vendorDraft") ?? "{}");
+  } catch {
+    return {};
+  }
 }
 function saveDraft(updates: Record<string, unknown>) {
-  localStorage.setItem("vendorDraft", JSON.stringify({ ...getDraft(), ...updates }));
+  localStorage.setItem(
+    "vendorDraft",
+    JSON.stringify({ ...getDraft(), ...updates }),
+  );
 }
 
 const inputCls =
@@ -139,12 +146,16 @@ export default function VendorOperationsPage() {
   // Load saved draft from localStorage on mount
   useEffect(() => {
     const draft = getDraft();
-    if (draft.working_days && Array.isArray(draft.working_days)) setWorkingDays(draft.working_days as string[]);
+    if (draft.working_days && Array.isArray(draft.working_days))
+      setWorkingDays(draft.working_days as string[]);
     if (draft.open_time) setOpenTime(draft.open_time as string);
     if (draft.close_time) setCloseTime(draft.close_time as string);
-    if (draft.specializations && Array.isArray(draft.specializations)) setSpecs(draft.specializations as string[]);
-    if (draft.supported_makes && Array.isArray(draft.supported_makes)) setSupportedMakes(draft.supported_makes as string[]);
-    if (draft.delivery_options && Array.isArray(draft.delivery_options)) setDeliveryOpts(draft.delivery_options as string[]);
+    if (draft.specializations && Array.isArray(draft.specializations))
+      setSpecs(draft.specializations as string[]);
+    if (draft.supported_makes && Array.isArray(draft.supported_makes))
+      setSupportedMakes(draft.supported_makes as string[]);
+    if (draft.delivery_options && Array.isArray(draft.delivery_options))
+      setDeliveryOpts(draft.delivery_options as string[]);
     if (draft.return_policy) setReturnPolicy(draft.return_policy as string);
     if (draft.governorate) setGovernorate(draft.governorate as string);
     if (draft.city) setArea(draft.city as string);
@@ -207,9 +218,21 @@ export default function VendorOperationsPage() {
     }
 
     if (isServiceCenter) {
-      saveDraft({ working_days: workingDays, open_time: openTime, close_time: closeTime, specializations, supported_makes: supportedMakes });
+      saveDraft({
+        working_days: workingDays,
+        open_time: openTime,
+        close_time: closeTime,
+        specializations,
+        supported_makes: supportedMakes,
+      });
     } else {
-      saveDraft({ delivery_options: deliveryOptions, return_policy: returnPolicy, governorate, city: area, address });
+      saveDraft({
+        delivery_options: deliveryOptions,
+        return_policy: returnPolicy,
+        governorate,
+        city: area,
+        address,
+      });
     }
     router.push(nextStep);
   }

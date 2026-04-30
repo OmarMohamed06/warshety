@@ -348,6 +348,9 @@ export async function approveVendorApplication(
           city: app.city ?? null,
           governorate: app.governorate ?? null,
           maps_link: app.maps_link ?? null,
+          cover_image_url: app.shop_photos?.[0] ?? null,
+          specializations: app.specializations ?? [],
+          supported_makes: app.supported_makes ?? [],
           commercial_reg_no: app.commercial_reg_no ?? null,
           tax_id: app.tax_id ?? null,
           description: app.description ?? null,
@@ -359,6 +362,26 @@ export async function approveVendorApplication(
         return {
           error: `Could not create vendor record: ${vendorErr?.message}`,
         };
+      }
+
+      // ── Auto-create working hours from application data ──────────────────
+      const DAY_MAP: Record<string, number> = {
+        Sunday: 0, Monday: 1, Tuesday: 2, Wednesday: 3,
+        Thursday: 4, Friday: 5, Saturday: 6,
+      };
+      if (app.working_days?.length && app.open_time && app.close_time) {
+        const hoursRows = (app.working_days as string[])
+          .filter((d) => DAY_MAP[d] !== undefined)
+          .map((d) => ({
+            vendor_id: newVendor.id,
+            day_of_week: DAY_MAP[d],
+            open_time: app.open_time,
+            close_time: app.close_time,
+            is_open: true,
+          }));
+        if (hoursRows.length) {
+          await admin.from("vendor_working_hours").insert(hoursRows);
+        }
       }
 
       // ── Auto-create main branch from application data ────────────────────

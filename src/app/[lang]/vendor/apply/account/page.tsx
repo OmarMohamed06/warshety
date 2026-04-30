@@ -12,7 +12,11 @@ const inputCls =
 // ── localStorage draft helpers ─────────────────────────────────────────────
 function getDraft(): Record<string, unknown> {
   if (typeof window === "undefined") return {};
-  try { return JSON.parse(localStorage.getItem("vendorDraft") ?? "{}"); } catch { return {}; }
+  try {
+    return JSON.parse(localStorage.getItem("vendorDraft") ?? "{}");
+  } catch {
+    return {};
+  }
 }
 
 export default function VendorAccountPage() {
@@ -25,7 +29,9 @@ export default function VendorAccountPage() {
   const [showPass, setShowPass] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [vendorType, setVendorType] = useState<"service_center" | "parts_seller">("service_center");
+  const [vendorType, setVendorType] = useState<
+    "service_center" | "parts_seller"
+  >("service_center");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -43,15 +49,23 @@ export default function VendorAccountPage() {
     setError(null);
 
     if (!email.trim()) {
-      setError(t("vendor.applyPages.errorEmailRequired") ?? "Email is required.");
+      setError(
+        t("vendor.applyPages.errorEmailRequired") ?? "Email is required.",
+      );
       return;
     }
     if (password.length < 8) {
-      setError(t("vendor.applyPages.errorPasswordLength") ?? "Password must be at least 8 characters.");
+      setError(
+        t("vendor.applyPages.errorPasswordLength") ??
+          "Password must be at least 8 characters.",
+      );
       return;
     }
     if (password !== confirmPassword) {
-      setError(t("vendor.applyPages.errorPasswordMismatch") ?? "Passwords do not match.");
+      setError(
+        t("vendor.applyPages.errorPasswordMismatch") ??
+          "Passwords do not match.",
+      );
       return;
     }
 
@@ -72,7 +86,8 @@ export default function VendorAccountPage() {
       phone: (draft.phone as string) ?? "",
       governorate: draft.governorate as string | undefined,
       city: draft.city as string | undefined,
-      national_id_url: (draft.national_id_front_url ?? draft.national_id_url) as string | undefined,
+      national_id_url: (draft.national_id_front_url ??
+        draft.national_id_url) as string | undefined,
       national_id_front_url: draft.national_id_front_url as string | undefined,
       national_id_back_url: draft.national_id_back_url as string | undefined,
       bank_name: draft.bank_name as string | undefined,
@@ -126,7 +141,10 @@ export default function VendorAccountPage() {
           </p>
         </div>
 
-        <OnboardingProgress currentStep={5} stepsType={isPartsSeller ? "ps" : "sc"} />
+        <OnboardingProgress
+          currentStep={5}
+          stepsType={isPartsSeller ? "ps" : "sc"}
+        />
 
         <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 border border-slate-100 dark:border-slate-700 shadow-sm space-y-5">
           <h2 className="text-xl font-black">
@@ -140,7 +158,10 @@ export default function VendorAccountPage() {
 
           {error && (
             <div className="flex items-center gap-2 px-4 py-3 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-300">
-              <span className="material-symbols-outlined shrink-0" style={{ fontSize: "18px" }}>
+              <span
+                className="material-symbols-outlined shrink-0"
+                style={{ fontSize: "18px" }}
+              >
                 error
               </span>
               {error}
@@ -176,7 +197,10 @@ export default function VendorAccountPage() {
                 <input
                   type={showPass ? "text" : "password"}
                   className={inputCls + " pr-10"}
-                  placeholder={t("vendor.applyPages.passwordPlaceholder") ?? "Min. 8 characters"}
+                  placeholder={
+                    t("vendor.applyPages.passwordPlaceholder") ??
+                    "Min. 8 characters"
+                  }
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete="new-password"
@@ -187,7 +211,10 @@ export default function VendorAccountPage() {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                   tabIndex={-1}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                  <span
+                    className="material-symbols-outlined"
+                    style={{ fontSize: 18 }}
+                  >
                     {showPass ? "visibility_off" : "visibility"}
                   </span>
                 </button>
@@ -207,18 +234,27 @@ export default function VendorAccountPage() {
                       ? " border-red-400 focus:ring-red-300"
                       : "")
                   }
-                  placeholder={t("vendor.applyPages.confirmPasswordPlaceholder") ?? "Repeat password"}
+                  placeholder={
+                    t("vendor.applyPages.confirmPasswordPlaceholder") ??
+                    "Repeat password"
+                  }
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   autoComplete="new-password"
                 />
                 {confirmPassword && confirmPassword !== password && (
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 material-symbols-outlined" style={{ fontSize: 18 }}>
+                  <span
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 material-symbols-outlined"
+                    style={{ fontSize: 18 }}
+                  >
                     error
                   </span>
                 )}
                 {confirmPassword && confirmPassword === password && (
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500 material-symbols-outlined" style={{ fontSize: 18 }}>
+                  <span
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500 material-symbols-outlined"
+                    style={{ fontSize: 18 }}
+                  >
                     check_circle
                   </span>
                 )}
@@ -248,8 +284,11 @@ export default function VendorAccountPage() {
                 </>
               ) : (
                 <>
-                  {t("vendor.applyPages.submitApplication") ?? "Submit Application"}
-                  <span className="material-symbols-outlined text-sm">send</span>
+                  {t("vendor.applyPages.submitApplication") ??
+                    "Submit Application"}
+                  <span className="material-symbols-outlined text-sm">
+                    send
+                  </span>
                 </>
               )}
             </button>

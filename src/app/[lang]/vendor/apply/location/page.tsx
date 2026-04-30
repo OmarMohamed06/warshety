@@ -12,18 +12,23 @@ import { GOVERNORATES, getAreas, tGov, tArea } from "@/lib/locationData";
 // ── localStorage draft helpers ─────────────────────────────────────────────
 function getDraft(): Record<string, unknown> {
   if (typeof window === "undefined") return {};
-  try { return JSON.parse(localStorage.getItem("vendorDraft") ?? "{}"); } catch { return {}; }
+  try {
+    return JSON.parse(localStorage.getItem("vendorDraft") ?? "{}");
+  } catch {
+    return {};
+  }
 }
 function saveDraft(updates: Record<string, unknown>) {
-  localStorage.setItem("vendorDraft", JSON.stringify({ ...getDraft(), ...updates }));
+  localStorage.setItem(
+    "vendorDraft",
+    JSON.stringify({ ...getDraft(), ...updates }),
+  );
 }
 
 const inputCls =
   "w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF4B19]/30";
 
-const PHOTO_SLOTS = [
-  { labelKey: "photoStorefront", required: true },
-] as const;
+const PHOTO_SLOTS = [{ labelKey: "photoStorefront", required: true }] as const;
 
 /** Canvas-based JPEG compression — same as product uploader */
 async function compressImage(

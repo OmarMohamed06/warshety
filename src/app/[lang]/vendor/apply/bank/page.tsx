@@ -11,10 +11,17 @@ const inputCls =
 // ── localStorage draft helpers ─────────────────────────────────────────────
 function getDraft(): Record<string, unknown> {
   if (typeof window === "undefined") return {};
-  try { return JSON.parse(localStorage.getItem("vendorDraft") ?? "{}"); } catch { return {}; }
+  try {
+    return JSON.parse(localStorage.getItem("vendorDraft") ?? "{}");
+  } catch {
+    return {};
+  }
 }
 function saveDraft(updates: Record<string, unknown>) {
-  localStorage.setItem("vendorDraft", JSON.stringify({ ...getDraft(), ...updates }));
+  localStorage.setItem(
+    "vendorDraft",
+    JSON.stringify({ ...getDraft(), ...updates }),
+  );
 }
 
 export default function VendorBankPage() {
@@ -37,9 +44,18 @@ export default function VendorBankPage() {
   }, []);
 
   function handleContinue() {
-    if (!bankName.trim()) { setError(t("vendor.applyPages.bankErrorName")); return; }
-    if (!accountName.trim()) { setError(t("vendor.applyPages.bankErrorHolder")); return; }
-    if (!accountNumber.trim()) { setError(t("vendor.applyPages.bankErrorNumber")); return; }
+    if (!bankName.trim()) {
+      setError(t("vendor.applyPages.bankErrorName"));
+      return;
+    }
+    if (!accountName.trim()) {
+      setError(t("vendor.applyPages.bankErrorHolder"));
+      return;
+    }
+    if (!accountNumber.trim()) {
+      setError(t("vendor.applyPages.bankErrorNumber"));
+      return;
+    }
 
     saveDraft({
       bank_name: bankName.trim(),
@@ -182,7 +198,10 @@ export default function VendorBankPage() {
               className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[#FF4B19] hover:bg-[#e04416] text-white font-black rounded-xl transition-colors"
             >
               {t("vendor.applyPages.continueBtn")}
-              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+              <span
+                className="material-symbols-outlined"
+                style={{ fontSize: 18 }}
+              >
                 arrow_forward
               </span>
             </button>

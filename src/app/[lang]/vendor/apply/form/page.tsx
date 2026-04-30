@@ -14,10 +14,17 @@ const inputCls =
 // ── localStorage draft helpers ─────────────────────────────────────────────
 function getDraft(): Record<string, unknown> {
   if (typeof window === "undefined") return {};
-  try { return JSON.parse(localStorage.getItem("vendorDraft") ?? "{}"); } catch { return {}; }
+  try {
+    return JSON.parse(localStorage.getItem("vendorDraft") ?? "{}");
+  } catch {
+    return {};
+  }
 }
 function saveDraft(updates: Record<string, unknown>) {
-  localStorage.setItem("vendorDraft", JSON.stringify({ ...getDraft(), ...updates }));
+  localStorage.setItem(
+    "vendorDraft",
+    JSON.stringify({ ...getDraft(), ...updates }),
+  );
 }
 
 export default function VendorApplyFormPage() {
@@ -57,7 +64,8 @@ export default function VendorApplyFormPage() {
       city: (draft.city as string) ?? "",
     });
     if (draft.governorate) setGovernorate(draft.governorate as string);
-    if (draft.vendor_type) localStorage.setItem("vendorType", draft.vendor_type as string);
+    if (draft.vendor_type)
+      localStorage.setItem("vendorType", draft.vendor_type as string);
   }, []);
 
   const set = (key: keyof typeof form, value: string) =>
@@ -69,7 +77,13 @@ export default function VendorApplyFormPage() {
       router.push(localePath("/vendor/apply/legal"));
       return;
     }
-    if (!form.business_name || !form.owner_name || !form.phone || !governorate || !form.city) {
+    if (
+      !form.business_name ||
+      !form.owner_name ||
+      !form.phone ||
+      !governorate ||
+      !form.city
+    ) {
       setError(t("vendor.applyPages.errorRequiredFields"));
       return;
     }
@@ -118,7 +132,10 @@ export default function VendorApplyFormPage() {
 
           {error && (
             <div className="mb-5 flex items-center gap-2 px-4 py-3 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-300">
-              <span className="material-symbols-outlined shrink-0" style={{ fontSize: "18px" }}>
+              <span
+                className="material-symbols-outlined shrink-0"
+                style={{ fontSize: "18px" }}
+              >
                 error
               </span>
               {error}
@@ -198,11 +215,18 @@ export default function VendorApplyFormPage() {
               <select
                 className={inputCls}
                 value={governorate}
-                onChange={(e) => { setGovernorate(e.target.value); set("city", ""); }}
+                onChange={(e) => {
+                  setGovernorate(e.target.value);
+                  set("city", "");
+                }}
               >
-                <option value="">{t("vendor.applyPages.selectGovernorate")}</option>
+                <option value="">
+                  {t("vendor.applyPages.selectGovernorate")}
+                </option>
                 {GOVERNORATES.map((g) => (
-                  <option key={g} value={g}>{tGov(g, locale)}</option>
+                  <option key={g} value={g}>
+                    {tGov(g, locale)}
+                  </option>
                 ))}
               </select>
             </div>
@@ -218,7 +242,9 @@ export default function VendorApplyFormPage() {
               >
                 <option value="">{t("vendor.applyPages.selectCity")}</option>
                 {getAreas(governorate).map((a) => (
-                  <option key={a} value={a}>{tArea(a, locale)}</option>
+                  <option key={a} value={a}>
+                    {tArea(a, locale)}
+                  </option>
                 ))}
               </select>
             </div>
@@ -233,7 +259,9 @@ export default function VendorApplyFormPage() {
               className="px-8 py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:opacity-90 transition-all flex items-center gap-2 shadow-lg shadow-primary/20"
             >
               {t("vendor.applyPages.continueBtn")}
-              <span className="material-symbols-outlined text-sm">arrow_forward</span>
+              <span className="material-symbols-outlined text-sm">
+                arrow_forward
+              </span>
             </button>
           </div>
         </div>

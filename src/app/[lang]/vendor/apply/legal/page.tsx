@@ -10,10 +10,17 @@ import { useLanguage } from "@/context/LanguageContext";
 // ── localStorage draft helpers ─────────────────────────────────────────────
 function getDraft(): Record<string, unknown> {
   if (typeof window === "undefined") return {};
-  try { return JSON.parse(localStorage.getItem("vendorDraft") ?? "{}"); } catch { return {}; }
+  try {
+    return JSON.parse(localStorage.getItem("vendorDraft") ?? "{}");
+  } catch {
+    return {};
+  }
 }
 function saveDraft(updates: Record<string, unknown>) {
-  localStorage.setItem("vendorDraft", JSON.stringify({ ...getDraft(), ...updates }));
+  localStorage.setItem(
+    "vendorDraft",
+    JSON.stringify({ ...getDraft(), ...updates }),
+  );
 }
 
 export default function VendorLegalPage() {
@@ -40,11 +47,17 @@ export default function VendorLegalPage() {
   // Load saved URLs from localStorage draft on mount
   useEffect(() => {
     const draft = getDraft();
-    if (draft.national_id_front_url) setFrontUrl(draft.national_id_front_url as string);
-    if (draft.national_id_back_url) setBackUrl(draft.national_id_back_url as string);
+    if (draft.national_id_front_url)
+      setFrontUrl(draft.national_id_front_url as string);
+    if (draft.national_id_back_url)
+      setBackUrl(draft.national_id_back_url as string);
   }, []);
 
-  async function uploadFile(file: File, slot: "front" | "back", tempId: string): Promise<string | null> {
+  async function uploadFile(
+    file: File,
+    slot: "front" | "back",
+    tempId: string,
+  ): Promise<string | null> {
     const ext = file.name.split(".").pop() ?? "jpg";
     const path = `national-ids/${tempId}-${slot}.${ext}`;
     const { error: uploadErr } = await supabase.storage
@@ -54,13 +67,19 @@ export default function VendorLegalPage() {
       setError(uploadErr.message ?? t("vendor.applyPages.legalErrorUpload"));
       return null;
     }
-    const { data: urlData } = supabase.storage.from("vendor-documents").getPublicUrl(path);
+    const { data: urlData } = supabase.storage
+      .from("vendor-documents")
+      .getPublicUrl(path);
     return urlData.publicUrl;
   }
 
   async function handleContinue() {
     if (process.env.NEXT_PUBLIC_SKIP_APPLY_VALIDATION === "true") {
-      router.push(localePath(isPartsSeller ? "/vendor/apply/bank" : "/vendor/apply/operations"));
+      router.push(
+        localePath(
+          isPartsSeller ? "/vendor/apply/bank" : "/vendor/apply/operations",
+        ),
+      );
       return;
     }
 
@@ -74,7 +93,11 @@ export default function VendorLegalPage() {
 
     // If no new files selected but both already saved, just advance
     if (!frontFile && !backFile && frontUrl && backUrl) {
-      router.push(localePath(isPartsSeller ? "/vendor/apply/bank" : "/vendor/apply/operations"));
+      router.push(
+        localePath(
+          isPartsSeller ? "/vendor/apply/bank" : "/vendor/apply/operations",
+        ),
+      );
       return;
     }
 
@@ -93,17 +116,30 @@ export default function VendorLegalPage() {
 
     if (frontFile) {
       newFrontUrl = await uploadFile(frontFile, "front", tempId);
-      if (!newFrontUrl) { setSaving(false); return; }
+      if (!newFrontUrl) {
+        setSaving(false);
+        return;
+      }
     }
     if (backFile) {
       newBackUrl = await uploadFile(backFile, "back", tempId);
-      if (!newBackUrl) { setSaving(false); return; }
+      if (!newBackUrl) {
+        setSaving(false);
+        return;
+      }
     }
 
-    saveDraft({ national_id_front_url: newFrontUrl, national_id_back_url: newBackUrl });
+    saveDraft({
+      national_id_front_url: newFrontUrl,
+      national_id_back_url: newBackUrl,
+    });
 
     setSaving(false);
-    router.push(localePath(isPartsSeller ? "/vendor/apply/bank" : "/vendor/apply/operations"));
+    router.push(
+      localePath(
+        isPartsSeller ? "/vendor/apply/bank" : "/vendor/apply/operations",
+      ),
+    );
   }
 
   function UploadSlot({
@@ -134,7 +170,10 @@ export default function VendorLegalPage() {
           className="hidden"
           onChange={(e) => {
             const f = e.target.files?.[0];
-            if (f) { onChange(f); setError(null); }
+            if (f) {
+              onChange(f);
+              setError(null);
+            }
           }}
         />
         <button
