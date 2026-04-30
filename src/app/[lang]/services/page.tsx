@@ -104,12 +104,16 @@ export default async function AllServiceCentersPage({
       reviewCount: v.total_reviews ?? 0,
       completedBookings: bookingCountByVendor.get(v.id) ?? 0,
       specializations: ["All Makes"],
-      services: ((v.specializations ?? []) as string[]).flatMap((catKey) => {
-        const cat = SERVICE_CATEGORIES.find((c) => c.key === catKey);
-        if (!cat) return [];
-        return cat.services.map(
-          (svcSlug) => (msgs as any).home?.services?.[svcSlug] ?? svcSlug,
-        );
+      services: ((v.specializations ?? []) as string[]).flatMap((entry) => {
+        // Support both category keys (legacy) and individual service slugs
+        const cat = SERVICE_CATEGORIES.find((c) => c.key === entry);
+        if (cat) {
+          return cat.services.map(
+            (svcSlug) => (msgs as any).home?.services?.[svcSlug] ?? svcSlug,
+          );
+        }
+        // It's a service slug directly
+        return [(msgs as any).home?.services?.[entry] ?? entry];
       }),
       availableToday: v.status === "approved",
       image: v.cover_image_url,

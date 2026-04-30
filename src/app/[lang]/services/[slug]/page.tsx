@@ -438,38 +438,55 @@ export default async function ServiceCenterPage({ params }: Props) {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {(vendor.specializations as string[]).map((catKey) => {
-                      const cat = SERVICE_CATEGORIES.find(
-                        (c) => c.key === catKey,
-                      );
-                      if (!cat) return null;
-                      const catName =
-                        (msgs as any).home?.serviceCategories?.[catKey] ??
-                        catKey;
-                      return (
-                        <div key={catKey}>
-                          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                            {catName}
-                          </p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {cat.services.map((svcSlug) => {
-                              const svcName =
-                                (msgs as any).home?.services?.[svcSlug] ??
-                                svcSlug;
-                              return (
-                                <Badge
-                                  key={svcSlug}
-                                  variant="secondary"
-                                  className="text-xs"
-                                >
-                                  {svcName}
-                                </Badge>
-                              );
-                            })}
+                    {(() => {
+                      const specs = vendor.specializations as string[];
+                      // Group selected service slugs by their parent category.
+                      // Also support legacy category-key entries.
+                      const grouped: {
+                        cat: (typeof SERVICE_CATEGORIES)[0];
+                        slugs: string[];
+                      }[] = [];
+                      for (const cat of SERVICE_CATEGORIES) {
+                        if (specs.includes(cat.key)) {
+                          // legacy: whole category selected → show all its services
+                          grouped.push({ cat, slugs: cat.services });
+                        } else {
+                          const selected = cat.services.filter((s) =>
+                            specs.includes(s),
+                          );
+                          if (selected.length)
+                            grouped.push({ cat, slugs: selected });
+                        }
+                      }
+                      return grouped.map(({ cat, slugs }) => {
+                        const catName =
+                          (msgs as any).home?.serviceCategories?.[cat.key] ??
+                          cat.key;
+                        return (
+                          <div key={cat.key}>
+                            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                              {catName}
+                            </p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {slugs.map((svcSlug) => {
+                                const svcName =
+                                  (msgs as any).home?.services?.[svcSlug] ??
+                                  svcSlug;
+                                return (
+                                  <Badge
+                                    key={svcSlug}
+                                    variant="secondary"
+                                    className="text-xs"
+                                  >
+                                    {svcName}
+                                  </Badge>
+                                );
+                              })}
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      });
+                    })()}
                   </div>
                 )}
               </CardContent>
