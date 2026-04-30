@@ -3,15 +3,22 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import OnboardingProgress from "@/components/vendor/OnboardingProgress";
-import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/context/LanguageContext";
 
 const inputCls =
   "w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF4B19]/30";
 
+// ── localStorage draft helpers ─────────────────────────────────────────────
+function getDraft(): Record<string, unknown> {
+  if (typeof window === "undefined") return {};
+  try { return JSON.parse(localStorage.getItem("vendorDraft") ?? "{}"); } catch { return {}; }
+}
+function saveDraft(updates: Record<string, unknown>) {
+  localStorage.setItem("vendorDraft", JSON.stringify({ ...getDraft(), ...updates }));
+}
+
 export default function VendorBankPage() {
   const router = useRouter();
-  const supabase = createClient();
   const { t, localePath } = useLanguage();
 
   const [bankName, setBankName] = useState("");
@@ -21,25 +28,13 @@ export default function VendorBankPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load saved draft from DB on mount
+  // Load saved draft from localStorage on mount
   useEffect(() => {
-    const applicationId =
-      typeof window !== "undefined"
-        ? localStorage.getItem("vendorApplicationId")
-        : null;
-    if (!applicationId) return;
-    supabase
-      .from("vendor_applications")
-      .select("bank_name, account_name, account_number, iban")
-      .eq("id", applicationId)
-      .single()
-      .then(({ data }) => {
-        if (!data) return;
-        if (data.bank_name) setBankName(data.bank_name);
-        if (data.account_name) setAccountName(data.account_name);
-        if (data.account_number) setAccountNumber(data.account_number);
-        if (data.iban) setIban(data.iban);
-      });
+    const draft = getDraft();
+    if (draft.bank_name) setBankName(draft.bank_name as string);
+    if (draft.account_name) setAccountName(draft.account_name as string);
+    if (draft.account_number) setAccountNumber(draft.account_number as string);
+    if (draft.iban) setIban(draft.iban as string);
   }, []);
 
   async function handleContinue() {
@@ -56,35 +51,16 @@ export default function VendorBankPage() {
       return;
     }
 
-    const applicationId =
-      typeof window !== "undefined"
-        ? localStorage.getItem("vendorApplicationId")
-        : null;
-
-    if (!applicationId) {
-      setError("Application not found. Please start from step 1.");
-      return;
-    }
-
     setSaving(true);
     setError(null);
 
-    const { error: dbError } = await supabase
-      .from("vendor_applications")
-      .update({
-        bank_name: bankName.trim(),
-        account_name: accountName.trim(),
-        account_number: accountNumber.trim(),
-        iban: iban.trim() || null,
-        step_completed: 3,
-      })
-      .eq("id", applicationId);
-
-    if (dbError) {
-      setError(dbError.message ?? "Failed to save. Please try again.");
-      setSaving(false);
-      return;
-    }
+    // Save to localStorage draft — no DB write
+    saveDraft({
+      bank_name: bankName.trim(),
+      account_name: accountName.trim(),
+      account_number: accountNumber.trim(),
+      iban: iban.trim() || null,
+    });
 
     setSaving(false);
     router.push(localePath("/vendor/apply/operations"));

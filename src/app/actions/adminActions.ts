@@ -151,6 +151,117 @@ export async function createVendorApplicationWithAccount(params: {
 }
 
 /**
+ * Final submission of a vendor application.
+ *
+ * Called from the last apply step (location for SC, operations for PS).
+ * Creates the auth account and inserts the full vendor_applications row
+ * in one shot — nothing is written to the DB during earlier steps.
+ *
+ * All prior steps persist their data only in localStorage (vendorDraft).
+ */
+export async function submitVendorApplication(params: {
+  email: string;
+  password: string;
+  business_name: string;
+  owner_name: string;
+  vendor_type: string;
+  phone: string;
+  governorate?: string;
+  city?: string;
+  national_id_url?: string;
+  bank_name?: string;
+  account_name?: string;
+  account_number?: string;
+  iban?: string;
+  working_days?: string[];
+  open_time?: string;
+  close_time?: string;
+  specializations?: string[];
+  supported_makes?: string[];
+  delivery_options?: string[];
+  return_policy?: string;
+  address?: string;
+  maps_link?: string;
+  shop_photos?: string[];
+}): Promise<{ applicationId: string | null; error: string | null }> {
+  const admin = adminClient();
+
+  // Create auth user — email not confirmed, so they cannot sign in yet
+  const { data: authData, error: authErr } = await admin.auth.admin.createUser({
+    email: params.email,
+    password: params.password,
+    email_confirm: false,
+    user_metadata: {
+      full_name: params.owner_name,
+      role: "vendor",
+      pending_vendor: true,
+    },
+  });
+
+  if (authErr) {
+    const msg = authErr.message.toLowerCase();
+    if (
+      msg.includes("already registered") ||
+      msg.includes("already been registered") ||
+      msg.includes("user already exists")
+    ) {
+      return {
+        applicationId: null,
+        error:
+          "This email is already registered. Please choose a different email for your vendor account.",
+      };
+    }
+    return { applicationId: null, error: authErr.message };
+  }
+
+  const userId = authData.user.id;
+
+  const { data: appData, error: appErr } = await admin
+    .from("vendor_applications")
+    .insert({
+      user_id: userId,
+      business_name: params.business_name,
+      vendor_type: params.vendor_type,
+      owner_name: params.owner_name,
+      email: params.email,
+      phone: params.phone,
+      governorate: params.governorate ?? null,
+      city: params.city ?? null,
+      national_id_url: params.national_id_url ?? null,
+      bank_name: params.bank_name ?? null,
+      account_name: params.account_name ?? null,
+      account_number: params.account_number ?? null,
+      iban: params.iban ?? null,
+      working_days: params.working_days ?? null,
+      open_time: params.open_time ?? null,
+      close_time: params.close_time ?? null,
+      specializations: params.specializations ?? null,
+      supported_makes: params.supported_makes ?? null,
+      delivery_options: params.delivery_options ?? null,
+      return_policy: params.return_policy ?? null,
+      address: params.address ?? null,
+      maps_link: params.maps_link ?? null,
+      shop_photos: params.shop_photos ?? null,
+      terms_accepted: true,
+      step_completed: params.vendor_type === "service_center" ? 4 : 4,
+      status: "pending",
+      submitted_at: new Date().toISOString(),
+    })
+    .select("id")
+    .single();
+
+  if (appErr || !appData) {
+    await admin.auth.admin.deleteUser(userId);
+    return {
+      applicationId: null,
+      error: appErr?.message ?? "Failed to save application.",
+    };
+  }
+
+  return { applicationId: appData.id, error: null };
+}
+
+/**
  * Approve a vendor application:
  *  1. Confirms the vendor's email so they can log in (they chose email+password at apply time)
  *  2. Creates the vendors row directly

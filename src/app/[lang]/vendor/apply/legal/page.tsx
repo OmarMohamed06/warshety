@@ -7,6 +7,15 @@ import OnboardingProgress from "@/components/vendor/OnboardingProgress";
 import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/context/LanguageContext";
 
+// ── localStorage draft helpers ─────────────────────────────────────────────
+function getDraft(): Record<string, unknown> {
+  if (typeof window === "undefined") return {};
+  try { return JSON.parse(localStorage.getItem("vendorDraft") ?? "{}"); } catch { return {}; }
+}
+function saveDraft(updates: Record<string, unknown>) {
+  localStorage.setItem("vendorDraft", JSON.stringify({ ...getDraft(), ...updates }));
+}
+
 export default function VendorLegalPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -25,21 +34,10 @@ export default function VendorLegalPage() {
     }
   }, []);
 
-  // Load saved national_id_url from DB on mount
+  // Load saved national_id_url from localStorage draft on mount
   useEffect(() => {
-    const applicationId =
-      typeof window !== "undefined"
-        ? localStorage.getItem("vendorApplicationId")
-        : null;
-    if (!applicationId) return;
-    supabase
-      .from("vendor_applications")
-      .select("national_id_url")
-      .eq("id", applicationId)
-      .single()
-      .then(({ data }) => {
-        if (data?.national_id_url) setExistingUrl(data.national_id_url);
-      });
+    const draft = getDraft();
+    if (draft.national_id_url) setExistingUrl(draft.national_id_url as string);
   }, []);
 
   async function handleContinue() {
@@ -68,12 +66,10 @@ export default function VendorLegalPage() {
       return;
     }
 
-    const applicationId =
-      typeof window !== "undefined"
-        ? localStorage.getItem("vendorApplicationId")
-        : null;
+    const draft = getDraft();
+    const tempId = draft.tempId as string | undefined;
 
-    if (!applicationId) {
+    if (!tempId) {
       setError(t("vendor.applyPages.legalErrorNotFound"));
       return;
     }
@@ -81,9 +77,9 @@ export default function VendorLegalPage() {
     setSaving(true);
     setError(null);
 
-    // Upload file to Supabase Storage
+    // Upload file to Supabase Storage using tempId (no DB write yet)
     const ext = file!.name.split(".").pop();
-    const path = `national-ids/${applicationId}.${ext}`;
+    const path = `national-ids/${tempId}.${ext}`;
     const { error: uploadErr } = await supabase.storage
       .from("vendor-documents")
       .upload(path, file!, { upsert: true });
@@ -98,19 +94,8 @@ export default function VendorLegalPage() {
       .from("vendor-documents")
       .getPublicUrl(path);
 
-    const { error: dbError } = await supabase
-      .from("vendor_applications")
-      .update({
-        national_id_url: urlData.publicUrl,
-        step_completed: 2,
-      })
-      .eq("id", applicationId);
-
-    if (dbError) {
-      setError(dbError.message ?? "Failed to save. Please try again.");
-      setSaving(false);
-      return;
-    }
+    // Save URL to localStorage draft — no DB write
+    saveDraft({ national_id_url: urlData.publicUrl });
 
     setSaving(false);
     router.push(

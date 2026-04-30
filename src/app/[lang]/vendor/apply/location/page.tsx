@@ -8,6 +8,16 @@ import OnboardingProgress from "@/components/vendor/OnboardingProgress";
 import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/context/LanguageContext";
 import { GOVERNORATES, getAreas, tGov, tArea } from "@/lib/locationData";
+import { submitVendorApplication } from "@/app/actions/adminActions";
+
+// ── localStorage draft helpers ─────────────────────────────────────────────
+function getDraft(): Record<string, unknown> {
+  if (typeof window === "undefined") return {};
+  try { return JSON.parse(localStorage.getItem("vendorDraft") ?? "{}"); } catch { return {}; }
+}
+function saveDraft(updates: Record<string, unknown>) {
+  localStorage.setItem("vendorDraft", JSON.stringify({ ...getDraft(), ...updates }));
+}
 
 const inputCls =
   "w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF4B19]/30";
@@ -92,27 +102,19 @@ export default function VendorLocationPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load saved draft from DB on mount
+  // Load saved draft from localStorage on mount
   useEffect(() => {
-    const applicationId =
-      typeof window !== "undefined"
-        ? localStorage.getItem("vendorApplicationId")
-        : null;
-    if (!applicationId) return;
-    supabase
-      .from("vendor_applications")
-      .select("governorate, city, address, maps_link")
-      .eq("id", applicationId)
-      .single()
-      .then(({ data }) => {
-        if (!data) return;
-        setForm({
-          governorate: data.governorate ?? "",
-          city: data.city ?? "",
-          address: data.address ?? "",
-          maps_link: data.maps_link ?? "",
-        });
-      });
+    const draft = getDraft();
+    setForm({
+      governorate: (draft.governorate as string) ?? "",
+      city: (draft.city as string) ?? "",
+      address: (draft.address as string) ?? "",
+      maps_link: (draft.maps_link as string) ?? "",
+    });
+    // Restore photo URLs from draft as previews (non-file, just URL strings)
+    if (Array.isArray(draft.shop_photos)) {
+      setPreviews((draft.shop_photos as string[]).map((u) => u || null));
+    }
   }, []);
 
   const set = (key: keyof typeof form, value: string) =>
@@ -144,7 +146,7 @@ export default function VendorLocationPage() {
       return;
     }
     // Validate required photo slots (0=storefront, 1=workshop, 2=inventory)
-    const requiredMissing = PHOTO_SLOTS.slice(0, 3).some((_, i) => !photos[i]);
+    const requiredMissing = PHOTO_SLOTS.slice(0, 3).some((_, i) => !photos[i] && !previews[i]);
     if (requiredMissing) {
       setError(
         t("vendor.applyPages.photoRequiredError") ??
@@ -153,12 +155,9 @@ export default function VendorLocationPage() {
       return;
     }
 
-    const applicationId =
-      typeof window !== "undefined"
-        ? localStorage.getItem("vendorApplicationId")
-        : null;
-
-    if (!applicationId) {
+    const draft = getDraft();
+    const tempId = draft.tempId as string | undefined;
+    if (!tempId) {
       setError("Application not found. Please start from step 1.");
       return;
     }
@@ -166,16 +165,17 @@ export default function VendorLocationPage() {
     setSaving(true);
     setError(null);
 
-    // Upload photos to vendor-documents bucket
+    // Upload photos to vendor-documents bucket using tempId
     const uploadedUrls: string[] = [];
     for (let i = 0; i < PHOTO_SLOTS.length; i++) {
       const file = photos[i];
       if (!file) {
-        uploadedUrls.push("");
+        // Reuse existing URL from draft if no new file selected
+        uploadedUrls.push((previews[i]) ?? "");
         continue;
       }
       const ext = file.name.split(".").pop() ?? "jpg";
-      const path = `shop-photos/${applicationId}/${PHOTO_SLOTS[i].labelKey}.${ext}`;
+      const path = `shop-photos/${tempId}/${PHOTO_SLOTS[i].labelKey}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from("vendor-documents")
         .upload(path, file, { upsert: true });
@@ -190,28 +190,45 @@ export default function VendorLocationPage() {
       uploadedUrls.push(urlData.publicUrl);
     }
 
-    const { error: dbError } = await supabase
-      .from("vendor_applications")
-      .update({
-        governorate: form.governorate,
-        city: form.city,
-        address: form.address,
-        maps_link: form.maps_link,
-        shop_photos: uploadedUrls.filter(Boolean),
-        step_completed: 4,
-        submitted_at: new Date().toISOString(),
-      })
-      .eq("id", applicationId);
+    // Save final location data to draft, then submit everything
+    saveDraft({
+      governorate: form.governorate,
+      city: form.city,
+      address: form.address,
+      maps_link: form.maps_link,
+      shop_photos: uploadedUrls.filter(Boolean),
+    });
 
-    if (dbError) {
-      setError(dbError.message ?? "Failed to save. Please try again.");
+    const finalDraft = getDraft();
+    const { applicationId, error: submitError } = await submitVendorApplication({
+      email: finalDraft.email as string,
+      password: finalDraft.password as string,
+      business_name: finalDraft.business_name as string,
+      owner_name: finalDraft.owner_name as string,
+      vendor_type: finalDraft.vendor_type as string,
+      phone: finalDraft.phone as string,
+      governorate: finalDraft.governorate as string | undefined,
+      city: finalDraft.city as string | undefined,
+      national_id_url: finalDraft.national_id_url as string | undefined,
+      working_days: finalDraft.working_days as string[] | undefined,
+      open_time: finalDraft.open_time as string | undefined,
+      close_time: finalDraft.close_time as string | undefined,
+      specializations: finalDraft.specializations as string[] | undefined,
+      supported_makes: finalDraft.supported_makes as string[] | undefined,
+      address: finalDraft.address as string | undefined,
+      maps_link: finalDraft.maps_link as string | undefined,
+      shop_photos: finalDraft.shop_photos as string[] | undefined,
+    });
+
+    if (submitError) {
+      setError(submitError);
       setSaving(false);
       return;
     }
 
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("vendorApplicationId");
-    }
+    // Clear draft on success
+    localStorage.removeItem("vendorDraft");
+    if (applicationId) localStorage.setItem("vendorApplicationId", applicationId);
 
     setSaving(false);
     router.push(localePath("/vendor/apply/status"));

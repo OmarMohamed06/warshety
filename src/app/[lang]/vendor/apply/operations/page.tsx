@@ -4,10 +4,20 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import OnboardingProgress from "@/components/vendor/OnboardingProgress";
-import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/context/LanguageContext";
 import { SERVICE_CATEGORIES } from "@/lib/serviceCategories";
 import { GOVERNORATES, getAreas } from "@/lib/locationData";
+import { submitVendorApplication } from "@/app/actions/adminActions";
+import { createClient } from "@/lib/supabase/client";
+
+// ── localStorage draft helpers ─────────────────────────────────────────────
+function getDraft(): Record<string, unknown> {
+  if (typeof window === "undefined") return {};
+  try { return JSON.parse(localStorage.getItem("vendorDraft") ?? "{}"); } catch { return {}; }
+}
+function saveDraft(updates: Record<string, unknown>) {
+  localStorage.setItem("vendorDraft", JSON.stringify({ ...getDraft(), ...updates }));
+}
 
 const inputCls =
   "w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF4B19]/30";
@@ -56,6 +66,7 @@ export default function VendorOperationsPage() {
   const router = useRouter();
   const supabase = createClient();
   const { t, localePath } = useLanguage();
+  const [submitting, setSubmitting] = useState(false);
 
   const [vendorType, setVendorType] = useState<
     "service_center" | "parts_seller"
@@ -127,35 +138,19 @@ export default function VendorOperationsPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load saved draft from DB on mount
+  // Load saved draft from localStorage on mount
   useEffect(() => {
-    const applicationId =
-      typeof window !== "undefined"
-        ? localStorage.getItem("vendorApplicationId")
-        : null;
-    if (!applicationId) return;
-    supabase
-      .from("vendor_applications")
-      .select(
-        "working_days, open_time, close_time, specializations, supported_makes, delivery_options, return_policy, governorate, city, address",
-      )
-      .eq("id", applicationId)
-      .single()
-      .then(({ data }) => {
-        if (!data) return;
-        if (data.working_days?.length) setWorkingDays(data.working_days);
-        if (data.open_time) setOpenTime(data.open_time);
-        if (data.close_time) setCloseTime(data.close_time);
-        if (data.specializations?.length) setSpecs(data.specializations);
-        if (data.supported_makes?.length)
-          setSupportedMakes(data.supported_makes);
-        if (data.delivery_options?.length)
-          setDeliveryOpts(data.delivery_options);
-        if (data.return_policy) setReturnPolicy(data.return_policy);
-        if (data.governorate) setGovernorate(data.governorate);
-        if (data.city) setArea(data.city);
-        if (data.address) setAddress(data.address);
-      });
+    const draft = getDraft();
+    if ((draft.working_days as string[] | undefined)?.length) setWorkingDays(draft.working_days as string[]);
+    if (draft.open_time) setOpenTime(draft.open_time as string);
+    if (draft.close_time) setCloseTime(draft.close_time as string);
+    if ((draft.specializations as string[] | undefined)?.length) setSpecs(draft.specializations as string[]);
+    if ((draft.supported_makes as string[] | undefined)?.length) setSupportedMakes(draft.supported_makes as string[]);
+    if ((draft.delivery_options as string[] | undefined)?.length) setDeliveryOpts(draft.delivery_options as string[]);
+    if (draft.return_policy) setReturnPolicy(draft.return_policy as string);
+    if (draft.governorate) setGovernorate(draft.governorate as string);
+    if (draft.city) setArea(draft.city as string);
+    if (draft.address) setAddress(draft.address as string);
   }, []);
 
   function toggleDay(day: string) {
@@ -182,15 +177,13 @@ export default function VendorOperationsPage() {
       prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
     );
   }
-  // Parts sellers go to bank details next; service centers go to location
-  const nextStep = isServiceCenter
-    ? localePath("/vendor/apply/location")
-    : localePath("/vendor/apply/bank");
+  // Service centers go to location; parts sellers submit here and go to status
+  const scNextStep = localePath("/vendor/apply/location");
 
   async function handleContinue() {
     // ── DEV ONLY: bypass validation for quick testing ──────────────────────────
     if (process.env.NEXT_PUBLIC_SKIP_APPLY_VALIDATION === "true") {
-      router.push(nextStep);
+      router.push(isServiceCenter ? scNextStep : localePath("/vendor/apply/status"));
       return;
     }
     if (isServiceCenter && workingDays.length === 0) {
@@ -214,57 +207,66 @@ export default function VendorOperationsPage() {
       return;
     }
 
-    const applicationId =
-      typeof window !== "undefined"
-        ? localStorage.getItem("vendorApplicationId")
-        : null;
-
-    if (!applicationId) {
-      setError("Application not found. Please start from step 1.");
-      return;
-    }
-
     setSaving(true);
     setError(null);
 
-    const updatePayload: Record<string, unknown> = {
-      terms_accepted: true,
-      step_completed: isServiceCenter ? 3 : 4,
-    };
-
     if (isServiceCenter) {
-      updatePayload.working_days = workingDays;
-      updatePayload.open_time = openTime;
-      updatePayload.close_time = closeTime;
-      updatePayload.specializations = specializations;
-      updatePayload.supported_makes = supportedMakes;
-    } else {
-      updatePayload.delivery_options = deliveryOptions;
-      updatePayload.return_policy = returnPolicy;
-      updatePayload.governorate = governorate;
-      updatePayload.city = area;
-      updatePayload.address = address;
-      // Mark as fully submitted — parts sellers complete here (no location step)
-      updatePayload.submitted_at = new Date().toISOString();
-    }
-
-    const { error: dbError } = await supabase
-      .from("vendor_applications")
-      .update(updatePayload)
-      .eq("id", applicationId);
-
-    if (dbError) {
-      setError(dbError.message ?? "Failed to save. Please try again.");
+      // SC: save to draft, proceed to location step
+      saveDraft({
+        working_days: workingDays,
+        open_time: openTime,
+        close_time: closeTime,
+        specializations,
+        supported_makes: supportedMakes,
+      });
       setSaving(false);
-      return;
-    }
+      router.push(scNextStep);
+    } else {
+      // PS: save to draft, then submit everything via server action
+      saveDraft({
+        delivery_options: deliveryOptions,
+        return_policy: returnPolicy,
+        governorate,
+        city: area,
+        address,
+      });
 
-    if (!isServiceCenter && typeof window !== "undefined") {
-      localStorage.removeItem("vendorApplicationId");
-    }
+      const draft = getDraft();
+      setSubmitting(true);
+      const { applicationId, error: submitError } = await submitVendorApplication({
+        email: draft.email as string,
+        password: draft.password as string,
+        business_name: draft.business_name as string,
+        owner_name: draft.owner_name as string,
+        vendor_type: draft.vendor_type as string,
+        phone: draft.phone as string,
+        governorate: draft.governorate as string | undefined,
+        city: draft.city as string | undefined,
+        national_id_url: draft.national_id_url as string | undefined,
+        bank_name: draft.bank_name as string | undefined,
+        account_name: draft.account_name as string | undefined,
+        account_number: draft.account_number as string | undefined,
+        iban: draft.iban as string | undefined,
+        delivery_options: draft.delivery_options as string[] | undefined,
+        return_policy: draft.return_policy as string | undefined,
+        address: draft.address as string | undefined,
+      });
 
-    setSaving(false);
-    router.push(nextStep);
+      if (submitError) {
+        setError(submitError);
+        setSaving(false);
+        setSubmitting(false);
+        return;
+      }
+
+      // Clear draft from localStorage after successful submission
+      localStorage.removeItem("vendorDraft");
+      if (applicationId) localStorage.setItem("vendorApplicationId", applicationId);
+
+      setSaving(false);
+      setSubmitting(false);
+      router.push(localePath("/vendor/apply/status"));
+    }
   }
 
   return (
@@ -731,14 +733,16 @@ export default function VendorOperationsPage() {
             </Link>
             <button
               onClick={handleContinue}
-              disabled={saving}
+              disabled={saving || submitting}
               className="px-8 py-3 bg-[#FF4B19] text-white font-bold rounded-xl hover:opacity-90 transition-all flex items-center gap-2 shadow-lg shadow-[#FF4B19]/20 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {saving
-                ? t("vendor.applyPages.saving")
-                : isServiceCenter
-                  ? t("vendor.applyPages.continueBtn")
-                  : t("vendor.applyPages.submitBtn")}
+              {submitting
+                ? t("vendor.applyPages.submitting") ?? "Submitting..."
+                : saving
+                  ? t("vendor.applyPages.saving")
+                  : isServiceCenter
+                    ? t("vendor.applyPages.continueBtn")
+                    : t("vendor.applyPages.submitBtn")}
               <span className="material-symbols-outlined text-sm">
                 {isServiceCenter ? "arrow_forward" : "check_circle"}
               </span>

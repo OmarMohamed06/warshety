@@ -4,14 +4,21 @@ import { useState, useTransition, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import OnboardingProgress from "@/components/vendor/OnboardingProgress";
-import { createVendorApplicationWithAccount } from "@/app/actions/adminActions";
-import { createClient } from "@/lib/supabase/client";
 import type { VendorType } from "@/types/database";
 import { useLanguage } from "@/context/LanguageContext";
 import { GOVERNORATES, getAreas, tGov, tArea } from "@/lib/locationData";
 
 const inputCls =
   "w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30";
+
+// ── localStorage draft helpers ─────────────────────────────────────────────
+function getDraft(): Record<string, unknown> {
+  if (typeof window === "undefined") return {};
+  try { return JSON.parse(localStorage.getItem("vendorDraft") ?? "{}"); } catch { return {}; }
+}
+function saveDraft(updates: Record<string, unknown>) {
+  localStorage.setItem("vendorDraft", JSON.stringify({ ...getDraft(), ...updates }));
+}
 
 export default function VendorApplyFormPage() {
   const router = useRouter();
@@ -43,57 +50,37 @@ export default function VendorApplyFormPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPass, setShowPass] = useState(false);
-  // true when resuming an existing application (draft was saved)
-  const [isExisting, setIsExisting] = useState(false);
+  // true when a draft already exists (password already set)
+  const [hasDraft, setHasDraft] = useState(false);
 
-  // Load saved draft from DB on mount
+  // Load saved draft from localStorage on mount
   useEffect(() => {
-    const applicationId =
-      typeof window !== "undefined"
-        ? localStorage.getItem("vendorApplicationId")
-        : null;
-    if (!applicationId || applicationId === "test-app-id") return;
-
-    const supabase = createClient();
-    supabase
-      .from("vendor_applications")
-      .select(
-        "business_name, owner_name, email, phone, vendor_type, city, governorate",
-      )
-      .eq("id", applicationId)
-      .single()
-      .then(({ data }) => {
-        if (!data) return;
-        setIsExisting(true);
-        setForm((f) => ({
-          ...f,
-          business_name: data.business_name ?? "",
-          owner_name: data.owner_name ?? "",
-          email: data.email ?? "",
-          phone: data.phone ?? "",
-          vendor_type: (data.vendor_type as VendorType) ?? "service_center",
-          city: data.city ?? "",
-        }));
-        if (data.governorate) setGovernorate(data.governorate);
-        if (typeof window !== "undefined" && data.vendor_type) {
-          localStorage.setItem("vendorType", data.vendor_type);
-        }
-      });
+    const draft = getDraft();
+    if (!draft.tempId) return;
+    setHasDraft(true);
+    setForm((f) => ({
+      ...f,
+      business_name: (draft.business_name as string) ?? "",
+      owner_name: (draft.owner_name as string) ?? "",
+      email: (draft.email as string) ?? "",
+      phone: (draft.phone as string) ?? "",
+      vendor_type: (draft.vendor_type as VendorType) ?? "service_center",
+      city: (draft.city as string) ?? "",
+    }));
+    if (draft.governorate) setGovernorate(draft.governorate as string);
+    if (draft.vendor_type)
+      localStorage.setItem("vendorType", draft.vendor_type as string);
   }, []);
 
   const set = (key: keyof typeof form, value: string) =>
     setForm((f) => ({ ...f, [key]: value }));
 
-  async function handleContinue() {
+  function handleContinue() {
     // ── DEV ONLY: bypass validation for quick testing ──────────────────────────
     if (process.env.NEXT_PUBLIC_SKIP_APPLY_VALIDATION === "true") {
-      if (typeof window !== "undefined") {
-        localStorage.setItem("vendorApplicationId", "test-app-id");
-        localStorage.setItem("vendorType", form.vendor_type);
-      }
-      startTransition(() => {
-        router.push(localePath("/vendor/apply/legal"));
-      });
+      saveDraft({ tempId: "test-id", vendor_type: form.vendor_type });
+      localStorage.setItem("vendorType", form.vendor_type);
+      startTransition(() => { router.push(localePath("/vendor/apply/legal")); });
       return;
     }
     if (
@@ -108,85 +95,39 @@ export default function VendorApplyFormPage() {
       return;
     }
 
-    // ── Resuming an existing application — just update the row ──────────────
-    if (isExisting) {
-      const applicationId =
-        typeof window !== "undefined"
-          ? localStorage.getItem("vendorApplicationId")
-          : null;
-      if (!applicationId) {
-        setError("Application not found. Please start from step 1.");
+    // Password only required on first visit (no existing draft)
+    if (!hasDraft) {
+      if (form.vendor_password.length < 8) {
+        setError(t("vendor.applyPages.errorPasswordLength"));
         return;
       }
-      setSaving(true);
-      setError(null);
-      const supabase = createClient();
-      const { error: dbError } = await supabase
-        .from("vendor_applications")
-        .update({
-          business_name: form.business_name,
-          owner_name: form.owner_name,
-          phone: form.phone,
-          vendor_type: form.vendor_type,
-          city: form.city,
-          governorate,
-        })
-        .eq("id", applicationId);
-      setSaving(false);
-      if (dbError) {
-        setError(dbError.message ?? "Failed to save. Please try again.");
+      if (form.vendor_password !== form.confirm_password) {
+        setError(t("vendor.applyPages.errorPasswordMatch"));
         return;
       }
-      if (typeof window !== "undefined") {
-        localStorage.setItem("vendorType", form.vendor_type);
-      }
-      startTransition(() => {
-        router.push(localePath("/vendor/apply/legal"));
-      });
-      return;
     }
 
-    // ── New application ────────────────────────────────────────────────────
-    if (form.vendor_password.length < 8) {
-      setError(t("vendor.applyPages.errorPasswordLength"));
-      return;
-    }
-    if (form.vendor_password !== form.confirm_password) {
-      setError(t("vendor.applyPages.errorPasswordMatch"));
-      return;
-    }
-    setSaving(true);
     setError(null);
 
-    const result = await createVendorApplicationWithAccount({
-      email: form.email,
-      password: form.vendor_password,
+    const draft = getDraft();
+    const tempId = (draft.tempId as string) || crypto.randomUUID();
+    saveDraft({
+      tempId,
       business_name: form.business_name,
       owner_name: form.owner_name,
-      vendor_type: form.vendor_type,
+      email: form.email,
+      // Only overwrite password if a new one was entered
+      ...(form.vendor_password ? { password: form.vendor_password } : {}),
       phone: form.phone,
-      city: form.city,
+      vendor_type: form.vendor_type,
       governorate,
+      city: form.city,
     });
+    localStorage.setItem("vendorType", form.vendor_type);
 
-    if (result.error || !result.applicationId) {
-      setError(
-        result.error ?? "Failed to create application. Please try again.",
-      );
-      setSaving(false);
-      return;
-    }
-
-    if (typeof window !== "undefined") {
-      localStorage.setItem("vendorApplicationId", result.applicationId);
-      localStorage.setItem("vendorType", form.vendor_type);
-    }
-
-    setSaving(false);
-    startTransition(() => {
-      router.push(localePath("/vendor/apply/legal"));
-    });
+    startTransition(() => { router.push(localePath("/vendor/apply/legal")); });
   }
+
 
   return (
     <div className="min-h-screen bg-[#f6f6f8] dark:bg-[#111621]">
@@ -362,14 +303,14 @@ export default function VendorApplyFormPage() {
                 value={form.email}
                 onChange={(e) => set("email", e.target.value)}
                 autoComplete="new-password"
-                readOnly={isExisting}
+                readOnly={hasDraft}
               />
               <p className="mt-1.5 text-xs text-slate-400">
                 {t("vendor.applyPages.businessEmailHint")}
               </p>
             </div>
 
-            {!isExisting && (
+            {!hasDraft && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <label className="text-xs font-bold uppercase text-slate-500 tracking-wider block mb-2">
@@ -451,24 +392,12 @@ export default function VendorApplyFormPage() {
             </p>
             <button
               onClick={handleContinue}
-              disabled={saving}
-              className="px-8 py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:opacity-90 disabled:opacity-60 transition-all flex items-center gap-2 shadow-lg shadow-primary/20"
+              className="px-8 py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:opacity-90 transition-all flex items-center gap-2 shadow-lg shadow-primary/20"
             >
-              {saving ? (
-                <>
-                  <span className="material-symbols-outlined animate-spin text-sm">
-                    progress_activity
-                  </span>
-                  {t("vendor.applyPages.saving")}
-                </>
-              ) : (
-                <>
-                  {t("vendor.applyPages.continueBtn")}
-                  <span className="material-symbols-outlined text-sm">
-                    arrow_forward
-                  </span>
-                </>
-              )}
+              {t("vendor.applyPages.continueBtn")}
+              <span className="material-symbols-outlined text-sm">
+                arrow_forward
+              </span>
             </button>
           </div>
         </div>
