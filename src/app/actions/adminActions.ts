@@ -165,6 +165,8 @@ export async function submitVendorApplication(params: {
   governorate?: string;
   city?: string;
   national_id_url?: string;
+  national_id_front_url?: string;
+  national_id_back_url?: string;
   bank_name?: string;
   account_name?: string;
   account_number?: string;
@@ -185,7 +187,7 @@ export async function submitVendorApplication(params: {
   const { data: authData, error: authErr } = await admin.auth.admin.createUser({
     email: params.email,
     password: params.password,
-    email_confirm: false,
+    email_confirm: true,
     user_metadata: {
       full_name: params.owner_name,
       role: "vendor",
@@ -223,6 +225,8 @@ export async function submitVendorApplication(params: {
       governorate: params.governorate ?? null,
       city: params.city ?? null,
       national_id_url: params.national_id_url ?? null,
+      national_id_front_url: params.national_id_front_url ?? null,
+      national_id_back_url: params.national_id_back_url ?? null,
       bank_name: params.bank_name ?? null,
       account_name: params.account_name ?? null,
       account_number: params.account_number ?? null,
