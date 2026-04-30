@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { LocaleLink as Link } from "@/components/ui/locale-link";
@@ -14,7 +15,8 @@ import { cn } from "@/lib/utils";
 
 export default function RegisterPage() {
   const { signUp, signInWithGoogle } = useAuth();
-  const { t } = useLanguage();
+  const { t, localePath } = useLanguage();
+  const router = useRouter();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -23,7 +25,6 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +40,7 @@ export default function RegisterPage() {
       setError(err);
       return;
     }
-    setSuccess(true);
+    router.push(localePath("/"));
   };
 
   const handleGoogle = async () => {
@@ -51,46 +52,6 @@ export default function RegisterPage() {
       setGoogleLoading(false);
     }
   };
-
-  if (success) {
-    return (
-      <div className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-10">
-        <div className="w-full max-w-md">
-          <Card className="overflow-hidden p-0">
-            <CardContent className="p-0">
-              <div className="p-6 md:p-8 flex flex-col items-center gap-4 text-center">
-                <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                  <svg
-                    className="w-6 h-6 text-green-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </div>
-                <h1 className="text-2xl font-bold">{t("auth.checkEmail")}</h1>
-                <p className="text-sm text-muted-foreground">
-                  {t("auth.checkEmailDesc")}
-                </p>
-                <Link
-                  href="/auth/login"
-                  className="text-sm underline underline-offset-4 hover:text-primary"
-                >
-                  {t("auth.goToLogin")}
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center bg-muted p-6 md:p-10">
