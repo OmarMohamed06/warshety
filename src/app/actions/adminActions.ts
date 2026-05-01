@@ -343,6 +343,7 @@ export async function approveVendorApplication(
           business_name: app.business_name,
           vendor_type: app.vendor_type,
           status: "approved",
+          approved_at: new Date().toISOString(),
           slug: finalSlug,
           phone: app.phone ?? null,
           email: app.email,

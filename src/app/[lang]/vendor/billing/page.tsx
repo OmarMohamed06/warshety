@@ -167,8 +167,10 @@ export default function VendorBillingPage() {
 
   // Current in-progress period (SC only)
   const currentPeriod = useMemo(() => {
-    if (!isService || !vendor?.approved_at) return null;
-    return currentBillingPeriod(new Date(vendor.approved_at as string));
+    if (!isService || !vendor) return null;
+    const anchor = vendor.approved_at ?? vendor.created_at;
+    if (!anchor) return null;
+    return currentBillingPeriod(new Date(anchor));
   }, [isService, vendor]);
 
   // Period detail dialog state
