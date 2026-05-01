@@ -1722,7 +1722,9 @@
       "thursdayPayoutNote": "Payouts processed every Thursday",
       "weekSummary": "Week Summary",
       "amountToTransfer": "Amount to Transfer"
-    }
+    },
+    "routineMaintenance": "Routine Maintenance",
+    "inspection": "Inspection"
   },
   "bookingSidebar": {
     "title": "Book an Appointment",

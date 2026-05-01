@@ -1723,7 +1723,9 @@
       "thursdayPayoutNote": "تُعالج المدفوعات كل خميس",
       "weekSummary": "ملخص الأسبوع",
       "amountToTransfer": "مبلغ التحويل"
-    }
+    },
+    "routineMaintenance": "صيانة دورية",
+    "inspection": "فحص وتشخيص"
   },
   "bookingSidebar": {
     "title": "حجز موعد",
