@@ -25,7 +25,7 @@ BEGIN
         NEW.id,
         COALESCE(
           REPLACE(NEW.service_key, '-', ' '),
-          NEW.booking_type,
+          NEW.booking_type::text,
           'Service'
         ),
         NEW.booking_date,
