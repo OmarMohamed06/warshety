@@ -712,7 +712,8 @@ export default function VendorDashboardPage() {
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {b.service_key
-                          ? t(`home.services.${b.service_key}`) !== `home.services.${b.service_key}`
+                          ? t(`home.services.${b.service_key}`) !==
+                            `home.services.${b.service_key}`
                             ? t(`home.services.${b.service_key}`)
                             : b.service_key.replace(/-/g, " ")
                           : b.booking_type === "routine_maintenance"
