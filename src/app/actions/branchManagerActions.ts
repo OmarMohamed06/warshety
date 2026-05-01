@@ -11,6 +11,16 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
+
+/** Service-role Supabase client — bypasses RLS. Used only to update user roles. */
+function adminClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  return createServiceClient(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+}
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -135,7 +145,9 @@ export async function assignBranchManager(
   if (insertErr) return { data: null, error: insertErr.message };
 
   // 7 — Flip the user's role to 'manager' so AuthContext can detect it simply
-  await supabase
+  // Must use service-role client — RLS only allows users to update their own row.
+  const admin = adminClient();
+  await admin
     .from("users")
     .update({ role: "manager" as any })
     .eq("id", targetUser.id);
@@ -193,7 +205,8 @@ export async function removeBranchManager(
       .limit(1)
       .maybeSingle();
     if (!remaining) {
-      await supabase
+      const admin = adminClient();
+      await admin
         .from("users")
         .update({ role: "customer" as any })
         .eq("id", userId);
