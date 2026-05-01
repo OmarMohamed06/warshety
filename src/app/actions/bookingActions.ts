@@ -7,7 +7,12 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
-import { notifyCustomerBookingCancelled } from "@/services/outboundNotificationService";
+import {
+  notifyCustomerBookingCancelled,
+  notifyCustomerBookingConfirmed,
+  notifyVendorNewBooking,
+  resolveBookingRecipient,
+} from "@/services/outboundNotificationService";
 
 function getServiceClient() {
   return createClient(
@@ -80,5 +85,104 @@ export async function notifyVendorCancelledBookingAction(
   } catch (err) {
     // Non-fatal — log but don't throw (vendor UI shouldn't break)
     console.error("[bookingActions] notifyVendorCancelledBookingAction:", err);
+  }
+}
+
+/**
+ * Send confirmation email + SMS to customer and vendor after a booking is created.
+ * Called server-side so SUPABASE_SERVICE_ROLE_KEY and RESEND_API_KEY are available.
+ */
+export async function notifyBookingConfirmedAction(
+  bookingId: string,
+): Promise<void> {
+  try {
+    const supabase = getServiceClient();
+
+    const { data: booking, error } = await supabase
+      .from("bookings")
+      .select(
+        "id, booking_date, booking_time, booking_type, service_key, user_id, vendor_id, branch_id",
+      )
+      .eq("id", bookingId)
+      .single();
+
+    if (error || !booking) {
+      console.error("[notifyBookingConfirmedAction] booking not found:", error);
+      return;
+    }
+
+    const [{ data: vendor }, { data: userRow }, bookingRecipient, locationRow] =
+      await Promise.all([
+        supabase
+          .from("vendors")
+          .select("business_name")
+          .eq("id", booking.vendor_id)
+          .single(),
+        supabase
+          .from("users")
+          .select("full_name, email, phone")
+          .eq("id", booking.user_id)
+          .single(),
+        resolveBookingRecipient(booking.branch_id, booking.vendor_id),
+        booking.branch_id
+          ? supabase
+              .from("vendor_branches")
+              .select("maps_link")
+              .eq("id", booking.branch_id)
+              .single()
+              .then((r) => r.data)
+          : supabase
+              .from("vendors")
+              .select("maps_link")
+              .eq("id", booking.vendor_id)
+              .single()
+              .then((r) => r.data),
+      ]);
+
+    const mapsLink = locationRow?.maps_link ?? undefined;
+    const centerName = vendor?.business_name ?? "Service Center";
+    const dateTime = `${booking.booking_date} at ${booking.booking_time ?? ""}`;
+    const service = booking.service_key
+      ? booking.service_key
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, (c: string) => c.toUpperCase())
+      : booking.booking_type
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, (c: string) => c.toUpperCase());
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://warshety.com";
+    const dashboardLink = `${appUrl}/en/vendor/bookings`;
+
+    if (userRow?.phone || userRow?.email) {
+      await notifyCustomerBookingConfirmed({
+        userId: booking.user_id,
+        phone: userRow?.phone ?? undefined,
+        email: userRow?.email ?? undefined,
+        customerName: userRow?.full_name ?? undefined,
+        centerName,
+        dateTime,
+        bookingId,
+        mapsLink,
+      }).catch((e) =>
+        console.error("[notifyBookingConfirmedAction] customer email:", e),
+      );
+    }
+
+    if (bookingRecipient.email) {
+      await notifyVendorNewBooking({
+        vendorUserId: bookingRecipient.userId ?? undefined,
+        vendorPhone: bookingRecipient.phone ?? "",
+        vendorEmail: bookingRecipient.email,
+        customerName: userRow?.full_name ?? "A customer",
+        service,
+        dateTime,
+        bookingId,
+        dashboardLink,
+      }).catch((e) =>
+        console.error("[notifyBookingConfirmedAction] vendor email:", e),
+      );
+    }
+  } catch (err) {
+    console.error("[notifyBookingConfirmedAction] unexpected error:", err);
   }
 }

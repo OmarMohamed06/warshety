@@ -36,6 +36,7 @@ import {
   notifyBookingConfirmed,
   notifyBookingCancelled,
 } from "@/services/notificationService";
+import { notifyBookingConfirmedAction } from "@/app/actions/bookingActions";
 import type { DbBooking, BookingStatus } from "@/types/database";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -145,14 +146,8 @@ export function useBooking(): UseBookingReturn {
       // In-app notification (client-safe)
       await notifyBookingConfirmed(user.id, booking!.id, input.vendorId);
 
-      // Email + SMS via server-side API route (uses Resend + service role)
-      // keepalive: true ensures the request survives page navigation
-      fetch("/api/bookings/notify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookingId: booking!.id }),
-        keepalive: true,
-      }).catch(() => {}); // fire-and-forget, don't block UI
+      // Email + SMS via server action (runs server-side, has access to all env vars)
+      notifyBookingConfirmedAction(booking!.id).catch(() => {});
 
       await refreshBookings();
       return { bookingId: booking!.id, error: null };
