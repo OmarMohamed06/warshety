@@ -409,10 +409,20 @@ export async function approveVendorApplication(
 
       // ── Auto-seed services table from specializations ────────────────────
       if (app.specializations?.length) {
-        const enServices = ((enMessages as unknown) as Record<string, Record<string, Record<string, string>>>)
-          ?.home?.services ?? {};
-        const arServices = ((arMessages as unknown) as Record<string, Record<string, Record<string, string>>>)
-          ?.home?.services ?? {};
+        const enServices =
+          (
+            enMessages as unknown as Record<
+              string,
+              Record<string, Record<string, string>>
+            >
+          )?.home?.services ?? {};
+        const arServices =
+          (
+            arMessages as unknown as Record<
+              string,
+              Record<string, Record<string, string>>
+            >
+          )?.home?.services ?? {};
         const serviceRows = (app.specializations as string[]).map((slug) => ({
           vendor_id: newVendor.id,
           branch_id: null,
