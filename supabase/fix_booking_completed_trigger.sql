@@ -15,6 +15,7 @@ BEGIN
     WHERE id = NEW.vendor_id;
 
     -- Insert maintenance record if vehicle is linked
+    -- Note: bookings table uses service_key (text slug), not service_id
     IF NEW.vehicle_id IS NOT NULL THEN
       INSERT INTO public.maintenance_records
         (vehicle_id, user_id, booking_id, service_type, service_date, cost)
@@ -23,7 +24,8 @@ BEGIN
         NEW.user_id,
         NEW.id,
         COALESCE(
-          (SELECT name FROM public.services WHERE id = NEW.service_id),
+          REPLACE(NEW.service_key, '-', ' '),
+          NEW.booking_type,
           'Service'
         ),
         NEW.booking_date,
