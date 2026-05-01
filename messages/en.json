@@ -1310,7 +1310,9 @@
     "navSearchBookings": "Search bookings, customers\u2026",
     "navSearchProducts": "Search products, orders\u2026",
     "bannerSuspended": "\u26a0\ufe0f Your vendor account has been suspended. Contact support.",
-    "bannerPending": "\u23f3 Your account is pending approval. Features will unlock once approved."
+    "bannerPending": "\u23f3 Your account is pending approval. Features will unlock once approved.",
+    "routineMaintenance": "Routine Maintenance",
+    "inspection": "Inspection"
   },
   "admin": {
     "dashboard": "Dashboard",

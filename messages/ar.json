@@ -1311,7 +1311,9 @@
     "navSearchBookings": "ابحث عن الحجوزات أو العملاء…",
     "navSearchProducts": "ابحث عن المنتجات أو الطلبات…",
     "bannerSuspended": "\u26a0\ufe0f تم تعليق حساب بائعك. تواصل مع الدعم.",
-    "bannerPending": "\u23f3 حسابك قيد المراجعة. ستتوفر الميزات بعد الموافقة."
+    "bannerPending": "\u23f3 حسابك قيد المراجعة. ستتوفر الميزات بعد الموافقة.",
+    "routineMaintenance": "صيانة دورية",
+    "inspection": "فحص وتشخيص"
   },
   "admin": {
     "dashboard": "لوحة التحكم",
