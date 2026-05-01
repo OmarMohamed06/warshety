@@ -146,8 +146,9 @@ export function useBooking(): UseBookingReturn {
       // In-app notification (client-safe)
       await notifyBookingConfirmed(user.id, booking!.id, input.vendorId);
 
-      // Email + SMS via server action (runs server-side, has access to all env vars)
-      notifyBookingConfirmedAction(booking!.id).catch(() => {});
+      // Email + SMS via server action (must be awaited — un-awaited server actions
+      // get aborted by the browser during page navigation before they can fire).
+      await notifyBookingConfirmedAction(booking!.id).catch(() => {});
 
       await refreshBookings();
       return { bookingId: booking!.id, error: null };
