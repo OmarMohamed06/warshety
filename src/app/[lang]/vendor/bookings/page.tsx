@@ -39,6 +39,7 @@ import {
   Phone,
   Mail,
   CalendarDays,
+  MapPin,
   Wrench,
 } from "lucide-react";
 
@@ -125,7 +126,7 @@ export default function VendorBookingsPage() {
       const q = supabase
         .from("bookings")
         .select(
-          "*, user:users!left(full_name,email,phone), vehicle:vehicles!left(*)",
+          "*, user:users!left(full_name,email,phone), vehicle:vehicles!left(*), branch:vendor_branches!left(name,name_ar,city)",
         )
         .eq("vendor_id", vendor.id)
         .order("booking_date", { ascending: false });
@@ -357,6 +358,7 @@ export default function VendorBookingsPage() {
                   <TableRow>
                     <TableHead>{t("vendor.customer")}</TableHead>
                     <TableHead>{t("vendor.service")}</TableHead>
+                    <TableHead>{t("vendor.branch") || "Branch"}</TableHead>
                     <TableHead>{t("vendor.date")}</TableHead>
                     <TableHead>{t("vendor.status")}</TableHead>
                     <TableHead />
@@ -384,6 +386,16 @@ export default function VendorBookingsPage() {
                             : b.booking_type === "inspection"
                               ? t("vendor.inspection")
                               : (b.booking_type ?? "—")}
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm">
+                          {b.branch?.name ?? "—"}
+                        </span>
+                        {b.branch?.city && (
+                          <span className="block text-xs text-muted-foreground">
+                            {b.branch.city}
+                          </span>
+                        )}
                       </TableCell>
                       <TableCell>
                         {b.booking_date}
@@ -502,6 +514,15 @@ export default function VendorBookingsPage() {
                       : ""}
                   </span>
                 </div>
+                {viewBooking.branch && (
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <MapPin className="h-3.5 w-3.5 shrink-0" />
+                    <span className="font-medium">
+                      {viewBooking.branch.name}
+                      {viewBooking.branch.city ? ` · ${viewBooking.branch.city}` : ""}
+                    </span>
+                  </div>
+                )}
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <Wrench className="h-3.5 w-3.5 shrink-0" />
                   <span>
