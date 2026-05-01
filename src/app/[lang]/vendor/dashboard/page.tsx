@@ -711,12 +711,15 @@ export default function VendorDashboardPage() {
                         {b.user?.full_name ?? "—"}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {b.service_key ??
-                          (b.booking_type === "routine_maintenance"
+                        {b.service_key
+                          ? t(`home.services.${b.service_key}`) !== `home.services.${b.service_key}`
+                            ? t(`home.services.${b.service_key}`)
+                            : b.service_key.replace(/-/g, " ")
+                          : b.booking_type === "routine_maintenance"
                             ? t("vendor.routineMaintenance")
                             : b.booking_type === "inspection"
                               ? t("vendor.inspection")
-                              : (b.booking_type ?? "—"))}
+                              : (b.booking_type ?? "—")}
                       </TableCell>
                       <TableCell className="text-muted-foreground text-sm">
                         {b.booking_date}
