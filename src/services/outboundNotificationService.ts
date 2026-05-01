@@ -31,7 +31,7 @@ function getResendClient(): Resend {
   return new Resend(key);
 }
 
-const FROM = `${process.env.RESEND_FROM_NAME ?? "Garage Platform"} <${process.env.RESEND_FROM_EMAIL ?? "noreply@yourplatform.com"}>`;
+const FROM = `${process.env.RESEND_FROM_NAME ?? "Warshety"} <${process.env.RESEND_FROM_EMAIL ?? "noreply@warshety.com"}>`;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
