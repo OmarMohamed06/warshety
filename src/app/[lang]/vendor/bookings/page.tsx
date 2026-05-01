@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
+import { toast } from "sonner";
 import VendorLayout from "@/components/vendor/VendorLayout";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
@@ -167,7 +168,15 @@ export default function VendorBookingsPage() {
 
   const updateStatus = async (bookingId: string, status: BookingStatus) => {
     setUpdating(true);
-    await supabase.from("bookings").update({ status }).eq("id", bookingId);
+    const { error } = await supabase
+      .from("bookings")
+      .update({ status })
+      .eq("id", bookingId);
+    if (error) {
+      toast.error(`Failed to update status: ${error.message}`);
+      setUpdating(false);
+      return;
+    }
     if (note) {
       await supabase.from("booking_status_history").insert({
         booking_id: bookingId,
@@ -177,6 +186,7 @@ export default function VendorBookingsPage() {
       });
       setNote("");
     }
+    toast.success(t("vendor.statusUpdated") || "Status updated");
     setSelected((prev: any) => (prev ? { ...prev, status } : null));
     setUpdating(false);
     loadBookings();
