@@ -158,12 +158,18 @@ export default function FeaturedServiceCenters({ initialData }: Props = {}) {
                           </span>
                         </div>
                       )}
-                      {/* Rating pill */}
+                      {/* Rating / New pill */}
                       <div className="absolute top-2 right-2">
-                        <span className="inline-flex items-center gap-1 bg-white/95 dark:bg-slate-900/90 text-foreground text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-                          <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
-                          {center.rating > 0 ? center.rating.toFixed(1) : "—"}
-                        </span>
+                        {center.reviews > 0 ? (
+                          <span className="inline-flex items-center gap-1 bg-white/95 dark:bg-slate-900/90 text-foreground text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                            <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
+                            {center.rating.toFixed(1)}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-200/90 dark:bg-slate-700/90 text-slate-500 dark:text-slate-400 text-[11px] font-semibold shadow-sm">
+                            {t("services.newCenter")}
+                          </span>
+                        )}
                       </div>
                     </div>
 
