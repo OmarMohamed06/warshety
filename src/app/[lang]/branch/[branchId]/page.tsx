@@ -1304,10 +1304,16 @@ function CalendarTab({
                                 "bg-muted text-foreground border-border",
                             )}
                           >
-                            {b.booking_time ? b.booking_time.slice(0, 5) + " " : ""}
-                            {b.user?.full_name?.split(" ")[0] ?? (b.service_key
-                              ? t(`home.services.${b.service_key}`) !== `home.services.${b.service_key}` ? t(`home.services.${b.service_key}`) : b.service_key.replace(/-/g, " ")
-                              : b.booking_type?.replace(/_/g, " ") ?? "—")}
+                            {b.booking_time
+                              ? b.booking_time.slice(0, 5) + " "
+                              : ""}
+                            {b.user?.full_name?.split(" ")[0] ??
+                              (b.service_key
+                                ? t(`home.services.${b.service_key}`) !==
+                                  `home.services.${b.service_key}`
+                                  ? t(`home.services.${b.service_key}`)
+                                  : b.service_key.replace(/-/g, " ")
+                                : (b.booking_type?.replace(/_/g, " ") ?? "—"))}
                           </div>
                         ))}
                         {dayBks.length > 3 && (
@@ -1506,8 +1512,12 @@ function CalendarTab({
                               <span>·</span>
                               <span className="truncate">
                                 {b.service_key
-                                  ? t(`home.services.${b.service_key}`) !== `home.services.${b.service_key}` ? t(`home.services.${b.service_key}`) : b.service_key.replace(/-/g, " ")
-                                  : b.booking_type?.replace(/_/g, " ") ?? t("vendor.service")}
+                                  ? t(`home.services.${b.service_key}`) !==
+                                    `home.services.${b.service_key}`
+                                    ? t(`home.services.${b.service_key}`)
+                                    : b.service_key.replace(/-/g, " ")
+                                  : (b.booking_type?.replace(/_/g, " ") ??
+                                    t("vendor.service"))}
                               </span>
                             </div>
                             {b.user?.phone && (
