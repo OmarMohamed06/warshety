@@ -318,7 +318,10 @@ export default function ReviewsSection({ vendorId, initialReviews }: Props) {
                 {avg.toFixed(1)}
               </Badge>
             ) : (
-              <Badge variant="secondary" className="font-semibold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-100">
+              <Badge
+                variant="secondary"
+                className="font-semibold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-100"
+              >
                 {t("services.newCenter")}
               </Badge>
             )}
