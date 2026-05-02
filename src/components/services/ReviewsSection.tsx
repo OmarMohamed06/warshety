@@ -313,9 +313,13 @@ export default function ReviewsSection({ vendorId, initialReviews }: Props) {
           <CardTitle className="flex items-center gap-2">
             <Star className="h-5 w-5 fill-amber-400 text-amber-400" />
             {t("servicePage.reviewsTitle")}
-            {total > 0 && (
+            {total > 0 ? (
               <Badge variant="secondary" className="font-bold">
                 {avg.toFixed(1)}
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="font-semibold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-100">
+                {t("services.newCenter")}
               </Badge>
             )}
           </CardTitle>

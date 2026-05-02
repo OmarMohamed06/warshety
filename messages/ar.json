@@ -488,7 +488,8 @@
     "highestRated": "الأعلى تقييماً",
     "distance": "المسافة",
     "allGovernorates": "جميع المحافظات",
-    "allDistricts": "جميع الأحياء"
+    "allDistricts": "جميع الأحياء",
+    "newCenter": "جديد"
   },
   "parts": {
     "home": "الرئيسية",
@@ -1821,6 +1822,7 @@
     "mainBranch": "رئيسي",
     "viewOnMaps": "عرض على خرائط جوجل",
     "supportedMakes": "الماركات المدعومة",
-    "closedToday": "مغلق"
+    "closedToday": "مغلق",
+    "newCenter": "جديد"
   }
 }

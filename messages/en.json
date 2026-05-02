@@ -488,7 +488,8 @@
     "highestRated": "Highest Rated",
     "distance": "Distance",
     "allGovernorates": "All Governorates",
-    "allDistricts": "All Districts"
+    "allDistricts": "All Districts",
+    "newCenter": "New"
   },
   "parts": {
     "home": "Home",
@@ -1820,6 +1821,7 @@
     "mainBranch": "Main",
     "viewOnMaps": "View on Google Maps",
     "supportedMakes": "Supported Car Makes",
-    "closedToday": "Closed"
+    "closedToday": "Closed",
+    "newCenter": "New"
   }
 }

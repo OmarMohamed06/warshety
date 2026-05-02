@@ -584,11 +584,19 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                           {sc.name}
                         </h3>
                         <div className="flex items-center gap-1 font-bold text-sm shrink-0">
-                          <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                          {sc.rating.toFixed(1)}
-                          <span className="text-muted-foreground font-normal text-xs">
-                            ({sc.reviewCount.toLocaleString()})
-                          </span>
+                          {sc.reviewCount > 0 ? (
+                            <>
+                              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                              {sc.rating.toFixed(1)}
+                              <span className="text-muted-foreground font-normal text-xs">
+                                ({sc.reviewCount.toLocaleString()})
+                              </span>
+                            </>
+                          ) : (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[11px] font-semibold">
+                              {t("services.newCenter")}
+                            </span>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-start gap-1 text-muted-foreground text-xs mb-2.5">

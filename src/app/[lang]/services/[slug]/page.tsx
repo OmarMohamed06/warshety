@@ -282,10 +282,14 @@ export default async function ServiceCenterPage({ params }: Props) {
         <div className="absolute bottom-6 left-6 text-white">
           <h1 className="text-4xl font-black mb-1">{center.name}</h1>
           <div className="flex items-center gap-3 text-sm flex-wrap">
-            {center.reviewCount > 0 && (
+            {center.reviewCount > 0 ? (
               <span className="flex items-center gap-1">
                 <Star className="w-4 h-4 text-primary fill-primary" />
                 {center.rating.toFixed(1)} ({center.reviewCount} {sc.reviews})
+              </span>
+            ) : (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/20 text-white text-xs font-semibold backdrop-blur-sm">
+                {sc.newCenter}
               </span>
             )}
             {(center.governorate || center.city) && (
