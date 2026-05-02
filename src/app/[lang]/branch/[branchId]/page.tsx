@@ -1295,7 +1295,7 @@ function CalendarTab({
                         {date.getDate()}
                       </span>
                       <div className="space-y-0.5">
-                        {dayBks.slice(0, 2).map((b) => (
+                        {dayBks.slice(0, 3).map((b) => (
                           <div
                             key={b.id}
                             className={cn(
@@ -1304,20 +1304,13 @@ function CalendarTab({
                                 "bg-muted text-foreground border-border",
                             )}
                           >
-                            {b.booking_time ? b.booking_time.slice(0, 5) : ""}{" "}
-                            {locale === "ar" && b.service?.name_ar
-                              ? b.service.name_ar
-                              : (b.service?.name ?? t("vendor.bookingsTitle"))}
+                            {b.booking_time ? b.booking_time.slice(0, 5) + " " : ""}
+                            {b.user?.full_name?.split(" ")[0] ?? (locale === "ar" && b.service?.name_ar ? b.service.name_ar : (b.service?.name ?? "—"))}
                           </div>
                         ))}
-                        {dayBks.length > 2 && (
+                        {dayBks.length > 3 && (
                           <div className="text-[9px] text-muted-foreground px-1">
-                            +{dayBks.length - 2} more
-                          </div>
-                        )}
-                        {count != null && (
-                          <div className="text-[9px] text-blue-500 px-1">
-                            {count} booked
+                            +{dayBks.length - 3} more
                           </div>
                         )}
                       </div>
@@ -1498,22 +1491,28 @@ function CalendarTab({
                             )}
                           >
                             <div className="flex items-center justify-between gap-2">
-                              <span className="text-xs font-bold">
-                                {b.booking_time?.slice(0, 5) ?? "—"}
+                              <span className="text-xs font-bold truncate">
+                                {b.user?.full_name ?? "—"}
                               </span>
-                              <span className="text-[10px] font-bold capitalize">
+                              <span className="text-[10px] font-bold capitalize shrink-0">
                                 {t(`vendor.statusLabels.${b.status}`) ||
                                   b.status.replace(/_/g, " ")}
                               </span>
                             </div>
-                            <p className="text-xs font-semibold truncate">
-                              {locale === "ar" && b.service?.name_ar
-                                ? b.service.name_ar
-                                : (b.service?.name ?? t("vendor.service"))}
-                            </p>
-                            <p className="text-[11px] text-muted-foreground truncate">
-                              {b.user?.full_name ?? "—"}
-                            </p>
+                            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                              <span>{b.booking_time?.slice(0, 5) ?? "—"}</span>
+                              <span>·</span>
+                              <span className="truncate">
+                                {locale === "ar" && b.service?.name_ar
+                                  ? b.service.name_ar
+                                  : (b.service?.name ?? t("vendor.service"))}
+                              </span>
+                            </div>
+                            {b.user?.phone && (
+                              <p className="text-[10px] text-muted-foreground truncate">
+                                {b.user.phone}
+                              </p>
+                            )}
                           </div>
                         </button>
                       ))}
