@@ -388,9 +388,7 @@ export default function VendorBookingsPage() {
                               : (b.booking_type ?? "—")}
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm">
-                          {b.branch?.name ?? "—"}
-                        </span>
+                        <span className="text-sm">{b.branch?.name ?? "—"}</span>
                         {b.branch?.city && (
                           <span className="block text-xs text-muted-foreground">
                             {b.branch.city}
@@ -519,7 +517,9 @@ export default function VendorBookingsPage() {
                     <MapPin className="h-3.5 w-3.5 shrink-0" />
                     <span className="font-medium">
                       {viewBooking.branch.name}
-                      {viewBooking.branch.city ? ` · ${viewBooking.branch.city}` : ""}
+                      {viewBooking.branch.city
+                        ? ` · ${viewBooking.branch.city}`
+                        : ""}
                     </span>
                   </div>
                 )}
