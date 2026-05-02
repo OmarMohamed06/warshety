@@ -739,7 +739,10 @@ function BookingsTab({
       </Card>
 
       {/* View Details Dialog */}
-      <Dialog open={!!viewBooking} onOpenChange={(o) => !o && setViewBooking(null)}>
+      <Dialog
+        open={!!viewBooking}
+        onOpenChange={(o) => !o && setViewBooking(null)}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -749,27 +752,43 @@ function BookingsTab({
           </DialogHeader>
           {viewBooking && (
             <div className="space-y-4 text-sm">
-              <div className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold capitalize border ${STATUS_VARIANT[viewBooking.status as BookingStatus]}`}>
-                {t(`vendor.statusLabels.${viewBooking.status}`) || viewBooking.status.replace(/_/g, " ")}
+              <div
+                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold capitalize border ${STATUS_VARIANT[viewBooking.status as BookingStatus]}`}
+              >
+                {t(`vendor.statusLabels.${viewBooking.status}`) ||
+                  viewBooking.status.replace(/_/g, " ")}
               </div>
 
               {/* Customer */}
               <div className="rounded-lg border p-3 space-y-2">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{t("vendor.customer")}</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
+                  {t("vendor.customer")}
+                </p>
                 <div className="space-y-1.5">
-                  <p className="font-semibold">{viewBooking.user?.full_name ?? "\u2014"}</p>
+                  <p className="font-semibold">
+                    {viewBooking.user?.full_name ?? "\u2014"}
+                  </p>
                   {viewBooking.user?.phone ? (
-                    <a href={`tel:${viewBooking.user.phone}`} className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline">
-                      <Phone className="h-3.5 w-3.5 shrink-0" />{viewBooking.user.phone}
+                    <a
+                      href={`tel:${viewBooking.user.phone}`}
+                      className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
+                    >
+                      <Phone className="h-3.5 w-3.5 shrink-0" />
+                      {viewBooking.user.phone}
                     </a>
                   ) : (
                     <p className="flex items-center gap-1.5 text-xs text-muted-foreground italic">
-                      <Phone className="h-3.5 w-3.5 shrink-0" />{t("vendor.noPhoneOnFile")}
+                      <Phone className="h-3.5 w-3.5 shrink-0" />
+                      {t("vendor.noPhoneOnFile")}
                     </p>
                   )}
                   {viewBooking.user?.email && (
-                    <a href={`mailto:${viewBooking.user.email}`} className="flex items-center gap-1.5 text-muted-foreground text-xs hover:text-primary hover:underline">
-                      <Mail className="h-3.5 w-3.5 shrink-0" />{viewBooking.user.email}
+                    <a
+                      href={`mailto:${viewBooking.user.email}`}
+                      className="flex items-center gap-1.5 text-muted-foreground text-xs hover:text-primary hover:underline"
+                    >
+                      <Mail className="h-3.5 w-3.5 shrink-0" />
+                      {viewBooking.user.email}
                     </a>
                   )}
                 </div>
@@ -777,16 +796,24 @@ function BookingsTab({
 
               {/* Appointment */}
               <div className="rounded-lg border p-3 space-y-2">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{t("vendor.appointment")}</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
+                  {t("vendor.appointment")}
+                </p>
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <CalendarDays className="h-3.5 w-3.5 shrink-0" />
-                  <span>{viewBooking.booking_date}{viewBooking.booking_time ? ` at ${viewBooking.booking_time.slice(0, 5)}` : ""}</span>
+                  <span>
+                    {viewBooking.booking_date}
+                    {viewBooking.booking_time
+                      ? ` at ${viewBooking.booking_time.slice(0, 5)}`
+                      : ""}
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <Wrench className="h-3.5 w-3.5 shrink-0" />
                   <span>
                     {viewBooking.service_key
-                      ? t(`home.services.${viewBooking.service_key}`) !== `home.services.${viewBooking.service_key}`
+                      ? t(`home.services.${viewBooking.service_key}`) !==
+                        `home.services.${viewBooking.service_key}`
                         ? t(`home.services.${viewBooking.service_key}`)
                         : viewBooking.service_key.replace(/-/g, " ")
                       : viewBooking.booking_type === "routine_maintenance"
@@ -801,23 +828,41 @@ function BookingsTab({
               {/* Vehicle */}
               {viewBooking.vehicle ? (
                 <div className="rounded-lg border p-3 space-y-2">
-                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{t("admin.vehicle")}</p>
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
+                    {t("admin.vehicle")}
+                  </p>
                   <div className="flex items-center gap-1.5 font-semibold">
                     <Car className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                    <span>{viewBooking.vehicle.year} {viewBooking.vehicle.make} {viewBooking.vehicle.model}</span>
+                    <span>
+                      {viewBooking.vehicle.year} {viewBooking.vehicle.make}{" "}
+                      {viewBooking.vehicle.model}
+                    </span>
                   </div>
                   {viewBooking.vehicle.color && (
-                    <p className="text-xs text-muted-foreground pl-5">{t("vendor.colorLabel")}: {viewBooking.vehicle.color}</p>
+                    <p className="text-xs text-muted-foreground pl-5">
+                      {t("vendor.colorLabel")}: {viewBooking.vehicle.color}
+                    </p>
                   )}
                   {viewBooking.vehicle.license_plate && (
-                    <p className="text-xs text-muted-foreground pl-5">{t("vendor.plateLabel")}: {viewBooking.vehicle.license_plate}</p>
+                    <p className="text-xs text-muted-foreground pl-5">
+                      {t("vendor.plateLabel")}:{" "}
+                      {viewBooking.vehicle.license_plate}
+                    </p>
                   )}
                   <div className="flex items-center gap-1.5 text-xs">
                     <Gauge className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                    {(viewBooking.mileage ?? viewBooking.vehicle?.mileage) != null ? (
-                      <span className="font-medium">{(viewBooking.mileage ?? viewBooking.vehicle.mileage).toLocaleString()} km</span>
+                    {(viewBooking.mileage ?? viewBooking.vehicle?.mileage) !=
+                    null ? (
+                      <span className="font-medium">
+                        {(
+                          viewBooking.mileage ?? viewBooking.vehicle.mileage
+                        ).toLocaleString()}{" "}
+                        km
+                      </span>
                     ) : (
-                      <span className="text-muted-foreground italic">{t("vendor.mileageNotProvided")}</span>
+                      <span className="text-muted-foreground italic">
+                        {t("vendor.mileageNotProvided")}
+                      </span>
                     )}
                   </div>
                 </div>
@@ -827,17 +872,28 @@ function BookingsTab({
               {viewBooking.notes && (
                 <div className="rounded-lg border p-3 space-y-2">
                   <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
-                    <FileText className="h-3.5 w-3.5" />{t("vendor.problemNotes")}
+                    <FileText className="h-3.5 w-3.5" />
+                    {t("vendor.problemNotes")}
                   </p>
                   <p className="text-sm leading-relaxed">{viewBooking.notes}</p>
                 </div>
               )}
 
               <div className="flex gap-2 pt-1">
-                <Button variant="outline" className="flex-1" onClick={() => setViewBooking(null)}>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setViewBooking(null)}
+                >
                   {t("vendor.close")}
                 </Button>
-                <Button className="flex-1" onClick={() => { setSelected(viewBooking); setViewBooking(null); }}>
+                <Button
+                  className="flex-1"
+                  onClick={() => {
+                    setSelected(viewBooking);
+                    setViewBooking(null);
+                  }}
+                >
                   {t("vendor.edit")}
                 </Button>
               </div>
