@@ -112,6 +112,8 @@ interface CalendarBooking {
   id: string;
   booking_date: string;
   booking_time: string | null;
+  booking_type: string | null;
+  service_key: string | null;
   status: string;
   notes: string | null;
   total_price: number | null;
@@ -120,7 +122,6 @@ interface CalendarBooking {
     phone: string | null;
     email: string | null;
   } | null;
-  service: { name: string; name_ar: string | null } | null;
   vehicle: { make: string; model: string; year: number } | null;
 }
 
@@ -1079,9 +1080,8 @@ function CalendarTab({
     const { data } = await supabase
       .from("bookings")
       .select(
-        "id,booking_date,booking_time,status,notes,total_price," +
+        "id,booking_date,booking_time,booking_type,service_key,status,notes,total_price," +
           "user:users!left(full_name,phone,email)," +
-          "service:services(name,name_ar)," +
           "vehicle:vehicles!left(make,model,year)",
       )
       .eq("branch_id", branchId)
@@ -1305,7 +1305,9 @@ function CalendarTab({
                             )}
                           >
                             {b.booking_time ? b.booking_time.slice(0, 5) + " " : ""}
-                            {b.user?.full_name?.split(" ")[0] ?? (locale === "ar" && b.service?.name_ar ? b.service.name_ar : (b.service?.name ?? "—"))}
+                            {b.user?.full_name?.split(" ")[0] ?? (b.service_key
+                              ? t(`home.services.${b.service_key}`) !== `home.services.${b.service_key}` ? t(`home.services.${b.service_key}`) : b.service_key.replace(/-/g, " ")
+                              : b.booking_type?.replace(/_/g, " ") ?? "—")}
                           </div>
                         ))}
                         {dayBks.length > 3 && (
@@ -1503,9 +1505,9 @@ function CalendarTab({
                               <span>{b.booking_time?.slice(0, 5) ?? "—"}</span>
                               <span>·</span>
                               <span className="truncate">
-                                {locale === "ar" && b.service?.name_ar
-                                  ? b.service.name_ar
-                                  : (b.service?.name ?? t("vendor.service"))}
+                                {b.service_key
+                                  ? t(`home.services.${b.service_key}`) !== `home.services.${b.service_key}` ? t(`home.services.${b.service_key}`) : b.service_key.replace(/-/g, " ")
+                                  : b.booking_type?.replace(/_/g, " ") ?? t("vendor.service")}
                               </span>
                             </div>
                             {b.user?.phone && (
