@@ -108,16 +108,39 @@ export default async function BlogPage({ params }: Props) {
           </div>
           <div className="px-8 py-5 flex items-center justify-between">
             <span className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4" aria-hidden>
-                <path fillRule="evenodd" d="M1 8a7 7 0 1 1 14 0A7 7 0 0 1 1 8Zm7.75-4.25a.75.75 0 0 0-1.5 0V8c0 .414.336.75.75.75h3.25a.75.75 0 0 0 0-1.5h-2.5v-3.5Z" clipRule="evenodd" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+                className="w-4 h-4"
+                aria-hidden
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M1 8a7 7 0 1 1 14 0A7 7 0 0 1 1 8Zm7.75-4.25a.75.75 0 0 0-1.5 0V8c0 .414.336.75.75.75h3.25a.75.75 0 0 0 0-1.5h-2.5v-3.5Z"
+                  clipRule="evenodd"
+                />
               </svg>
-              {calculateReadingTime(isAr ? featured.content_ar : featured.content_en, isAr)}{" "}
+              {calculateReadingTime(
+                isAr ? featured.content_ar : featured.content_en,
+                isAr,
+              )}{" "}
               {isAr ? "دقيقة قراءة" : "min read"}
             </span>
             <span className="text-[#FF4B19] font-semibold text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
               {isAr ? "اقرأ المقال" : "Read Article"}
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className={`w-4 h-4 ${isAr ? "rotate-180" : ""}`} aria-hidden>
-                <path fillRule="evenodd" d="M2 8a.75.75 0 0 1 .75-.75h8.69L8.22 4.03a.75.75 0 0 1 1.06-1.06l4.5 4.5a.75.75 0 0 1 0 1.06l-4.5 4.5a.75.75 0 0 1-1.06-1.06l3.22-3.22H2.75A.75.75 0 0 1 2 8Z" clipRule="evenodd" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+                className={`w-4 h-4 ${isAr ? "rotate-180" : ""}`}
+                aria-hidden
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M2 8a.75.75 0 0 1 .75-.75h8.69L8.22 4.03a.75.75 0 0 1 1.06-1.06l4.5 4.5a.75.75 0 0 1 0 1.06l-4.5 4.5a.75.75 0 0 1-1.06-1.06l3.22-3.22H2.75A.75.75 0 0 1 2 8Z"
+                  clipRule="evenodd"
+                />
               </svg>
             </span>
           </div>
@@ -147,7 +170,13 @@ export default async function BlogPage({ params }: Props) {
                   className={`${color} h-36 flex items-center justify-center relative overflow-hidden`}
                 >
                   <div className="absolute inset-0 opacity-20 bg-gradient-to-br from-white to-transparent" />
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-14 h-14 text-white opacity-80 drop-shadow-lg" aria-hidden>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="w-14 h-14 text-white opacity-80 drop-shadow-lg"
+                    aria-hidden
+                  >
                     <path d="M11.25 4.533A9.707 9.707 0 0 0 6 3a9.735 9.735 0 0 0-3.25.555.75.75 0 0 0-.5.707v14.25a.75.75 0 0 0 1 .707A8.237 8.237 0 0 1 6 18.75c1.995 0 3.823.707 5.25 1.886V4.533ZM12.75 20.636A8.214 8.214 0 0 1 18 18.75c.966 0 1.89.166 2.75.47a.75.75 0 0 0 1-.708V4.262a.75.75 0 0 0-.5-.707A9.735 9.735 0 0 0 18 3a9.707 9.707 0 0 0-5.25 1.533v16.103Z" />
                   </svg>
                 </div>
@@ -161,8 +190,18 @@ export default async function BlogPage({ params }: Props) {
                   </p>
                   <div className="flex items-center justify-end text-xs text-slate-400 dark:text-slate-500">
                     <span className="flex items-center gap-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5" aria-hidden>
-                        <path fillRule="evenodd" d="M1 8a7 7 0 1 1 14 0A7 7 0 0 1 1 8Zm7.75-4.25a.75.75 0 0 0-1.5 0V8c0 .414.336.75.75.75h3.25a.75.75 0 0 0 0-1.5h-2.5v-3.5Z" clipRule="evenodd" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 16 16"
+                        fill="currentColor"
+                        className="w-3.5 h-3.5"
+                        aria-hidden
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M1 8a7 7 0 1 1 14 0A7 7 0 0 1 1 8Zm7.75-4.25a.75.75 0 0 0-1.5 0V8c0 .414.336.75.75.75h3.25a.75.75 0 0 0 0-1.5h-2.5v-3.5Z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                       {readMin} {isAr ? "دقيقة" : "min read"}
                     </span>
