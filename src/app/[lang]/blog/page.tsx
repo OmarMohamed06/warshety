@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { generateSeoMeta } from "@/utils/seo";
 import NewsletterForm from "@/components/blog/NewsletterForm";
+import { getAllArticles, calculateReadingTime } from "@/lib/blog";
 
 interface Props {
   params: Promise<{ lang: string }>;
@@ -22,140 +23,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-const FEATURED_POST = {
-  slug: "top-5-maintenance-tips-egypt",
-  categoryAr: "الصيانة",
-  categoryEn: "Maintenance",
-  titleAr: "أهم ٥ نصائح لصيانة سيارتك في الطقس الحار بمصر",
-  titleEn: "Top 5 Car Maintenance Tips for Egypt's Hot Weather",
-  excerptAr:
-    "الحرارة الشديدة تؤثر بشكل مباشر على أداء سيارتك. اكتشف كيف تحافظ على مبرد المياه، البطارية، والإطارات خلال فصل الصيف.",
-  excerptEn:
-    "Extreme heat directly impacts your car's performance. Learn how to maintain your coolant, battery, and tires through Egypt's summer months.",
-  date: "2025-06-01",
-  readMinAr: "٥ دقائق",
-  readMinEn: "5 min read",
-  color: "from-orange-600 to-red-700",
-};
-
-const POSTS = [
-  {
-    slug: "how-to-choose-brake-pads",
-    categoryAr: "قطع الغيار",
-    categoryEn: "Spare Parts",
-    titleAr: "كيف تختار تيل الفرامل المناسب لسيارتك",
-    titleEn: "How to Choose the Right Brake Pads for Your Car",
-    excerptAr: "دليل شامل لاختيار تيل الفرامل حسب نوع سيارتك وأسلوب قيادتك.",
-    excerptEn:
-      "A complete guide to selecting brake pads based on your car model and driving style.",
-    date: "2025-05-22",
-    readMinAr: "٤ دقائق",
-    readMinEn: "4 min read",
-    icon: "tire_repair",
-    color: "bg-blue-500",
-  },
-  {
-    slug: "engine-oil-change-guide",
-    categoryAr: "الصيانة",
-    categoryEn: "Maintenance",
-    titleAr: "متى تغير زيت المحرك؟ — الدليل الكامل",
-    titleEn: "When to Change Your Engine Oil — The Complete Guide",
-    excerptAr:
-      "تعرف على علامات الحاجة لتغيير الزيت وكيف تختار النوع الصحيح لموديل سيارتك.",
-    excerptEn:
-      "Learn the signs you need an oil change and how to pick the right grade for your car.",
-    date: "2025-05-15",
-    readMinAr: "٦ دقائق",
-    readMinEn: "6 min read",
-    icon: "water_drop",
-    color: "bg-amber-500",
-  },
-  {
-    slug: "oem-vs-aftermarket-parts",
-    categoryAr: "قطع الغيار",
-    categoryEn: "Spare Parts",
-    titleAr: "قطع OEM مقابل القطع البديلة — أيهما تختار؟",
-    titleEn: "OEM vs Aftermarket Parts — Which Should You Choose?",
-    excerptAr:
-      "مقارنة شاملة بين قطع المصنع الأصلية وقطع الشركات البديلة من ناحية السعر والجودة والضمان.",
-    excerptEn:
-      "A full comparison of OEM vs aftermarket parts in terms of price, quality, and warranty.",
-    date: "2025-05-08",
-    readMinAr: "٧ دقائق",
-    readMinEn: "7 min read",
-    icon: "build",
-    color: "bg-emerald-500",
-  },
-  {
-    slug: "ac-refrigerant-egypt-summer",
-    categoryAr: "تكييف",
-    categoryEn: "Air Conditioning",
-    titleAr: "شحن فريون التكييف — كل ما تحتاج معرفته قبل الصيف",
-    titleEn: "AC Refrigerant Recharge — Everything You Need Before Summer",
-    excerptAr:
-      "أعراض نقص الفريون وكيف تجهز تكييف سيارتك قبل حرارة الصيف المصري.",
-    excerptEn:
-      "Symptoms of low refrigerant and how to prep your AC before Egypt's brutal summer heat.",
-    date: "2025-04-28",
-    readMinAr: "٥ دقائق",
-    readMinEn: "5 min read",
-    icon: "ac_unit",
-    color: "bg-cyan-500",
-  },
-  {
-    slug: "warshety-vendor-success-story",
-    categoryAr: "قصص نجاح",
-    categoryEn: "Success Stories",
-    titleAr: "قصة نجاح: كيف زاد محمد مبيعاته ٣ أضعاف مع ورشتي",
-    titleEn: "Success Story: How Mohamed Tripled Sales with Warshety",
-    excerptAr:
-      "بائع قطع غيار من الإسكندرية يحكي كيف أحدثت ورشتي تحولًا في مشروعه.",
-    excerptEn:
-      "An Alexandria spare parts dealer shares how Warshety transformed his business.",
-    date: "2025-04-18",
-    readMinAr: "٤ دقائق",
-    readMinEn: "4 min read",
-    icon: "store",
-    color: "bg-purple-500",
-  },
-  {
-    slug: "tire-pressure-guide-egypt",
-    categoryAr: "السلامة",
-    categoryEn: "Safety",
-    titleAr: "ضغط الإطارات الصحيح — أهميته وكيفية فحصه",
-    titleEn: "Correct Tire Pressure — Why It Matters and How to Check",
-    excerptAr:
-      "الضغط الصحيح للإطارات يحسن الأمان ويقلل استهلاك الوقود ويطيل عمر الإطار.",
-    excerptEn:
-      "Correct tire pressure improves safety, reduces fuel consumption, and extends tire life.",
-    date: "2025-04-10",
-    readMinAr: "٣ دقائق",
-    readMinEn: "3 min read",
-    icon: "tire_repair",
-    color: "bg-rose-500",
-  },
+const CARD_COLORS = [
+  "bg-orange-500",
+  "bg-blue-500",
+  "bg-emerald-500",
+  "bg-amber-500",
+  "bg-purple-500",
+  "bg-cyan-500",
+  "bg-rose-500",
+  "bg-indigo-500",
+  "bg-teal-500",
+  "bg-pink-500",
 ];
 
-const CATEGORIES = [
-  { slugKey: "all", labelAr: "الكل", labelEn: "All" },
-  { slugKey: "maintenance", labelAr: "الصيانة", labelEn: "Maintenance" },
-  { slugKey: "parts", labelAr: "قطع الغيار", labelEn: "Spare Parts" },
-  { slugKey: "safety", labelAr: "السلامة", labelEn: "Safety" },
-  { slugKey: "success", labelAr: "قصص نجاح", labelEn: "Success Stories" },
-];
-
-function formatDate(dateStr: string, isAr: boolean) {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString(isAr ? "ar-EG" : "en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
+const FEATURED_GRADIENT = "from-orange-600 to-red-700";
 
 export default async function BlogPage({ params }: Props) {
   const { lang } = await params;
   const isAr = lang === "ar";
+
+  const allArticles = getAllArticles();
+  const featured = allArticles[0];
+  const posts = allArticles.slice(1);
 
   return (
     <div
@@ -166,7 +55,6 @@ export default async function BlogPage({ params }: Props) {
       {/* ── Hero ─────────────────────────────────────────────────────── */}
       <section className="bg-slate-950 text-white">
         <div className="max-w-7xl mx-auto px-6 py-16 md:py-20">
-          {/* Breadcrumb */}
           <nav className="text-xs text-slate-400 mb-8 flex items-center gap-2">
             <Link
               href={`/${lang}`}
@@ -196,115 +84,93 @@ export default async function BlogPage({ params }: Props) {
       {/* ── Featured post ────────────────────────────────────────────── */}
       <section className="max-w-7xl mx-auto px-6 py-12">
         <Link
-          href={`/${lang}/blog/${FEATURED_POST.slug}`}
+          href={`/${lang}/blog/${featured.slug}`}
           className="group block rounded-3xl overflow-hidden shadow-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:shadow-2xl transition-shadow"
         >
-          {/* Banner */}
           <div
-            className={`bg-gradient-to-r ${FEATURED_POST.color} p-10 md:p-14 text-white relative overflow-hidden`}
+            className={`bg-gradient-to-r ${FEATURED_GRADIENT} p-10 md:p-14 text-white relative overflow-hidden`}
           >
             <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/4" />
             <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-black/10 translate-y-1/2 -translate-x-1/4" />
             <div className="relative">
               <span className="inline-block bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full mb-4">
-                {isAr ? FEATURED_POST.categoryAr : FEATURED_POST.categoryEn}
+                {isAr ? "مقال مميز" : "Featured"}
               </span>
               <h2 className="text-2xl md:text-3xl font-black leading-tight mb-3">
-                {isAr ? FEATURED_POST.titleAr : FEATURED_POST.titleEn}
+                {isAr ? featured.title_ar : featured.title_en}
               </h2>
               <p className="text-white/80 text-base leading-relaxed max-w-2xl">
-                {isAr ? FEATURED_POST.excerptAr : FEATURED_POST.excerptEn}
+                {isAr
+                  ? featured.meta_description_ar
+                  : featured.meta_description_en}
               </p>
             </div>
           </div>
-          {/* Footer */}
           <div className="px-8 py-5 flex items-center justify-between">
-            <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
-              <span className="flex items-center gap-1">
-                <span className="material-symbols-outlined text-sm">
-                  calendar_today
-                </span>
-                {formatDate(FEATURED_POST.date, isAr)}
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="material-symbols-outlined text-sm">
-                  schedule
-                </span>
-                {isAr ? FEATURED_POST.readMinAr : FEATURED_POST.readMinEn}
-              </span>
-            </div>
+            <span className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4" aria-hidden>
+                <path fillRule="evenodd" d="M1 8a7 7 0 1 1 14 0A7 7 0 0 1 1 8Zm7.75-4.25a.75.75 0 0 0-1.5 0V8c0 .414.336.75.75.75h3.25a.75.75 0 0 0 0-1.5h-2.5v-3.5Z" clipRule="evenodd" />
+              </svg>
+              {calculateReadingTime(isAr ? featured.content_ar : featured.content_en, isAr)}{" "}
+              {isAr ? "دقيقة قراءة" : "min read"}
+            </span>
             <span className="text-[#FF4B19] font-semibold text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
               {isAr ? "اقرأ المقال" : "Read Article"}
-              <span className="material-symbols-outlined text-base">
-                {isAr ? "arrow_back" : "arrow_forward"}
-              </span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className={`w-4 h-4 ${isAr ? "rotate-180" : ""}`} aria-hidden>
+                <path fillRule="evenodd" d="M2 8a.75.75 0 0 1 .75-.75h8.69L8.22 4.03a.75.75 0 0 1 1.06-1.06l4.5 4.5a.75.75 0 0 1 0 1.06l-4.5 4.5a.75.75 0 0 1-1.06-1.06l3.22-3.22H2.75A.75.75 0 0 1 2 8Z" clipRule="evenodd" />
+              </svg>
             </span>
           </div>
         </Link>
       </section>
 
-      {/* ── Category pills ───────────────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-6 pb-4">
-        <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.slugKey}
-              className={`flex-shrink-0 px-5 py-2 rounded-full text-sm font-semibold transition-colors border ${
-                cat.slugKey === "all"
-                  ? "bg-[#FF4B19] text-white border-[#FF4B19]"
-                  : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-[#FF4B19] hover:text-[#FF4B19]"
-              }`}
-            >
-              {isAr ? cat.labelAr : cat.labelEn}
-            </button>
-          ))}
-        </div>
-      </section>
-
       {/* ── Posts grid ───────────────────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-6 py-8 pb-20">
+      <section className="max-w-7xl mx-auto px-6 py-4 pb-20">
         <h2 className="text-xl font-black text-slate-900 dark:text-white mb-6">
           {isAr ? "أحدث المقالات" : "Latest Articles"}
         </h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {POSTS.map((post) => (
-            <Link
-              key={post.slug}
-              href={`/${lang}/blog/${post.slug}`}
-              className="group bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-lg transition-shadow"
-            >
-              {/* Icon banner */}
-              <div
-                className={`${post.color} h-36 flex items-center justify-center relative overflow-hidden`}
+          {posts.map((post, i) => {
+            const color = CARD_COLORS[i % CARD_COLORS.length];
+            const readMin = calculateReadingTime(
+              isAr ? post.content_ar : post.content_en,
+              isAr,
+            );
+            return (
+              <Link
+                key={post.slug}
+                href={`/${lang}/blog/${post.slug}`}
+                className="group bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-lg transition-shadow"
               >
-                <div className="absolute inset-0 opacity-20 bg-gradient-to-br from-white to-transparent" />
-                <span className="material-symbols-outlined text-white text-6xl opacity-90 drop-shadow-lg">
-                  {post.icon}
-                </span>
-              </div>
-              {/* Content */}
-              <div className="p-5">
-                <span className="inline-block text-xs font-semibold text-[#FF4B19] bg-[#FF4B19]/10 px-2.5 py-0.5 rounded-full mb-3">
-                  {isAr ? post.categoryAr : post.categoryEn}
-                </span>
-                <h3 className="font-black text-slate-900 dark:text-white leading-snug mb-2 group-hover:text-[#FF4B19] transition-colors line-clamp-2">
-                  {isAr ? post.titleAr : post.titleEn}
-                </h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 mb-4">
-                  {isAr ? post.excerptAr : post.excerptEn}
-                </p>
-                <div className="flex items-center justify-between text-xs text-slate-400 dark:text-slate-500">
-                  <span>{formatDate(post.date, isAr)}</span>
-                  <span className="flex items-center gap-1">
-                    <span className="material-symbols-outlined text-xs">
-                      schedule
-                    </span>
-                    {isAr ? post.readMinAr : post.readMinEn}
-                  </span>
+                {/* Color banner */}
+                <div
+                  className={`${color} h-36 flex items-center justify-center relative overflow-hidden`}
+                >
+                  <div className="absolute inset-0 opacity-20 bg-gradient-to-br from-white to-transparent" />
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-14 h-14 text-white opacity-80 drop-shadow-lg" aria-hidden>
+                    <path d="M11.25 4.533A9.707 9.707 0 0 0 6 3a9.735 9.735 0 0 0-3.25.555.75.75 0 0 0-.5.707v14.25a.75.75 0 0 0 1 .707A8.237 8.237 0 0 1 6 18.75c1.995 0 3.823.707 5.25 1.886V4.533ZM12.75 20.636A8.214 8.214 0 0 1 18 18.75c.966 0 1.89.166 2.75.47a.75.75 0 0 0 1-.708V4.262a.75.75 0 0 0-.5-.707A9.735 9.735 0 0 0 18 3a9.707 9.707 0 0 0-5.25 1.533v16.103Z" />
+                  </svg>
                 </div>
-              </div>
-            </Link>
-          ))}
+                {/* Content */}
+                <div className="p-5">
+                  <h3 className="font-black text-slate-900 dark:text-white leading-snug mb-2 group-hover:text-[#FF4B19] transition-colors line-clamp-2">
+                    {isAr ? post.title_ar : post.title_en}
+                  </h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 mb-4">
+                    {isAr ? post.meta_description_ar : post.meta_description_en}
+                  </p>
+                  <div className="flex items-center justify-end text-xs text-slate-400 dark:text-slate-500">
+                    <span className="flex items-center gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5" aria-hidden>
+                        <path fillRule="evenodd" d="M1 8a7 7 0 1 1 14 0A7 7 0 0 1 1 8Zm7.75-4.25a.75.75 0 0 0-1.5 0V8c0 .414.336.75.75.75h3.25a.75.75 0 0 0 0-1.5h-2.5v-3.5Z" clipRule="evenodd" />
+                      </svg>
+                      {readMin} {isAr ? "دقيقة" : "min read"}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
