@@ -1,6 +1,16 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    serverActions: {
+      allowedOrigins: [
+        "warshety.com",
+        "www.warshety.com",
+        "warshety-omarmohamed06s-projects.vercel.app",
+        "warshety-git-main-omarmohamed06s-projects.vercel.app",
+      ],
+    },
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
