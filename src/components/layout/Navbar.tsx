@@ -55,6 +55,7 @@ import {
   MoreHorizontal,
   Globe,
   ChevronRight,
+  Gift,
 } from "lucide-react";
 
 const LANGUAGES = [
@@ -72,6 +73,11 @@ const NAV_LINKS = [
     tKey: "nav.serviceCenters",
     href: "/services",
     icon: <Wrench className="w-4 h-4" />,
+  },
+  {
+    tKey: "nav.rewards",
+    href: "/rewards",
+    icon: <Gift className="w-4 h-4" />,
   },
   {
     tKey: "nav.becomeVendor",
@@ -770,6 +776,15 @@ export default function Navbar() {
                         {t("nav.myOrders")}
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/rewards"
+                        className="text-orange-500 font-semibold"
+                      >
+                        <Gift className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                        My Rewards
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       className="text-destructive focus:text-destructive"
@@ -811,11 +826,11 @@ export default function Navbar() {
               className="h-7 hidden sm:block mx-1"
             />
 
-            {/* Cart — desktop only */}
+            {/* Cart */}
             <Button
               variant="ghost"
               size="sm"
-              className="relative gap-1.5 px-2.5 hidden sm:flex"
+              className="relative gap-1.5 px-2.5 flex"
               onClick={() => setCartOpen(true)}
             >
               <div className="relative">
@@ -1033,22 +1048,26 @@ export default function Navbar() {
           {t("nav.carParts")}
         </Link>
 
-        {/* Cart — center feature button */}
-        <button
-          onClick={() => setCartOpen(true)}
+        {/* Rewards — center feature button */}
+        <Link
+          href="/rewards"
           className="flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold text-muted-foreground relative"
-          aria-label={t("nav.cart")}
         >
-          <div className="relative -mt-5 w-12 h-12 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/30">
-            <ShoppingCart className="w-5 h-5 text-primary-foreground" />
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[17px] h-[17px] bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center px-[3px]">
-                {cartCount}
-              </span>
-            )}
+          <div
+            className={`relative -mt-5 w-12 h-12 rounded-full flex items-center justify-center shadow-lg shadow-primary/30 ${
+              pathname.includes("/rewards") ? "bg-primary" : "bg-primary"
+            }`}
+          >
+            <Gift className="w-5 h-5 text-primary-foreground" />
           </div>
-          <span className="mt-0.5">{t("nav.cartLabel")}</span>
-        </button>
+          <span
+            className={`mt-0.5 ${
+              pathname.includes("/rewards") ? "text-primary font-bold" : ""
+            }`}
+          >
+            Rewards
+          </span>
+        </Link>
 
         {/* Services */}
         <Link
@@ -1156,6 +1175,18 @@ export default function Navbar() {
                   icon: <ShoppingBag className="w-6 h-6" />,
                   tKey: "nav.myOrders",
                   color: "text-green-500 bg-green-50 dark:bg-green-950/40",
+                },
+                {
+                  href: "/rewards",
+                  icon: <Gift className="w-6 h-6" />,
+                  tKey: "nav.rewards",
+                  color: "text-orange-500 bg-orange-50 dark:bg-orange-950/40",
+                },
+                {
+                  href: "/services",
+                  icon: <Wrench className="w-6 h-6" />,
+                  tKey: "nav.serviceCenters",
+                  color: "text-amber-500 bg-amber-50 dark:bg-amber-950/40",
                 },
                 {
                   href: "/vendor/apply",

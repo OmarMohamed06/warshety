@@ -1,4 +1,7 @@
+export const dynamic = "force-dynamic";
+
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import BookingTracker from "@/components/tracking/BookingTracker";
 import en from "@/../messages/en.json";
 import ar from "@/../messages/ar.json";
@@ -41,7 +44,15 @@ export default async function TrackBookingPage({
           <h1 className="text-2xl font-black mt-3">{m.tracking.heading}</h1>
           <p className="text-slate-500 text-sm mt-1">{m.tracking.subtitle}</p>
         </div>
-        <BookingTracker bookingId={id} />
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center py-16">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            </div>
+          }
+        >
+          <BookingTracker bookingId={id} />
+        </Suspense>
       </div>
     </div>
   );

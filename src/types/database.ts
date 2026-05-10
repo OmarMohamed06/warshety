@@ -298,6 +298,66 @@ export interface DbVendorApplication {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// REWARDS SYSTEM
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type RewardCategory =
+  | "wash"
+  | "detailing"
+  | "protection"
+  | "inspection"
+  | "parts"
+  | "other";
+
+export type RewardType = "service_reward" | "parts_reward";
+
+export type PointsTransactionType =
+  | "booking_reward"
+  | "redeem_service"
+  | "redeem_parts"
+  | "admin_adjustment";
+
+export interface DbReward {
+  id: string;
+  title: string;
+  title_ar: string | null;
+  description: string | null;
+  description_ar: string | null;
+  points_required: number;
+  category: RewardCategory;
+  type: RewardType;
+  image_url: string | null;
+  value: number | null;
+  value_type: "fixed" | "percent";
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DbUserReward {
+  id: string;
+  user_id: string;
+  reward_id: string;
+  code: string;
+  qr_data: string | null;
+  is_used: boolean;
+  used_at: string | null;
+  created_at: string;
+  // Joined
+  reward?: DbReward;
+}
+
+export interface DbPointsTransaction {
+  id: string;
+  user_id: string;
+  points: number;
+  type: PointsTransactionType;
+  reference_id: string | null;
+  note: string | null;
+  created_at: string;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Supabase Database generic type (for typed client)
 // ─────────────────────────────────────────────────────────────────────────────
 

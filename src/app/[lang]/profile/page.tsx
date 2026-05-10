@@ -294,6 +294,12 @@ export default function ProfilePage() {
               label: t("profile.myOrders"),
               desc: t("profile.partsHistory"),
             },
+            {
+              href: "/rewards",
+              icon: "card_giftcard",
+              label: "My Rewards",
+              desc: "Points, vouchers & perks",
+            },
           ].map((link) => (
             <Link
               key={link.href}

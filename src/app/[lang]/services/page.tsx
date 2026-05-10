@@ -1,4 +1,6 @@
-﻿import type { Metadata } from "next";
+﻿export const dynamic = "force-dynamic";
+
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import ServiceCentersClient from "@/components/services/ServiceCentersClient";

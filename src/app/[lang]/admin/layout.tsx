@@ -63,6 +63,11 @@ function getNavGroups(t: (k: string) => string, lang: string) {
           icon: "confirmation_number",
           href: `/${lang}/admin/offers`,
         },
+        {
+          label: "Rewards",
+          icon: "redeem",
+          href: `/${lang}/admin/rewards`,
+        },
       ],
     },
     {
