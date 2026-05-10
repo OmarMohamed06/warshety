@@ -74,23 +74,31 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Generate unique code ──────────────────────────────────────────────────
-  const prefix = reward.type === "parts_reward" ? "PART" : "WRS";
-  let code = generateCode(prefix);
+  // parts_reward: use the fixed promo_code stored on the reward (set by admin)
+  // service_reward: generate a unique per-user WRS-XXXXXX code
+  let code: string;
 
-  // Retry on collision (extremely rare)
-  let collision = true;
-  let attempts = 0;
-  while (collision && attempts < 5) {
-    const { data: existing } = await supabase
-      .from("user_rewards")
-      .select("id")
-      .eq("code", code)
-      .maybeSingle();
-    if (!existing) {
-      collision = false;
-    } else {
-      code = generateCode(prefix);
-      attempts++;
+  if (reward.type === "parts_reward" && (reward as any).promo_code) {
+    code = String((reward as any).promo_code).toUpperCase();
+  } else {
+    const prefix = reward.type === "parts_reward" ? "PART" : "WRS";
+    code = generateCode(prefix);
+
+    // Retry on collision (extremely rare)
+    let collision = true;
+    let attempts = 0;
+    while (collision && attempts < 5) {
+      const { data: existing } = await supabase
+        .from("user_rewards")
+        .select("id")
+        .eq("code", code)
+        .maybeSingle();
+      if (!existing) {
+        collision = false;
+      } else {
+        code = generateCode(prefix);
+        attempts++;
+      }
     }
   }
 

@@ -44,7 +44,8 @@ export type OutboundEventType =
   | "new_booking_vendor"
   | "new_order_vendor"
   | "payment_due"
-  | "payment_overdue";
+  | "payment_overdue"
+  | "vendor_approved";
 
 export type NotificationChannel = "sms" | "email";
 
@@ -960,5 +961,54 @@ export async function notifyVendorPaymentOverdue({
     `URGENT: Payment of ${amountEGP.toFixed(2)} EGP Overdue`,
     html,
     { userId: vendorUserId, eventType: "payment_overdue", windowHours: 0 },
+  );
+}
+
+/**
+ * 9. Vendor Application Approved — sent when admin approves a vendor application.
+ * Rate-limited: max 1 email per vendor (idempotencyKey = vendorId/userId).
+ */
+export async function notifyVendorApprovedEmail({
+  vendorUserId,
+  vendorEmail,
+  businessName,
+  ownerName,
+  dashboardLink,
+}: {
+  vendorUserId?: string;
+  vendorEmail: string;
+  businessName: string;
+  ownerName?: string;
+  dashboardLink?: string;
+}): Promise<void> {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://warshety.com";
+  const link = dashboardLink ?? `${appUrl}/en/vendor/dashboard`;
+  const greeting = ownerName ? `Hi ${ownerName},` : "Hi,";
+
+  const html = emailWrapper(
+    "Your Vendor Application is Approved 🎉",
+    `<span style="${S.badge("#dcfce7", "#166534")}">🎉 Application Approved</span>
+    <p style="${S.title}">Welcome to Warshety!</p>
+    <p style="${S.subtitle}">${greeting} great news — your vendor application for <strong>${businessName}</strong> has been approved. Your account is now active and ready to go.</p>
+    ${infoRow("Business Name", businessName)}
+    ${infoRow("Status", '<span style="color:#16a34a;font-weight:700">✓ Approved &amp; Active</span>')}
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px 18px;margin:20px 0">
+      <p style="font-size:13px;color:#166534;margin:0;line-height:1.6;font-family:Arial,sans-serif">
+        You can now log in with the email and password you chose during your application. Set up your profile, add your services, and start receiving bookings.
+      </p>
+    </div>
+    ${ctaButton(link, "Go to Your Dashboard")}`,
+  );
+
+  await sendEmail(
+    vendorEmail,
+    `Your Warshety vendor account is approved — ${businessName}`,
+    html,
+    {
+      userId: vendorUserId,
+      eventType: "vendor_approved",
+      windowHours: 0,
+      idempotencyKey: vendorUserId ?? vendorEmail,
+    },
   );
 }

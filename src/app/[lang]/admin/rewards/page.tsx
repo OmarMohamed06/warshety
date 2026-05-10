@@ -56,6 +56,7 @@ interface Reward {
   image_url: string | null;
   value: number | null;
   value_type: ValueType;
+  promo_code: string | null;
   is_active: boolean;
   created_at: string;
 }
@@ -107,6 +108,7 @@ const EMPTY_FORM = {
   image_url: "",
   value: "",
   value_type: "fixed" as ValueType,
+  promo_code: "",
   is_active: true,
 };
 
@@ -180,6 +182,7 @@ export default function AdminRewardsPage() {
       image_url: r.image_url ?? "",
       value: r.value !== null ? String(r.value) : "",
       value_type: r.value_type,
+      promo_code: r.promo_code ?? "",
       is_active: r.is_active,
     });
     setError(null);
@@ -202,6 +205,11 @@ export default function AdminRewardsPage() {
     setSaving(true);
     setError(null);
 
+    if (form.type === "parts_reward" && !form.promo_code.trim()) {
+      setError("Promo code is required for parts rewards.");
+      return;
+    }
+
     const payload = {
       title: form.title.trim(),
       title_ar: form.title_ar.trim() || null,
@@ -213,6 +221,10 @@ export default function AdminRewardsPage() {
       image_url: form.image_url.trim() || null,
       value: form.value !== "" ? Number(form.value) : null,
       value_type: form.value_type,
+      promo_code:
+        form.type === "parts_reward"
+          ? form.promo_code.trim().toUpperCase() || null
+          : null,
       is_active: form.is_active,
     };
 
@@ -529,6 +541,11 @@ export default function AdminRewardsPage() {
                     <p className="text-[11px] font-bold text-orange-500 mt-0.5">
                       {valueLabel}
                     </p>
+                    {r.type === "parts_reward" && r.promo_code && (
+                      <p className="mt-0.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 text-[10px] font-mono font-bold tracking-widest">
+                        {r.promo_code}
+                      </p>
+                    )}
                   </div>
 
                   {/* Category */}
@@ -796,6 +813,32 @@ export default function AdminRewardsPage() {
                 </div>
               </div>
             </div>
+
+            {/* Promo code — only for parts_reward */}
+            {form.type === "parts_reward" && (
+              <div className="space-y-1.5 rounded-xl border-2 border-orange-200 bg-orange-50 dark:bg-orange-950/20 dark:border-orange-800 px-4 py-3">
+                <Label className="text-xs font-bold text-orange-700 dark:text-orange-400">
+                  Promo Code <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  placeholder="e.g. PARTS100 or TIRE50"
+                  value={form.promo_code}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      promo_code: e.target.value
+                        .toUpperCase()
+                        .replace(/\s/g, ""),
+                    }))
+                  }
+                  className="font-mono font-bold tracking-widest uppercase"
+                />
+                <p className="text-[11px] text-orange-600 dark:text-orange-400">
+                  This is the discount code customers will receive after
+                  redeeming their points. They apply it at parts checkout.
+                </p>
+              </div>
+            )}
 
             {/* Image URL */}
             <div className="space-y-1.5">

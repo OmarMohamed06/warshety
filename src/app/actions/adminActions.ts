@@ -23,6 +23,7 @@ import { createClient as createAdminSupabaseClient } from "@supabase/supabase-js
 import { generateSlugEn, generateSlugAr } from "@/utils/seo";
 import enMessages from "@/../messages/en.json";
 import arMessages from "@/../messages/ar.json";
+import { notifyVendorApprovedEmail } from "@/services/outboundNotificationService";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -448,6 +449,18 @@ export async function approveVendorApplication(
       reviewed_by: adminUser?.id ?? null,
     })
     .eq("id", applicationId);
+
+  // ── 5. Send approval email to vendor ─────────────────────────────────────
+  if (app.email) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://warshety.com";
+    await notifyVendorApprovedEmail({
+      vendorUserId: app.user_id ?? undefined,
+      vendorEmail: app.email,
+      businessName: app.business_name,
+      ownerName: app.owner_name ?? undefined,
+      dashboardLink: `${appUrl}/en/vendor/dashboard`,
+    }).catch((e) => console.error("[approveVendor] approval email error:", e));
+  }
 
   return { error: null };
 }

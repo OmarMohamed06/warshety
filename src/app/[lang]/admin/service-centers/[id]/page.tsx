@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
@@ -43,6 +43,33 @@ export default function ServiceCenterDetailPage({
   const [isApplication, setIsApplication] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  // points_reward inline edit: map of serviceId → draft value
+  const [pointsDraft, setPointsDraft] = useState<Record<string, string>>({});
+  const [savingPoints, setSavingPoints] = useState<string | null>(null);
+  const pointsToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  async function savePoints(serviceId: string) {
+    const pts = Number(pointsDraft[serviceId]);
+    if (isNaN(pts) || pts < 0) return;
+    setSavingPoints(serviceId);
+    const { error } = await (supabase as any)
+      .from("services")
+      .update({ points_reward: pts })
+      .eq("id", serviceId);
+    setSavingPoints(null);
+    if (!error) {
+      setServices((prev) =>
+        prev.map((s) =>
+          String(s.id) === serviceId ? { ...s, points_reward: pts } : s,
+        ),
+      );
+      if (pointsToastTimer.current) clearTimeout(pointsToastTimer.current);
+      setMsg(`Points updated to ${pts} pts ✓`);
+      pointsToastTimer.current = setTimeout(() => setMsg(null), 3000);
+    } else {
+      setMsg(`Error: ${error.message}`);
+    }
+  }
 
   useEffect(() => {
     async function load() {
@@ -572,22 +599,61 @@ export default function ServiceCenterDetailPage({
             </h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
-            {services.map((s) => (
-              <div
-                key={String(s.id)}
-                className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl"
-              >
-                <p className="font-bold text-sm">{String(s.name)}</p>
-                <p className="text-[#FF4B19] font-black text-lg">
-                  EGP {Number(s.price).toLocaleString()}
-                </p>
-                {!!s.duration_minutes && (
-                  <p className="text-xs text-slate-400">
-                    {Number(s.duration_minutes as number)} min
+            {services.map((s) => {
+              const sid = String(s.id);
+              const currentPts = Number(s.points_reward ?? 0);
+              const draft = pointsDraft[sid] ?? String(currentPts);
+              const isDirty = Number(draft) !== currentPts;
+              return (
+                <div
+                  key={sid}
+                  className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl space-y-2"
+                >
+                  <p className="font-bold text-sm">{String(s.name)}</p>
+                  <p className="text-[#FF4B19] font-black text-lg">
+                    EGP {Number(s.price).toLocaleString()}
                   </p>
-                )}
-              </div>
-            ))}
+                  {!!s.duration_minutes && (
+                    <p className="text-xs text-slate-400">
+                      {Number(s.duration_minutes as number)} min
+                    </p>
+                  )}
+                  {/* Points reward inline edit */}
+                  <div className="pt-1 border-t border-slate-200 dark:border-slate-700">
+                    <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">
+                      Points on completion
+                    </p>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="number"
+                        min={0}
+                        value={draft}
+                        onChange={(e) =>
+                          setPointsDraft((prev) => ({
+                            ...prev,
+                            [sid]: e.target.value,
+                          }))
+                        }
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && isDirty) savePoints(sid);
+                        }}
+                        className="w-20 px-2 py-1 text-sm font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-[#FF4B19]/30"
+                      />
+                      <span className="text-xs text-slate-400">pts</span>
+                      {isDirty && (
+                        <button
+                          onClick={() => savePoints(sid)}
+                          disabled={savingPoints === sid}
+                          className="px-2 py-1 text-xs font-bold rounded-lg bg-[#FF4B19] text-white hover:bg-[#e04316] disabled:opacity-50 transition-colors"
+                        >
+                          {savingPoints === sid ? "…" : "Save"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

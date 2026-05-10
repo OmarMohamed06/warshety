@@ -782,7 +782,7 @@ export default function Navbar() {
                         className="text-orange-500 font-semibold"
                       >
                         <Gift className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
-                        My Rewards
+                        {t("nav.rewards")}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -1065,7 +1065,7 @@ export default function Navbar() {
               pathname.includes("/rewards") ? "text-primary font-bold" : ""
             }`}
           >
-            Rewards
+            {t("nav.rewards")}
           </span>
         </Link>
 
