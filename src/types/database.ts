@@ -372,6 +372,7 @@ export type Database = {
           phone: string | null;
           avatar_url: string | null;
           role: UserRole;
+          total_points: number;
           created_at: string;
           updated_at: string;
         };
@@ -382,6 +383,7 @@ export type Database = {
           phone?: string | null;
           avatar_url?: string | null;
           role?: UserRole;
+          total_points?: number;
           created_at?: string;
           updated_at?: string;
         };
@@ -392,6 +394,7 @@ export type Database = {
           phone?: string | null;
           avatar_url?: string | null;
           role?: UserRole;
+          total_points?: number;
           created_at?: string;
           updated_at?: string;
         };
@@ -1634,6 +1637,143 @@ export type Database = {
           },
         ];
       };
+      rewards: {
+        Row: {
+          id: string;
+          title: string;
+          title_ar: string | null;
+          description: string | null;
+          description_ar: string | null;
+          points_required: number;
+          category: RewardCategory;
+          type: RewardType;
+          image_url: string | null;
+          value: number | null;
+          value_type: string | null;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          title_ar?: string | null;
+          description?: string | null;
+          description_ar?: string | null;
+          points_required: number;
+          category?: RewardCategory;
+          type: RewardType;
+          image_url?: string | null;
+          value?: number | null;
+          value_type?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          title_ar?: string | null;
+          description?: string | null;
+          description_ar?: string | null;
+          points_required?: number;
+          category?: RewardCategory;
+          type?: RewardType;
+          image_url?: string | null;
+          value?: number | null;
+          value_type?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      user_rewards: {
+        Row: {
+          id: string;
+          user_id: string;
+          reward_id: string;
+          code: string;
+          qr_data: string | null;
+          is_used: boolean;
+          used_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          reward_id: string;
+          code: string;
+          qr_data?: string | null;
+          is_used?: boolean;
+          used_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          reward_id?: string;
+          code?: string;
+          qr_data?: string | null;
+          is_used?: boolean;
+          used_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_rewards_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "user_rewards_reward_id_fkey";
+            columns: ["reward_id"];
+            isOneToOne: false;
+            referencedRelation: "rewards";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      points_transactions: {
+        Row: {
+          id: string;
+          user_id: string;
+          points: number;
+          type: PointsTransactionType;
+          reference_id: string | null;
+          note: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          points: number;
+          type: PointsTransactionType;
+          reference_id?: string | null;
+          note?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          points?: number;
+          type?: PointsTransactionType;
+          reference_id?: string | null;
+          note?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "points_transactions_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -1671,6 +1811,10 @@ export type Database = {
           last_activity: string | null;
         }[];
       };
+      use_reward_code: {
+        Args: { p_code: string };
+        Returns: Record<string, unknown>;
+      };
     };
     Enums: {
       user_role: UserRole;
@@ -1680,6 +1824,9 @@ export type Database = {
       order_status: OrderStatus;
       notification_type: NotificationType;
       slot_override_type: SlotOverrideType;
+      points_transaction_type: PointsTransactionType;
+      reward_category: RewardCategory;
+      reward_type: RewardType;
     };
     CompositeTypes: {
       [_ in never]: never;
