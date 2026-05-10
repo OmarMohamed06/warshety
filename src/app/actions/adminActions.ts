@@ -237,7 +237,7 @@ export async function submitVendorApplication(params: {
       open_time: params.open_time ?? null,
       close_time: params.close_time ?? null,
       specializations: params.specializations ?? null,
-      supported_makes: params.supported_makes ?? null,
+      supported_makes: params.supported_makes ?? [],
       delivery_options: params.delivery_options ?? null,
       return_policy: params.return_policy ?? null,
       address: params.address ?? null,
