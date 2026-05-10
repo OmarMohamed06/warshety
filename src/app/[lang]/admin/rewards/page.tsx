@@ -152,7 +152,7 @@ export default function AdminRewardsPage() {
       .from("rewards")
       .select("*")
       .order("points_required", { ascending: true });
-    setRewards((data as Reward[]) ?? []);
+    setRewards((data as unknown as Reward[]) ?? []);
     setLoading(false);
   }, [supabase]);
 
