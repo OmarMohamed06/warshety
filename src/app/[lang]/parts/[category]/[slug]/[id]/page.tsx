@@ -724,12 +724,6 @@ export default async function PartDetailPage({ params }: Props) {
                   <p className="text-xs font-bold text-blue-700 dark:text-blue-400">
                     {t("parts.fastDelivery")}
                   </p>
-                  <p className="text-xs text-blue-600 dark:text-blue-500">
-                    {t("parts.deliveryDays").replace(
-                      "{count}",
-                      String(part.deliveryDays),
-                    )}
-                  </p>
                 </div>
               </div>
             </div>
