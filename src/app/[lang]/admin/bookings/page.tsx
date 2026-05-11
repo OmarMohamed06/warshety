@@ -33,7 +33,7 @@ interface Booking {
   created_at: string;
   users: { full_name: string | null; email: string } | null;
   vendors: { business_name: string } | null;
-  services: { name: string } | null;
+  services?: { name: string } | null;
 }
 
 const STATUS_BADGE: Record<BookingStatus, string> = {
@@ -75,7 +75,7 @@ export default function AdminBookingsPage() {
     let q = supabase
       .from("bookings")
       .select(
-        "id, display_id, booking_date, booking_type, status, notes, total_price, mileage, cancelled_by, created_at, users(full_name, email), vendors(business_name), services(name)",
+        "id, display_id, booking_date, booking_type, status, notes, total_price, mileage, cancelled_by, created_at, users(full_name, email), vendors(business_name)",
         { count: "exact" },
       );
 
@@ -91,7 +91,8 @@ export default function AdminBookingsPage() {
       .order("created_at", { ascending: false })
       .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
 
-    const { data, count } = await q;
+    const { data, count, error } = await q;
+    if (error) console.error("[AdminBookings] fetch error:", error.message);
     setBookings((data ?? []) as unknown as Booking[]);
     setTotal(count ?? 0);
     setLoading(false);

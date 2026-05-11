@@ -176,7 +176,9 @@ export async function POST(req: NextRequest) {
         amount: Math.round(item.price * 100),
         quantity: item.qty,
       })),
-      specialReference,
+      // Use orderId (UUID) as the Paymob special_reference so retries
+      // for the same order don't conflict on Paymob's side.
+      specialReference: orderId,
       notificationUrl: `${APP_URL}/api/payments/webhook`,
       redirectionUrl: `${APP_URL}/en/checkout/payment-result`,
     });

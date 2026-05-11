@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     const origin = req.nextUrl.origin;
 
     // Fetch order with user info
-    const { data: order } = await supabase
+    const { data: order, error: orderError } = await supabase
       .from("orders")
       .select(
         `id, total_amount, delivery_name, user_id,
@@ -31,8 +31,13 @@ export async function POST(req: NextRequest) {
       .eq("id", orderId)
       .single();
 
-    if (!order)
+    if (!order) {
+      console.error(
+        "[orders/notify] order not found or join failed:",
+        orderError?.message,
+      );
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
 
     // Fetch order items
     const { data: orderItems } = await supabase

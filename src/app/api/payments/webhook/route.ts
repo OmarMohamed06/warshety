@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { verifyHmac } from "@/lib/paymob";
+import {
+  notifyCustomerOrderConfirmed,
+  notifyVendorNewOrder,
+} from "@/services/outboundNotificationService";
 
 /**
  * Paymob transaction webhook.
@@ -62,10 +66,11 @@ export async function POST(req: NextRequest) {
   const db = getServiceClient();
 
   // 7. Update order status to "paid" (idempotent — safe to call multiple times)
+  // special_reference is set to the order UUID (see intention/route.ts)
   const { data: order, error: updateError } = await db
     .from("orders")
     .update({ status: "paid" as const })
-    .eq("idempotency_key", specialReference)
+    .eq("id", specialReference)
     .eq("status", "pending") // only update if still pending (avoids re-processing)
     .select("id")
     .maybeSingle();
@@ -79,16 +84,108 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true }, { status: 200 });
   }
 
-  // 8. Fire order confirmation notifications (non-blocking)
+  // 8. Fire order confirmation notifications (awaited — serverless functions kill unawaited promises)
   if (order?.id) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://warshety.com";
-    fetch(`${appUrl}/api/orders/notify`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderId: order.id }),
-    }).catch(() => {
-      /* non-fatal */
-    });
+    try {
+      const origin = req.nextUrl.origin;
+      const orderId = order.id;
+
+      // Fetch order user info and items in parallel
+      const [{ data: fullOrder }, { data: orderItems }] = await Promise.all([
+        db
+          .from("orders")
+          .select(
+            `id, total_amount, delivery_name, user_id, user:users!inner(phone, email, full_name)`,
+          )
+          .eq("id", orderId)
+          .single(),
+        db
+          .from("order_items")
+          .select("name, quantity, unit_price, vendor_id")
+          .eq("order_id", orderId),
+      ]);
+
+      const user = (fullOrder as { user?: { phone?: string; email?: string; full_name?: string } } | null)?.user ?? null;
+      const customerPhone = user?.phone ?? "";
+      const customerEmail = user?.email ?? "";
+      const customerName =
+        user?.full_name ??
+        (fullOrder as { delivery_name?: string } | null)?.delivery_name ??
+        "Customer";
+      const orderNumber = orderId.slice(0, 8).toUpperCase();
+      const items = (orderItems ?? []).map((i) => ({
+        name: i.name,
+        qty: i.quantity,
+        price: i.unit_price,
+      }));
+
+      // Notify customer
+      if (customerPhone || customerEmail) {
+        await notifyCustomerOrderConfirmed({
+          userId: (fullOrder as { user_id?: string } | null)?.user_id,
+          phone: customerPhone,
+          email: customerEmail,
+          orderNumber,
+          items,
+          totalAmount: (fullOrder as { total_amount?: number } | null)?.total_amount ?? 0,
+          orderLink: `${origin}/en/orders/${orderId}`,
+        }).catch((e) =>
+          console.error("[Paymob webhook] customer order notification failed:", e),
+        );
+      }
+
+      // Notify vendor(s)
+      const vendorIds = [
+        ...new Set(
+          (orderItems ?? []).map((i) => i.vendor_id).filter(Boolean),
+        ),
+      ];
+      for (const vendorId of vendorIds) {
+        try {
+          const { data: vendor } = await db
+            .from("vendors")
+            .select("user_id, business_name, email, phone")
+            .eq("id", vendorId)
+            .single();
+
+          const vendorAcctEmail = vendor?.user_id
+            ? (
+                await db
+                  .from("users")
+                  .select("email")
+                  .eq("id", vendor.user_id)
+                  .single()
+              ).data?.email
+            : null;
+          const vendorEmail = vendorAcctEmail ?? vendor?.email ?? null;
+
+          if (!vendor || !vendorEmail) continue;
+
+          const vendorItems = (orderItems ?? [])
+            .filter((i) => i.vendor_id === vendorId)
+            .map((i) => ({ name: i.name, qty: i.quantity, price: i.unit_price }));
+          const vendorTotal = vendorItems.reduce((s, i) => s + i.price * i.qty, 0);
+
+          await notifyVendorNewOrder({
+            vendorUserId: vendor.user_id ?? undefined,
+            vendorPhone: vendor.phone ?? "",
+            vendorEmail,
+            orderNumber,
+            customerName,
+            items: vendorItems,
+            totalAmount: vendorTotal,
+            dashboardLink: `${origin}/en/vendor/orders`,
+          });
+        } catch (e) {
+          console.error(
+            `[Paymob webhook] vendor ${vendorId} notification failed:`,
+            e,
+          );
+        }
+      }
+    } catch (e) {
+      console.error("[Paymob webhook] notifications failed:", e);
+    }
   }
 
   return NextResponse.json({ received: true }, { status: 200 });

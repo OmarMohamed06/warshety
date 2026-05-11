@@ -59,7 +59,7 @@ export default function BookingDetailPage({
         supabase
           .from("bookings")
           .select(
-            "*, users(full_name, email, phone), vendors(business_name, city, phone), vehicles(make, model, year, plate_number), services(name, price)",
+            "*, users(full_name, email, phone), vendors(business_name, city, phone), vehicles(make, model, year, plate_number)",
           )
           .eq("id", id)
           .single(),

@@ -12,6 +12,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { createClient } from "@/lib/supabase/client";
 import { LocaleLink as LocaleLink } from "@/components/ui/locale-link";
 import { PaymobPixel } from "@/components/checkout/PaymobPixel";
+import { notifyOrderConfirmedAction } from "@/app/actions/orderActions";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -712,9 +713,7 @@ function SuccessScreen({
 }) {
   const { t, locale } = useLanguage();
   const methodLabel =
-    method === "cod"
-      ? t("checkout.cashOnDelivery")
-      : t("checkout.creditCard");
+    method === "cod" ? t("checkout.cashOnDelivery") : t("checkout.creditCard");
   const methodIcon =
     method === "cod" ? (
       <Truck className="w-4 h-4" />
@@ -1005,11 +1004,9 @@ export default function CheckoutPage() {
       placingRef.current = false;
       setPlacing(false);
 
-      fetch("/api/orders/notify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId: savedId }),
-      }).catch(() => {
+      // Use a server action so the notification runs server-side and can't be
+      // cancelled by browser navigation or component unmount.
+      notifyOrderConfirmedAction(savedId).catch(() => {
         /* non-fatal */
       });
       return;
@@ -1082,9 +1079,9 @@ export default function CheckoutPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <LocaleLink href="/">
             <img
-              src="/motorlogo.png"
+              src="/warshety-nav.svg"
               alt="Warshety"
-              className="h-20 w-auto object-contain"
+              className="h-10 w-auto object-contain"
             />
           </LocaleLink>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
