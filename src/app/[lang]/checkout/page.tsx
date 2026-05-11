@@ -11,6 +11,7 @@ import { saveOrder } from "@/services/orderService";
 import { useLanguage } from "@/context/LanguageContext";
 import { createClient } from "@/lib/supabase/client";
 import { LocaleLink as LocaleLink } from "@/components/ui/locale-link";
+import { PaymobPixel } from "@/components/checkout/PaymobPixel";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -46,9 +47,11 @@ import { GOVERNORATES, getAreas, tGov, tArea } from "@/lib/locationData";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
+const PAYMOB_PUBLIC_KEY = process.env.NEXT_PUBLIC_PAYMOB_PUBLIC_KEY ?? "";
+
 type PaymentMethod = "cod" | "card" | "wallet";
 type WalletProvider = "vodafone" | "etisalat" | "we" | "instapay";
-type Step = "delivery" | "payment" | "success";
+type Step = "delivery" | "payment" | "paymob" | "success";
 
 function generateOrderId(): string {
   return `GRG-${Date.now().toString(36).toUpperCase().slice(-6)}`;
@@ -63,7 +66,14 @@ function StepIndicator({ step }: { step: Step }) {
     { key: "payment", label: t("checkout.payment") },
     { key: "success", label: t("checkout.confirm") },
   ];
-  const activeIndex = step === "delivery" ? 0 : step === "payment" ? 1 : 2;
+  const activeIndex =
+    step === "delivery"
+      ? 0
+      : step === "payment"
+        ? 1
+        : step === "paymob"
+          ? 1
+          : 2;
 
   return (
     <div className="flex items-center gap-0 mb-8">
@@ -534,70 +544,23 @@ function DeliveryStep({
 
 // ── Payment Step ──────────────────────────────────────────────────────────────
 
-interface CardForm {
-  number: string;
-  name: string;
-  expiry: string;
-  cvv: string;
-}
-
 function PaymentStep({
   method,
   setMethod,
-  walletProvider,
-  setWalletProvider,
-  walletNumber,
-  setWalletNumber,
-  cardForm,
-  setCardForm,
   onBack,
   onPlace,
   placing,
 }: {
   method: PaymentMethod;
   setMethod: (m: PaymentMethod) => void;
-  walletProvider: WalletProvider;
-  setWalletProvider: (w: WalletProvider) => void;
-  walletNumber: string;
-  setWalletNumber: (s: string) => void;
-  cardForm: CardForm;
-  setCardForm: (f: CardForm) => void;
   onBack: () => void;
   onPlace: () => void;
   placing: boolean;
 }) {
   const { total } = useCart();
   const { t, locale } = useLanguage();
-  const [cardErrors, setCardErrors] = useState<Partial<CardForm>>({});
 
-  function formatCardNumber(val: string) {
-    return val
-      .replace(/\D/g, "")
-      .slice(0, 16)
-      .replace(/(.{4})/g, "$1 ")
-      .trim();
-  }
-  function formatExpiry(val: string) {
-    const d = val.replace(/\D/g, "").slice(0, 4);
-    if (d.length >= 3) return `${d.slice(0, 2)}/${d.slice(2)}`;
-    return d;
-  }
-  function validateCard() {
-    const e: Partial<CardForm> = {};
-    if (
-      !cardForm.number.replace(/\s/g, "") ||
-      cardForm.number.replace(/\s/g, "").length < 16
-    )
-      e.number = "Enter a valid 16-digit card number";
-    if (!cardForm.name.trim()) e.name = "Required";
-    if (!cardForm.expiry || cardForm.expiry.length < 5)
-      e.expiry = "Enter MM/YY";
-    if (!cardForm.cvv || cardForm.cvv.length < 3) e.cvv = "Enter 3-digit CVV";
-    setCardErrors(e);
-    return Object.keys(e).length === 0;
-  }
   function handlePlace() {
-    if (method === "card" && !validateCard()) return;
     onPlace();
   }
 
@@ -682,135 +645,32 @@ function PaymentStep({
         ))}
       </div>
 
-      {/* Card form */}
+      {/* Card / Apple Pay / Google Pay — Paymob Pixel handles collection */}
       {method === "card" && (
         <Card className="bg-muted/30">
-          <CardContent className="pt-4 space-y-3">
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              {t("checkout.cardDetails")}
-            </p>
-            <div>
-              <Input
-                value={cardForm.number}
-                onChange={(e) =>
-                  setCardForm({
-                    ...cardForm,
-                    number: formatCardNumber(e.target.value),
-                  })
-                }
-                placeholder={t("checkout.cardNumber")}
-                maxLength={19}
-                className={cardErrors.number ? "border-destructive" : ""}
-              />
-              {cardErrors.number && (
-                <p className="text-[11px] text-destructive mt-1">
-                  {cardErrors.number}
-                </p>
-              )}
-            </div>
-            <div>
-              <Input
-                value={cardForm.name}
-                onChange={(e) =>
-                  setCardForm({ ...cardForm, name: e.target.value })
-                }
-                placeholder={t("checkout.cardHolder")}
-                className={cardErrors.name ? "border-destructive" : ""}
-              />
-              {cardErrors.name && (
-                <p className="text-[11px] text-destructive mt-1">
-                  {cardErrors.name}
-                </p>
-              )}
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Input
-                  value={cardForm.expiry}
-                  onChange={(e) =>
-                    setCardForm({
-                      ...cardForm,
-                      expiry: formatExpiry(e.target.value),
-                    })
-                  }
-                  placeholder={t("checkout.expiry")}
-                  maxLength={5}
-                  className={cardErrors.expiry ? "border-destructive" : ""}
-                />
-                {cardErrors.expiry && (
-                  <p className="text-[11px] text-destructive mt-1">
-                    {cardErrors.expiry}
-                  </p>
-                )}
-              </div>
-              <div>
-                <Input
-                  type="password"
-                  value={cardForm.cvv}
-                  onChange={(e) =>
-                    setCardForm({
-                      ...cardForm,
-                      cvv: e.target.value.replace(/\D/g, "").slice(0, 4),
-                    })
-                  }
-                  placeholder={t("checkout.cvv")}
-                  maxLength={4}
-                  className={cardErrors.cvv ? "border-destructive" : ""}
-                />
-                {cardErrors.cvv && (
-                  <p className="text-[11px] text-destructive mt-1">
-                    {cardErrors.cvv}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2 mb-3">
               <Lock className="w-3.5 h-3.5 text-muted-foreground" />
               <p className="text-[11px] text-muted-foreground">
                 {t("checkout.paymentSecure")}
               </p>
             </div>
+            <p className="text-xs text-muted-foreground">
+              Click &ldquo;Proceed to Pay&rdquo; to enter your card details
+              securely via Paymob. Apple Pay and Google Pay are also supported.
+            </p>
           </CardContent>
         </Card>
       )}
 
-      {/* Wallet form */}
+      {/* Mobile Wallet — redirects to Paymob Unified Checkout */}
       {method === "wallet" && (
         <Card className="bg-muted/30">
-          <CardContent className="pt-4 space-y-3">
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              {t("checkout.selectWallet")}
+          <CardContent className="pt-4">
+            <p className="text-xs text-muted-foreground">
+              Click &ldquo;Proceed to Pay&rdquo; to complete your payment via
+              Vodafone Cash, Etisalat Cash, WE Pay, or InstaPay.
             </p>
-            <div className="grid grid-cols-2 gap-2">
-              {WALLET_PROVIDERS.map((wp) => (
-                <button
-                  key={wp.id}
-                  onClick={() => setWalletProvider(wp.id)}
-                  className={`py-2.5 px-3 rounded-xl border-2 text-xs font-bold text-left transition-all ${
-                    walletProvider === wp.id
-                      ? "border-primary bg-primary/[0.05]"
-                      : "border-border hover:border-muted-foreground/40"
-                  } ${wp.color}`}
-                >
-                  {wp.label}
-                </button>
-              ))}
-            </div>
-            <div>
-              <Input
-                type="tel"
-                value={walletNumber}
-                onChange={(e) =>
-                  setWalletNumber(
-                    e.target.value.replace(/\D/g, "").slice(0, 11),
-                  )
-                }
-                placeholder={t("checkout.walletNumber")}
-              />
-              <p className="text-[11px] text-muted-foreground mt-1">
-                {t("checkout.walletRequest")}
-              </p>
-            </div>
           </CardContent>
         </Card>
       )}
@@ -856,14 +716,20 @@ function PaymentStep({
           {placing ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              {t("checkout.placingOrder")}
+              {method === "cod"
+                ? t("checkout.placingOrder")
+                : "Preparing payment…"}
             </>
           ) : (
             <>
               <Lock className="w-4 h-4 mr-2" />
-              {locale === "ar"
-                ? `تأكيد الطلب · EGP ${total.toLocaleString("en-EG")}`
-                : `Place Order · EGP ${total.toLocaleString("en-EG")}`}
+              {method === "cod"
+                ? locale === "ar"
+                  ? `تأكيد الطلب · EGP ${total.toLocaleString("en-EG")}`
+                  : `Place Order · EGP ${total.toLocaleString("en-EG")}`
+                : locale === "ar"
+                  ? `المتابعة للدفع · EGP ${total.toLocaleString("en-EG")}`
+                  : `Proceed to Pay · EGP ${total.toLocaleString("en-EG")}`}
             </>
           )}
         </Button>
@@ -1124,15 +990,10 @@ export default function CheckoutPage() {
   }
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cod");
-  const [walletProvider, setWalletProvider] =
-    useState<WalletProvider>("vodafone");
-  const [walletNumber, setWalletNumber] = useState("");
-  const [cardForm, setCardForm] = useState<CardForm>({
-    number: "",
-    name: "",
-    expiry: "",
-    cvv: "",
-  });
+  // Paymob Pixel state — populated after intention API call
+  const [pixelClientSecret, setPixelClientSecret] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     if (isHydrated && items.length === 0 && step !== "success") {
@@ -1153,48 +1014,105 @@ export default function CheckoutPage() {
 
     const idempotencyKey = generateIdempotencyKey();
 
-    // Use cart-computed totals so product-level discounts (baked into
-    // item.price) and promo-code discounts are both reflected in the order.
-    const { orderId: savedId, error } = await saveOrder(
-      {
-        userId: user?.id ?? null,
-        deliveryName: `${delivery.firstName} ${delivery.lastName}`.trim(),
-        deliveryPhone: delivery.phone,
-        deliveryAddress: `${delivery.address}${delivery.apartment ? ", " + delivery.apartment : ""}`,
-        deliveryCity: `${delivery.city}, ${delivery.governorate}`,
-        paymentMethod,
-        notes: delivery.notes || null,
-        subtotal,
-        shippingFee: shipping,
-        discount,
-        promoCode: promo?.code ?? null,
-        total,
-        idempotencyKey,
-      },
-      items,
-    );
+    // ── Cash on Delivery: save order immediately on click ──────────────────
+    if (paymentMethod === "cod") {
+      const { orderId: savedId, error } = await saveOrder(
+        {
+          userId: user.id,
+          deliveryName: `${delivery.firstName} ${delivery.lastName}`.trim(),
+          deliveryPhone: delivery.phone,
+          deliveryAddress: `${delivery.address}${delivery.apartment ? ", " + delivery.apartment : ""}`,
+          deliveryCity: `${delivery.city}, ${delivery.governorate}`,
+          paymentMethod,
+          notes: delivery.notes || null,
+          subtotal,
+          shippingFee: shipping,
+          discount,
+          promoCode: promo?.code ?? null,
+          total,
+          idempotencyKey,
+        },
+        items,
+      );
 
-    if (error || !savedId) {
-      setOrderError("Failed to place order. Please try again.");
+      if (error || !savedId) {
+        setOrderError("Failed to place order. Please try again.");
+        placingRef.current = false;
+        setPlacing(false);
+        return;
+      }
+
+      clearCart();
+      setOrderId(savedId);
+      setStep("success");
       placingRef.current = false;
       setPlacing(false);
+
+      fetch("/api/orders/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: savedId }),
+      }).catch(() => {
+        /* non-fatal */
+      });
       return;
     }
 
-    clearCart();
-    setOrderId(savedId);
-    setStep("success");
-    placingRef.current = false;
-    setPlacing(false);
+    // ── Card / Wallet: create Paymob payment intention ─────────────────────
+    try {
+      const res = await fetch("/api/payments/intention", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          paymentType: paymentMethod, // "card" or "wallet"
+          items,
+          delivery,
+          subtotal,
+          shippingFee: shipping,
+          discount,
+          total,
+          promoCode: promo?.code ?? null,
+          notes: delivery.notes || null,
+          specialReference: idempotencyKey,
+        }),
+      });
 
-    // Fire-and-forget: send order confirmation emails/SMS to customer + vendor
-    fetch("/api/orders/notify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderId: savedId }),
-    }).catch(() => {
-      /* non-fatal */
-    });
+      const json = await res.json();
+
+      if (!res.ok) {
+        setOrderError(
+          json.error ?? "Failed to initialise payment. Please try again.",
+        );
+        placingRef.current = false;
+        setPlacing(false);
+        return;
+      }
+
+      const { clientSecret, orderId: presavedId } = json as {
+        clientSecret: string;
+        orderId: string;
+      };
+
+      setOrderId(presavedId);
+
+      if (paymentMethod === "card") {
+        // Render Pixel SDK inline
+        setPixelClientSecret(clientSecret);
+        setStep("paymob");
+        placingRef.current = false;
+        setPlacing(false);
+      } else {
+        // Wallet: redirect to Paymob Unified Checkout
+        window.location.href = `https://accept.paymob.com/unifiedcheckout/?publicKey=${encodeURIComponent(PAYMOB_PUBLIC_KEY)}&clientSecret=${encodeURIComponent(clientSecret)}`;
+      }
+    } catch (err) {
+      console.error("[checkout] intention error:", err);
+      setOrderError(
+        "Network error. Please check your connection and try again.",
+      );
+      placingRef.current = false;
+      setPlacing(false);
+    }
   }
 
   if (!isHydrated) {
@@ -1292,15 +1210,43 @@ export default function CheckoutPage() {
                     <PaymentStep
                       method={paymentMethod}
                       setMethod={setPaymentMethod}
-                      walletProvider={walletProvider}
-                      setWalletProvider={setWalletProvider}
-                      walletNumber={walletNumber}
-                      setWalletNumber={setWalletNumber}
-                      cardForm={cardForm}
-                      setCardForm={setCardForm}
                       onBack={() => setStep("delivery")}
                       onPlace={handlePlaceOrder}
                       placing={placing}
+                    />
+                  </>
+                )}
+
+                {step === "paymob" && pixelClientSecret && (
+                  <>
+                    <div className="mb-4">
+                      <button
+                        onClick={() => {
+                          setStep("payment");
+                          setPixelClientSecret(null);
+                        }}
+                        className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <ArrowLeft className="w-4 h-4" />
+                        Back to payment options
+                      </button>
+                    </div>
+                    <PaymobPixel
+                      publicKey={PAYMOB_PUBLIC_KEY}
+                      clientSecret={pixelClientSecret}
+                      paymentMethods={["card", "apple-pay", "google-pay"]}
+                      onComplete={({ success }) => {
+                        if (success) {
+                          clearCart();
+                          setStep("success");
+                        } else {
+                          setStep("payment");
+                          setPixelClientSecret(null);
+                          setOrderError(
+                            "Payment was not completed. Please try again.",
+                          );
+                        }
+                      }}
                     />
                   </>
                 )}

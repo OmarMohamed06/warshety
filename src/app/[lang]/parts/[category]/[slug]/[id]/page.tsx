@@ -35,10 +35,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = (lang === "ar" ? "ar" : "en") as "ar" | "en";
   const supabase = await createClient();
   const supabaseAny2 = supabase as any;
+  const UUID_RE =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const metaFilter = UUID_RE.test(id)
+    ? `id.eq.${id},slug.eq.${id}`
+    : `slug.eq.${id}`;
   const { data: product } = await supabaseAny2
     .from("products")
-    .select("name, brand, image_url")
-    .or(`id.eq.${id},slug.eq.${id}`)
+    .select("name, name_ar, brand, image_url")
+    .or(metaFilter)
     .single();
   if (!product) {
     return {
@@ -50,6 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
   return productPageSeo({
     partName: product.name,
+    partNameAr: product.name_ar ?? product.name,
     brand: product.brand ?? "Unknown",
     imageUrl: product.image_url,
     slugEn: generateSlugEn(`${product.name}-${product.brand ?? ""}-${id}`),
@@ -349,10 +355,15 @@ export default async function PartDetailPage({ params }: Props) {
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabaseAny = supabase as any;
+  const UUID_REGEX =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const productFilter = UUID_REGEX.test(id)
+    ? `id.eq.${id},slug.eq.${id}`
+    : `slug.eq.${id}`;
   const { data: rawProduct } = (await supabaseAny
     .from("products")
     .select("*, vendor:vendors(id, business_name, rating, total_reviews, city)")
-    .or(`id.eq.${id},slug.eq.${id}`)
+    .or(productFilter)
     .single()) as {
     data:
       | (Record<string, unknown> & {
@@ -399,12 +410,12 @@ export default async function PartDetailPage({ params }: Props) {
   const { data: cvData } = await supabaseAny
     .from("product_vehicles")
     .select("*")
-    .eq("product_id", id);
+    .eq("product_id", rawProduct.id);
   compatibleVehicles = (cvData ?? []) as DbCompatibleVehicle[];
   const { data: oeData } = await supabaseAny
     .from("product_oe_numbers")
     .select("*")
-    .eq("product_id", id);
+    .eq("product_id", rawProduct.id);
   oeNumbers = (oeData ?? []) as DbOeNumber[];
 
   // Images are stored in the products.images array
