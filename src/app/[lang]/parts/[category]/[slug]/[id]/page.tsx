@@ -433,7 +433,10 @@ export default async function PartDetailPage({ params }: Props) {
 
   const part = {
     id: rawProduct.id,
-    name: rawProduct.name,
+    name:
+      isAr && rawProduct.name_ar
+        ? (rawProduct.name_ar as string)
+        : rawProduct.name,
     brand: rawProduct.brand ?? "",
     oemNumber: rawProduct.oem_number ?? undefined,
     partNumber: rawProduct.part_number ?? undefined,
