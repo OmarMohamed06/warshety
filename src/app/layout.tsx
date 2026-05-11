@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Figtree, Cairo } from "next/font/google";
 import { headers } from "next/headers";
+import Script from "next/script";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import type { Locale } from "@/context/LanguageContext";
@@ -99,6 +100,19 @@ export default async function RootLayout({
         className={`${figtree.variable} ${cairo.variable} font-sans bg-[#f6f6f8] dark:bg-[#111621] text-slate-900 dark:text-slate-100 antialiased`}
         suppressHydrationWarning
       >
+        {/* Google tag (gtag.js) */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-C5G8WYS3G6"
+          strategy="afterInteractive"
+        />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-C5G8WYS3G6');
+          `}
+        </Script>
         {children}
       </body>
     </html>
