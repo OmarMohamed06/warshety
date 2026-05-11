@@ -230,20 +230,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const supabase = createClient();
       const { data } = await supabase
         .from("promo_codes")
-        .select("code, discount_pct, label")
+        .select("code, discount_value, label")
         .eq("code", code.toUpperCase().trim())
         .eq("active", true)
         .or("expires_at.is.null,expires_at.gt." + new Date().toISOString())
         .maybeSingle();
       const row = data as unknown as {
         code: string;
-        discount_pct: number;
+        discount_value: number;
         label: string;
       } | null;
       if (!row) return "Invalid or expired promo code.";
       setPromo({
         code: row.code,
-        discountPct: row.discount_pct,
+        discountPct: row.discount_value,
         label: row.label,
       });
       return null;

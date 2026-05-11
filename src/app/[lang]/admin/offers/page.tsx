@@ -23,22 +23,22 @@ import { Ticket, PlusCircle, Pencil, Trash2, Copy, Check } from "lucide-react";
 interface PromoCode {
   id: string;
   code: string;
-  discount_pct: number;
+  discount_value: number;
   label: string;
   active: boolean;
   expires_at: string | null;
-  usage_limit: number | null;
-  usage_count: number;
+  max_uses: number | null;
+  current_uses: number;
   created_at: string;
 }
 
 const emptyForm = {
   code: "",
-  discount_pct: "",
+  discount_value: "",
   label: "",
   active: true,
   expires_at: "",
-  usage_limit: "",
+  max_uses: "",
 };
 
 // ── Page ───────────────────────────────────────────────────────────────────────
@@ -85,11 +85,11 @@ export default function AdminPromoCodesPage() {
     setEditingId(p.id);
     setForm({
       code: p.code,
-      discount_pct: String(p.discount_pct),
+      discount_value: String(p.discount_value),
       label: p.label,
       active: p.active,
       expires_at: p.expires_at ? p.expires_at.slice(0, 10) : "",
-      usage_limit: p.usage_limit != null ? String(p.usage_limit) : "",
+      max_uses: p.max_uses != null ? String(p.max_uses) : "",
     });
     setError(null);
     setDialogOpen(true);
@@ -100,7 +100,7 @@ export default function AdminPromoCodesPage() {
       setError("Code is required.");
       return;
     }
-    const pct = Number(form.discount_pct);
+    const pct = Number(form.discount_value);
     if (!pct || pct < 1 || pct > 100) {
       setError("Discount must be between 1 and 100%.");
       return;
@@ -115,13 +115,14 @@ export default function AdminPromoCodesPage() {
 
     const payload = {
       code: form.code.trim().toUpperCase(),
-      discount_pct: pct,
+      discount_type: "percentage" as const,
+      discount_value: pct,
       label: form.label.trim(),
       active: form.active,
       expires_at: form.expires_at
         ? new Date(form.expires_at).toISOString()
         : null,
-      usage_limit: form.usage_limit ? Number(form.usage_limit) : null,
+      max_uses: form.max_uses ? Number(form.max_uses) : null,
     };
 
     let err;
@@ -203,7 +204,7 @@ export default function AdminPromoCodesPage() {
           },
           {
             label: "Total Uses",
-            value: promos.reduce((s, p) => s + p.usage_count, 0),
+            value: promos.reduce((s, p) => s + p.current_uses, 0),
           },
         ].map((stat) => (
           <Card key={stat.label}>
@@ -271,7 +272,7 @@ export default function AdminPromoCodesPage() {
                     {/* Discount */}
                     <div className="text-center w-16">
                       <p className="font-black text-primary">
-                        {p.discount_pct}%
+                        {p.discount_value}%
                       </p>
                       <p className="text-[10px] text-muted-foreground">OFF</p>
                     </div>
@@ -279,8 +280,8 @@ export default function AdminPromoCodesPage() {
                     {/* Usage */}
                     <div className="text-center w-20">
                       <p className="font-semibold text-sm">
-                        {p.usage_count}
-                        {p.usage_limit != null ? ` / ${p.usage_limit}` : ""}
+                        {p.current_uses}
+                        {p.max_uses != null ? ` / ${p.max_uses}` : ""}
                       </p>
                       <p className="text-[10px] text-muted-foreground">uses</p>
                     </div>
@@ -374,9 +375,9 @@ export default function AdminPromoCodesPage() {
                   min={1}
                   max={100}
                   placeholder="e.g. 20"
-                  value={form.discount_pct}
+                  value={form.discount_value}
                   onChange={(e) =>
-                    setForm((f) => ({ ...f, discount_pct: e.target.value }))
+                    setForm((f) => ({ ...f, discount_value: e.target.value }))
                   }
                 />
               </div>
@@ -410,9 +411,9 @@ export default function AdminPromoCodesPage() {
                   type="number"
                   min={1}
                   placeholder="Unlimited"
-                  value={form.usage_limit}
+                  value={form.max_uses}
                   onChange={(e) =>
-                    setForm((f) => ({ ...f, usage_limit: e.target.value }))
+                    setForm((f) => ({ ...f, max_uses: e.target.value }))
                   }
                 />
               </div>
