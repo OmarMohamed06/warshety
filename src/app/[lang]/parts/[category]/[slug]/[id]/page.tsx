@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .from("products")
     .select("name, name_ar, brand, image_url")
     .or(metaFilter)
-    .single();
+    .maybeSingle();
   if (!product) {
     return {
       title:
@@ -360,11 +360,11 @@ export default async function PartDetailPage({ params }: Props) {
   const productFilter = UUID_REGEX.test(id)
     ? `id.eq.${id},slug.eq.${id}`
     : `slug.eq.${id}`;
-  const { data: rawProduct } = (await supabaseAny
+  const { data: rawProduct, error: productError } = (await supabaseAny
     .from("products")
     .select("*, vendor:vendors(id, business_name, rating, total_reviews, city)")
     .or(productFilter)
-    .single()) as {
+    .maybeSingle()) as {
     data:
       | (Record<string, unknown> & {
           id: string;
@@ -394,6 +394,14 @@ export default async function PartDetailPage({ params }: Props) {
   };
 
   if (!rawProduct) {
+    if (productError) {
+      console.error(
+        "[PartDetailPage] Supabase error:",
+        productError,
+        "| filter:",
+        productFilter,
+      );
+    }
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-muted-foreground">Part not found.</p>
