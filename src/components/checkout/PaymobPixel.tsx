@@ -20,9 +20,9 @@ declare global {
 }
 
 const PIXEL_CSS =
-  "https://cdn.jsdelivr.net/npm/paymob-pixel@latest/dist/pixel.css";
+  "https://cdn.jsdelivr.net/npm/paymob-pixel@latest/main.css";
 const PIXEL_JS =
-  "https://cdn.jsdelivr.net/npm/paymob-pixel@latest/dist/pixel.esm.js";
+  "https://cdn.jsdelivr.net/npm/paymob-pixel@latest/main.js";
 
 export function PaymobPixel({
   publicKey,
@@ -47,11 +47,7 @@ export function PaymobPixel({
       document.head.appendChild(link);
     }
 
-    // Inject ES module script
-    const script = document.createElement("script");
-    script.type = "module";
-    script.src = PIXEL_JS;
-    script.onload = () => {
+    function initPixel() {
       if (!window.Pixel) {
         console.error(
           "[PaymobPixel] window.Pixel not available after script load",
@@ -69,11 +65,38 @@ export function PaymobPixel({
         },
       });
       initializedRef.current = true;
-    };
-    script.onerror = () => {
-      console.error("[PaymobPixel] Failed to load Pixel SDK script");
-    };
-    document.body.appendChild(script);
+    }
+
+    // If the SDK is already loaded (e.g. user went back and returned), init immediately
+    if (window.Pixel) {
+      initPixel();
+      return;
+    }
+
+    // Avoid injecting a duplicate script tag
+    if (!document.querySelector(`script[src="${PIXEL_JS}"]`)) {
+      const script = document.createElement("script");
+      script.type = "module";
+      script.src = PIXEL_JS;
+      script.onload = initPixel;
+      script.onerror = () => {
+        console.error("[PaymobPixel] Failed to load Pixel SDK script");
+      };
+      document.body.appendChild(script);
+    } else {
+      // Script tag exists but window.Pixel not yet ready — poll briefly
+      let attempts = 0;
+      const interval = setInterval(() => {
+        attempts++;
+        if (window.Pixel) {
+          clearInterval(interval);
+          initPixel();
+        } else if (attempts > 20) {
+          clearInterval(interval);
+          console.error("[PaymobPixel] Timed out waiting for Pixel SDK");
+        }
+      }, 200);
+    }
 
     return () => {
       // Don't remove the script on unmount — Pixel SDK manages its own state

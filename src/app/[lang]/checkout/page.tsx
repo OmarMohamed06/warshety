@@ -28,7 +28,6 @@ import {
 import {
   Truck,
   CreditCard,
-  Wallet,
   Lock,
   CheckCircle2,
   Minus,
@@ -49,8 +48,7 @@ import { GOVERNORATES, getAreas, tGov, tArea } from "@/lib/locationData";
 
 const PAYMOB_PUBLIC_KEY = process.env.NEXT_PUBLIC_PAYMOB_PUBLIC_KEY ?? "";
 
-type PaymentMethod = "cod" | "card" | "wallet";
-type WalletProvider = "vodafone" | "etisalat" | "we" | "instapay";
+type PaymentMethod = "cod" | "card";
 type Step = "delivery" | "payment" | "paymob" | "success";
 
 function generateOrderId(): string {
@@ -577,31 +575,6 @@ function PaymentStep({
       label: t("checkout.creditCard"),
       desc: t("checkout.cardBrands"),
     },
-    {
-      id: "wallet" as PaymentMethod,
-      icon: <Wallet className="w-5 h-5" />,
-      label: t("checkout.mobileWallet"),
-      desc: t("checkout.walletDesc"),
-    },
-  ];
-
-  const WALLET_PROVIDERS = [
-    {
-      id: "vodafone" as WalletProvider,
-      label: "Vodafone Cash",
-      color: "text-red-600",
-    },
-    {
-      id: "etisalat" as WalletProvider,
-      label: "Etisalat Cash",
-      color: "text-green-600",
-    },
-    { id: "we" as WalletProvider, label: "WE Pay", color: "text-purple-600" },
-    {
-      id: "instapay" as WalletProvider,
-      label: "InstaPay",
-      color: "text-blue-600",
-    },
   ];
 
   return (
@@ -658,18 +631,6 @@ function PaymentStep({
             <p className="text-xs text-muted-foreground">
               Click &ldquo;Proceed to Pay&rdquo; to enter your card details
               securely via Paymob. Apple Pay and Google Pay are also supported.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Mobile Wallet — redirects to Paymob Unified Checkout */}
-      {method === "wallet" && (
-        <Card className="bg-muted/30">
-          <CardContent className="pt-4">
-            <p className="text-xs text-muted-foreground">
-              Click &ldquo;Proceed to Pay&rdquo; to complete your payment via
-              Vodafone Cash, Etisalat Cash, WE Pay, or InstaPay.
             </p>
           </CardContent>
         </Card>
@@ -753,16 +714,12 @@ function SuccessScreen({
   const methodLabel =
     method === "cod"
       ? t("checkout.cashOnDelivery")
-      : method === "card"
-        ? t("checkout.creditCard")
-        : t("checkout.mobileWallet");
+      : t("checkout.creditCard");
   const methodIcon =
     method === "cod" ? (
       <Truck className="w-4 h-4" />
-    ) : method === "card" ? (
-      <CreditCard className="w-4 h-4" />
     ) : (
-      <Wallet className="w-4 h-4" />
+      <CreditCard className="w-4 h-4" />
     );
 
   return (
@@ -1058,13 +1015,13 @@ export default function CheckoutPage() {
       return;
     }
 
-    // ── Card / Wallet: create Paymob payment intention ─────────────────────
+    // ── Card: create Paymob payment intention ────────────────────────────────
     try {
       const res = await fetch("/api/payments/intention", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          paymentType: paymentMethod, // "card" or "wallet"
+          paymentType: paymentMethod,
           items,
           delivery,
           subtotal,
@@ -1095,16 +1052,11 @@ export default function CheckoutPage() {
 
       setOrderId(presavedId);
 
-      if (paymentMethod === "card") {
-        // Render Pixel SDK inline
-        setPixelClientSecret(clientSecret);
-        setStep("paymob");
-        placingRef.current = false;
-        setPlacing(false);
-      } else {
-        // Wallet: redirect to Paymob Unified Checkout
-        window.location.href = `https://accept.paymob.com/unifiedcheckout/?publicKey=${encodeURIComponent(PAYMOB_PUBLIC_KEY)}&clientSecret=${encodeURIComponent(clientSecret)}`;
-      }
+      // Render Pixel SDK inline
+      setPixelClientSecret(clientSecret);
+      setStep("paymob");
+      placingRef.current = false;
+      setPlacing(false);
     } catch (err) {
       console.error("[checkout] intention error:", err);
       setOrderError(
