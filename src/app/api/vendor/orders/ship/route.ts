@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
   const { data: vendor, error: vendorErr } = await supabase
     .from("vendors")
     .select(
-      "id, user_id, business_name, phone, address, city, vendor_type, status",
+      "id, user_id, business_name, phone, address, city, vendor_type, status, bosta_pickup_address_id",
     )
     .eq("user_id", user.id)
     .eq("vendor_type", "parts_seller")
@@ -82,6 +82,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { error: "Vendor profile not found or not approved" },
       { status: 403 },
+    );
+  }
+
+  // Ensure the vendor has registered a Bosta pickup address
+  if (!vendor.bosta_pickup_address_id) {
+    return NextResponse.json(
+      {
+        error:
+          'Pickup address not registered with Bosta. Go to Vendor Settings → Pickup Address and click "Register with Bosta".',
+      },
+      { status: 409 },
     );
   }
 
@@ -133,10 +144,7 @@ export async function POST(req: NextRequest) {
     .map((i) => i.name)
     .join(", ");
 
-  // 7. Call Bosta API
-  // Pickup is resolved automatically from the vendor's registered Bosta business
-  // location (configured in Bosta dashboard → Settings → Business Locations).
-  // Bosta does NOT accept a pickup address in the delivery creation payload.
+  // 7. Call Bosta API — pass the vendor's registered Bosta pickup location ID
   const result = await createShipment({
     orderId,
     dropoff: {
@@ -151,6 +159,7 @@ export async function POST(req: NextRequest) {
       cod: 0, // pre-paid orders — no COD
       description: packageDescription ?? descriptionFallback,
     },
+    businessLocationId: vendor.bosta_pickup_address_id,
     ...(pickupDate ? { pickupDate } : {}),
   });
 

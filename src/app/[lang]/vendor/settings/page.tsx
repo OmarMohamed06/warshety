@@ -12,7 +12,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import {
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  MapPin,
+  PackageCheck,
+} from "lucide-react";
 import { GOVERNORATES, getAreas, tGov, tArea } from "@/lib/locationData";
 
 export default function VendorSettingsPage() {
@@ -33,6 +39,17 @@ export default function VendorSettingsPage() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // ── Pickup address state (for parts_seller vendors only) ──────────────────
+  const [pickupAddress, setPickupAddress] = useState("");
+  const [pickupCity, setPickupCity] = useState("");
+  const [pickupGovernorate, setPickupGovernorate] = useState("");
+  const [pickupDistrict, setPickupDistrict] = useState("");
+  const [pickupPhone, setPickupPhone] = useState("");
+  const [bostaPickupId, setBostaPickupId] = useState<string | null>(null);
+  const [registeringPickup, setRegisteringPickup] = useState(false);
+  const [pickupSaved, setPickupSaved] = useState(false);
+  const [pickupError, setPickupError] = useState<string | null>(null);
+
   // Sync all fields once vendor data arrives from AuthContext
   useEffect(() => {
     if (vendor) {
@@ -44,8 +61,46 @@ export default function VendorSettingsPage() {
       setGovernorate(vendor.governorate ?? "");
       setCity(vendor.city ?? "");
       setAddress(vendor.address ?? "");
+      // Pickup address fields
+      setPickupAddress((vendor as any).pickup_address ?? "");
+      setPickupCity((vendor as any).pickup_city ?? "");
+      setPickupGovernorate((vendor as any).pickup_governorate ?? "");
+      setPickupDistrict((vendor as any).pickup_district ?? "");
+      setPickupPhone((vendor as any).pickup_phone ?? "");
+      setBostaPickupId((vendor as any).bosta_pickup_address_id ?? null);
     }
   }, [vendor]);
+
+  const handleRegisterPickup = async () => {
+    setRegisteringPickup(true);
+    setPickupError(null);
+    setPickupSaved(false);
+
+    const res = await fetch("/api/vendor/bosta/register-pickup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        pickupAddress,
+        pickupCity,
+        pickupGovernorate,
+        pickupDistrict,
+        pickupPhone,
+      }),
+    });
+
+    const json = await res.json();
+    setRegisteringPickup(false);
+
+    if (!res.ok) {
+      setPickupError(json.error ?? "Registration failed");
+      return;
+    }
+
+    setBostaPickupId(json.bostaLocationId);
+    setPickupSaved(true);
+    await refreshProfile();
+    setTimeout(() => setPickupSaved(false), 4000);
+  };
 
   const handleSave = async () => {
     if (!vendor) return;
@@ -229,6 +284,154 @@ export default function VendorSettingsPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* ── Pickup Address (parts_seller only) ───────────────────────────── */}
+        {vendor?.vendor_type === "parts_seller" && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-primary" />
+                Pickup Address for Bosta Deliveries
+              </CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                This is where Bosta couriers will pick up your packages.
+                Register it once — all future shipments use it automatically.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Status badge */}
+              {bostaPickupId ? (
+                <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900/50 rounded-lg text-sm text-green-700 dark:text-green-400">
+                  <PackageCheck className="w-4 h-4 shrink-0" />
+                  Registered with Bosta
+                  <code className="ml-auto text-xs font-mono opacity-70">
+                    {bostaPickupId}
+                  </code>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-lg text-sm text-amber-700 dark:text-amber-400">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  Not yet registered — fill in the fields below and click
+                  &ldquo;Register with Bosta&rdquo;.
+                </div>
+              )}
+
+              {pickupError && (
+                <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  {pickupError}
+                </div>
+              )}
+              {pickupSaved && (
+                <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900/50 rounded-lg text-sm text-green-700 dark:text-green-400">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  Pickup address registered successfully with Bosta!
+                </div>
+              )}
+
+              {/* Governorate + City */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label>Governorate</Label>
+                  <select
+                    className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-input/30"
+                    value={pickupGovernorate}
+                    onChange={(e) => {
+                      setPickupGovernorate(e.target.value);
+                      setPickupCity("");
+                    }}
+                  >
+                    <option value="">Select governorate</option>
+                    {GOVERNORATES.map((g) => (
+                      <option key={g} value={g}>
+                        {tGov(g, locale)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <Label>City / District</Label>
+                  <select
+                    className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring dark:bg-input/30"
+                    value={pickupCity}
+                    onChange={(e) => setPickupCity(e.target.value)}
+                    disabled={!pickupGovernorate}
+                  >
+                    <option value="">Select city</option>
+                    {getAreas(pickupGovernorate).map((a) => (
+                      <option key={a} value={a}>
+                        {tArea(a, locale)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* District / neighbourhood (freetext) */}
+              <div className="space-y-1">
+                <Label>
+                  Neighbourhood / Area
+                  <span className="text-muted-foreground font-normal text-xs ms-1">
+                    (optional)
+                  </span>
+                </Label>
+                <Input
+                  value={pickupDistrict}
+                  onChange={(e) => setPickupDistrict(e.target.value)}
+                  placeholder="e.g. Nasr City, Mohandiseen"
+                />
+              </div>
+
+              {/* Street address */}
+              <div className="space-y-1">
+                <Label>Street Address</Label>
+                <Input
+                  value={pickupAddress}
+                  onChange={(e) => setPickupAddress(e.target.value)}
+                  placeholder="e.g. 15 Ahmed Orabi Street, Building 3"
+                />
+              </div>
+
+              {/* Pickup phone */}
+              <div className="space-y-1">
+                <Label>
+                  Pickup Contact Phone
+                  <span className="text-muted-foreground font-normal text-xs ms-1">
+                    (defaults to business phone)
+                  </span>
+                </Label>
+                <Input
+                  value={pickupPhone}
+                  onChange={(e) => setPickupPhone(e.target.value)}
+                  placeholder="+20 1X XXXX XXXX"
+                  type="tel"
+                />
+              </div>
+
+              <Button
+                onClick={handleRegisterPickup}
+                disabled={
+                  registeringPickup ||
+                  !pickupAddress.trim() ||
+                  !pickupCity.trim()
+                }
+                variant={bostaPickupId ? "outline" : "default"}
+                className="w-full sm:w-auto"
+              >
+                {registeringPickup ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Registering…
+                  </>
+                ) : bostaPickupId ? (
+                  "Update Bosta Pickup Address"
+                ) : (
+                  "Register with Bosta"
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Save button */}
         <Button

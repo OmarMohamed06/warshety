@@ -273,6 +273,65 @@ export async function getShipment(bostaShipmentId: string): Promise<{
 }
 
 /**
+ * Register a vendor pickup address with Bosta.
+ * Creates a new business location in the Bosta account.
+ * Returns the Bosta `businessLocationId` to store on the vendor record.
+ *
+ * Docs: POST /business/create-business-location
+ */
+export async function registerPickupAddress(input: {
+  name: string; // e.g. business name
+  address: BostaAddress;
+  contactName: string;
+  contactPhone: string;
+}): Promise<
+  { locationId: string; error: null } | { locationId: null; error: string }
+> {
+  try {
+    const body = {
+      locationName: input.name,
+      address: formatAddress(input.address),
+      contactPerson: {
+        name: input.contactName,
+        phone: input.contactPhone,
+      },
+    };
+
+    const res = await fetch(`${baseUrl()}/business/create-business-location`, {
+      method: "POST",
+      headers: headers(),
+      body: JSON.stringify(body),
+    });
+
+    const json = await res.json();
+
+    if (!res.ok) {
+      return {
+        locationId: null,
+        error: json?.message ?? json?.error ?? `Bosta API error ${res.status}`,
+      };
+    }
+
+    // Bosta returns the location id as _id or id
+    const locationId: string = json._id ?? json.id ?? json.locationId;
+    if (!locationId) {
+      return {
+        locationId: null,
+        error: "Bosta returned no location ID — check the Bosta dashboard.",
+      };
+    }
+
+    return { locationId, error: null };
+  } catch (err: unknown) {
+    return {
+      locationId: null,
+      error:
+        err instanceof Error ? err.message : "Network error contacting Bosta",
+    };
+  }
+}
+
+/**
  * Terminate (cancel) an existing Bosta shipment.
  * Only possible before the shipment is picked up.
  */
