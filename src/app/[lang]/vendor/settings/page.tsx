@@ -61,12 +61,16 @@ export default function VendorSettingsPage() {
       setGovernorate(vendor.governorate ?? "");
       setCity(vendor.city ?? "");
       setAddress(vendor.address ?? "");
-      // Pickup address fields
-      setPickupAddress((vendor as any).pickup_address ?? "");
-      setPickupCity((vendor as any).pickup_city ?? "");
-      setPickupGovernorate((vendor as any).pickup_governorate ?? "");
-      setPickupDistrict((vendor as any).pickup_district ?? "");
-      setPickupPhone((vendor as any).pickup_phone ?? "");
+      // Pickup address fields — auto-fill from vendor profile if not yet set
+      setPickupAddress((vendor as any).pickup_address || vendor.address || "");
+      setPickupCity((vendor as any).pickup_city || vendor.city || "");
+      setPickupGovernorate(
+        (vendor as any).pickup_governorate || vendor.governorate || "",
+      );
+      setPickupDistrict(
+        (vendor as any).pickup_district || (vendor as any).district || "",
+      );
+      setPickupPhone((vendor as any).pickup_phone || vendor.phone || "");
       setBostaPickupId((vendor as any).bosta_pickup_address_id ?? null);
     }
   }, [vendor]);
