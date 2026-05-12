@@ -113,12 +113,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 5. Build Bosta addresses
-  const pickupAddress: BostaAddress = {
-    firstLine: vendor.address ?? "Vendor address not set",
-    city: vendor.city ?? "Cairo",
-  };
-
+  // 5. Build Bosta dropoff address (customer)
   const dropoffAddress: BostaAddress = {
     firstLine: order.delivery_address ?? "Delivery address not set",
     city: order.delivery_city ?? "Cairo",
@@ -139,15 +134,11 @@ export async function POST(req: NextRequest) {
     .join(", ");
 
   // 7. Call Bosta API
+  // Pickup is resolved automatically from the vendor's registered Bosta business
+  // location (configured in Bosta dashboard → Settings → Business Locations).
+  // Bosta does NOT accept a pickup address in the delivery creation payload.
   const result = await createShipment({
     orderId,
-    pickup: {
-      address: pickupAddress,
-      contact: {
-        name: vendor.business_name,
-        phone: vendor.phone ?? "",
-      },
-    },
     dropoff: {
       address: dropoffAddress,
       contact: {
@@ -156,7 +147,6 @@ export async function POST(req: NextRequest) {
       },
     },
     pkg: {
-      weight: packageWeight ?? 1,
       itemsCount,
       cod: 0, // pre-paid orders — no COD
       description: packageDescription ?? descriptionFallback,
@@ -179,7 +169,7 @@ export async function POST(req: NextRequest) {
       status: "processing",
       bosta_shipment_id: result.shipmentId,
       tracking_number: result.trackingNumber,
-      bosta_state_code: "CREATED",
+      bosta_state_code: "10",
     })
     .eq("id", orderId);
 
