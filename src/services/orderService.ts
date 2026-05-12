@@ -108,7 +108,7 @@ export async function saveOrder(
   const orderItems = items.map((item) => ({
     order_id: order.id,
     product_id: null,
-    vendor_id: null,
+    vendor_id: item.vendorId ?? null,
     name: item.name,
     sku: item.sku ?? null,
     quantity: item.qty,

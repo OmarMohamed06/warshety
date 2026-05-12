@@ -1,18 +1,19 @@
 /**
  * bostaService — Bosta last-mile delivery integration.
  *
- * Bosta API docs: https://app.bosta.co/developers/docs
+ * Bosta API docs: https://docs.bosta.co/docs/category/how-to
+ * API base: https://app.bosta.co/api/v2
  *
  * Flow:
  *  1. Vendor confirms order is ready → call createShipment()
  *  2. Bosta assigns a tracking number → we save it to orders table
  *  3. Bosta pushes status updates via webhook → handleWebhook()
- *  4. On "Delivered" webhook → trigger payout + mark order completed
+ *  4. On Delivered (state 45) webhook → trigger payout + mark order completed
  *
  * Environment variables required:
- *   BOSTA_API_KEY      — your Bosta API key
+ *   BOSTA_API_KEY      — your Bosta API key (no "Bearer" prefix needed)
  *   BOSTA_API_BASE_URL — e.g. https://app.bosta.co/api/v2  (or sandbox URL)
- *   BOSTA_WEBHOOK_SECRET — HMAC secret to verify incoming webhooks (optional but recommended)
+ *   BOSTA_WEBHOOK_SECRET — value of the Authorization header Bosta sends with webhooks (optional)
  */
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -20,15 +21,19 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface BostaAddress {
-  /** First line of street address */
+  /** First line of street address (must be ≥ 5 characters) */
   firstLine: string;
   secondLine?: string;
-  /** Bosta city code, e.g. "Cairo", "Alexandria" */
+  /** City name from Bosta city list, e.g. "Cairo", "Alexandria" */
   city: string;
-  /** Bosta zone / district name (optional) */
-  zone?: string;
-  /** Bosta district code (optional) */
-  district?: string;
+  /** District ID from GET /cities/getAllDistricts — preferred over districtName */
+  districtId?: string;
+  /** District name — used together with cityId when districtId is unavailable */
+  districtName?: string;
+  /** City ID from GET /cities?countryId=... — required when using districtName */
+  cityId?: string;
+  /** Zone ID from GET /cities/{cityId}/zones */
+  zoneId?: string;
   buildingNumber?: string;
   floor?: string;
   apartment?: string;
@@ -52,17 +57,17 @@ export interface BostaPackage {
 export interface CreateShipmentInput {
   /** Internal order ID (used as reference) */
   orderId: string;
-  /** Who we're picking up from */
-  pickup: {
-    address: BostaAddress;
-    contact: BostaContact;
-  };
-  /** Where we're delivering to */
+  /** Where we're delivering to (customer address) */
   dropoff: {
     address: BostaAddress;
     contact: BostaContact;
   };
   pkg: BostaPackage;
+  /**
+   * Bosta business location ID (registered in Bosta dashboard).
+   * If omitted, Bosta will use your default pickup location.
+   */
+  businessLocationId?: string;
   /** Optional: scheduled pickup date (ISO string) — leave undefined for ASAP */
   pickupDate?: string;
 }
@@ -81,33 +86,56 @@ export interface ShipmentError {
   error: string;
 }
 
-// ── Bosta webhook event state codes ─────────────────────────────────────────
-// Full list: https://app.bosta.co/developers/docs#tracking-states
+/**
+ * Numeric state codes sent by Bosta in webhook payloads.
+ * Docs: https://docs.bosta.co/docs/how-to/get-delivery-status-via-webhook#bosta-states
+ */
 export type BostaStateCode =
-  | "CREATED" // Shipment created
-  | "PICKED_UP" // Picked up from seller
-  | "IN_TRANSIT" // Moving through Bosta network
-  | "OUT_FOR_DELIVERY" // With courier, delivering today
-  | "DELIVERED" // Successfully delivered ✅
-  | "WAITING_FOR_CUSTOMER_ACTION" // Customer unreachable
-  | "DELIVERY_FAILED" // Failed attempt
-  | "RETURNED" // Returned to sender
-  | "CANCELLED"; // Shipment cancelled
+  | 10 // Pickup requested (new)
+  | 20 // Route assigned
+  | 21 // Picked up from business
+  | 22 // Picking up from consignee (exchange/CRP)
+  | 23 // Picked up from consignee
+  | 24 // Received at warehouse
+  | 25 // Fulfilled (fulfillment)
+  | 30 // In transit between hubs
+  | 40 // Picking up (cash collection)
+  | 41 // Out for delivery
+  | 45 // Delivered ✅
+  | 46 // Returned to business
+  | 47 // Exception (NDR — non-delivery report)
+  | 48 // Terminated
+  | 49 // Cancelled
+  | 100 // Lost
+  | 101 // Damaged
+  | 102 // Investigation
+  | 103 // Awaiting your action
+  | 104 // Archived
+  | 105; // On hold
 
 export interface BostaWebhookPayload {
   /** Bosta shipment ID */
   _id: string;
-  /** Bosta tracking number shown to customer */
-  trackingNumber: string;
+  /** Bosta tracking number */
+  trackingNumber: number | string;
   /** Your reference (the order ID we passed when creating) */
   businessReference: string;
-  state: {
-    code: BostaStateCode;
-    value: string; // human-readable Arabic/English label
-  };
-  updateTime: string; // ISO timestamp
-  reason?: string; // failure reason if applicable
-  nextAttempt?: string; // next delivery attempt date
+  /** Numeric state code — see BostaStateCode */
+  state: BostaStateCode;
+  /** Order type: "SEND" | "EXCHANGE" | "CRP" | "RTO" etc. */
+  type: string;
+  /** Timestamp (epoch ms) when state changed */
+  timeStamp: number;
+  /** COD amount collected — only present on state 45 */
+  cod?: number;
+  /** Delivery promise date (DD-MM-YYYY format) */
+  deliveryPromiseDate?: string;
+  /** NDR exception reason string */
+  exceptionReason?: string;
+  /** NDR exception code */
+  exceptionCode?: number;
+  /** Number of delivery attempts made */
+  numberOfAttempts?: number;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -121,7 +149,8 @@ function baseUrl(): string {
 function headers(): Record<string, string> {
   return {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${process.env.BOSTA_API_KEY ?? ""}`,
+    // Bosta uses plain API key — no "Bearer" prefix
+    Authorization: process.env.BOSTA_API_KEY ?? "",
   };
 }
 
@@ -130,38 +159,52 @@ function headers(): Record<string, string> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Create a shipment request with Bosta.
+ * Create a "Deliver" shipment with Bosta (type 10).
+ * Pickup location is resolved from the vendor's registered Bosta business location.
  * Returns the Bosta shipment ID and tracking number on success.
  */
 export async function createShipment(
   input: CreateShipmentInput,
 ): Promise<CreateShipmentResult | ShipmentError> {
-  const body = {
-    // Bosta "SEND" delivery type = standard forward shipment
+  const receiverName = input.dropoff.contact.name.trim();
+  const nameParts = receiverName.split(" ");
+  const firstName = nameParts[0] ?? receiverName;
+  const lastName = nameParts.slice(1).join(" ") || "-";
+
+  const body: Record<string, unknown> = {
+    // Bosta delivery type 10 = standard "Deliver" (forward shipment)
     type: 10,
     businessReference: input.orderId,
     specs: {
       packageDetails: {
-        weight: input.pkg.weight ?? 1,
         itemsCount: input.pkg.itemsCount ?? 1,
         description: input.pkg.description ?? "Auto Parts",
       },
     },
     cod: input.pkg.cod ?? 0,
-    pickupAddress: formatAddress(input.pickup.address),
+    // dropOffAddress = customer delivery address (required for type 10)
     dropOffAddress: formatAddress(input.dropoff.address),
     receiver: {
-      firstName:
-        input.dropoff.contact.name.split(" ")[0] ?? input.dropoff.contact.name,
-      lastName: input.dropoff.contact.name.split(" ").slice(1).join(" ") || "-",
+      firstName,
+      lastName,
       phone: input.dropoff.contact.phone,
     },
-    notes: input.pkg.description,
-    ...(input.pickupDate ? { pickupDate: input.pickupDate } : {}),
+    notes: input.pkg.description ?? null,
   };
 
+  // Use registered Bosta business location ID if provided;
+  // otherwise Bosta falls back to the account's default pickup location.
+  if (input.businessLocationId) {
+    body.businessLocationId = input.businessLocationId;
+  }
+
+  if (input.pickupDate) {
+    body.pickupDate = input.pickupDate;
+  }
+
   try {
-    const res = await fetch(`${baseUrl()}/deliveries`, {
+    // ?apiVersion=1 is required by Bosta docs
+    const res = await fetch(`${baseUrl()}/deliveries?apiVersion=1`, {
       method: "POST",
       headers: headers(),
       body: JSON.stringify(body),
@@ -179,7 +222,9 @@ export async function createShipment(
     }
 
     const shipmentId: string = json._id ?? json.id;
-    const trackingNumber: string = json.trackingNumber ?? json.Tracking_Number;
+    const trackingNumber: string = String(
+      json.trackingNumber ?? json.Tracking_Number ?? "",
+    );
 
     return {
       shipmentId,
@@ -199,7 +244,37 @@ export async function createShipment(
 }
 
 /**
- * Cancel an existing Bosta shipment (e.g. on order cancellation).
+ * Fetch a single Bosta shipment by its Bosta ID.
+ * Useful for on-demand status checks without waiting for a webhook.
+ */
+export async function getShipment(bostaShipmentId: string): Promise<{
+  data: Record<string, unknown> | null;
+  error: string | null;
+}> {
+  try {
+    const res = await fetch(`${baseUrl()}/deliveries/${bostaShipmentId}`, {
+      method: "GET",
+      headers: headers(),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      return {
+        data: null,
+        error: json?.message ?? `Bosta API error ${res.status}`,
+      };
+    }
+    return { data: json as Record<string, unknown>, error: null };
+  } catch (err: unknown) {
+    return {
+      data: null,
+      error: err instanceof Error ? err.message : "Network error",
+    };
+  }
+}
+
+/**
+ * Terminate (cancel) an existing Bosta shipment.
+ * Only possible before the shipment is picked up.
  */
 export async function cancelShipment(
   bostaShipmentId: string,
@@ -222,46 +297,48 @@ export async function cancelShipment(
 }
 
 /**
- * Verify that an incoming webhook request is from Bosta.
- * Bosta signs the payload with HMAC-SHA256 using your BOSTA_WEBHOOK_SECRET.
- * Returns true if the signature matches.
+ * Verify an incoming Bosta webhook request.
+ * Configure a custom Authorization header value in the Bosta dashboard
+ * and set BOSTA_WEBHOOK_SECRET to that same value.
+ * Returns true when the header matches, or when no secret is configured.
  */
-export async function verifyWebhookSignature(
-  rawBody: string,
-  signatureHeader: string | null,
-): Promise<boolean> {
+export function verifyWebhookSignature(
+  authorizationHeader: string | null,
+): boolean {
   const secret = process.env.BOSTA_WEBHOOK_SECRET;
-  if (!secret) return true; // skip verification if no secret configured
-
-  if (!signatureHeader) return false;
-
-  const encoder = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
-  const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(rawBody));
-  const expected = Buffer.from(sig).toString("hex");
-
-  return expected === signatureHeader;
+  if (!secret) return true; // skip verification if not configured
+  if (!authorizationHeader) return false;
+  return authorizationHeader === secret;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Internal formatting helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
-function formatAddress(addr: BostaAddress) {
-  return {
-    city: { name: addr.city },
-    zone: addr.zone ? { name: addr.zone } : undefined,
-    district: addr.district ? { name: addr.district } : undefined,
+/**
+ * Build a Bosta address object.
+ * Prefers districtId (most reliable).
+ * Falls back to cityId + districtName when districtId is unavailable.
+ * Minimum required: city name + firstLine (≥ 5 chars).
+ */
+function formatAddress(addr: BostaAddress): Record<string, unknown> {
+  const out: Record<string, unknown> = {
+    city: addr.city,
     firstLine: addr.firstLine,
-    secondLine: addr.secondLine,
-    buildingNumber: addr.buildingNumber,
-    floor: addr.floor,
-    apartment: addr.apartment,
   };
+
+  if (addr.districtId) {
+    out.districtId = addr.districtId;
+  } else if (addr.districtName && addr.cityId) {
+    out.cityId = addr.cityId;
+    out.districtName = addr.districtName;
+  }
+
+  if (addr.zoneId) out.zoneId = addr.zoneId;
+  if (addr.secondLine) out.secondLine = addr.secondLine;
+  if (addr.buildingNumber) out.buildingNumber = addr.buildingNumber;
+  if (addr.floor) out.floor = addr.floor;
+  if (addr.apartment) out.apartment = addr.apartment;
+
+  return out;
 }

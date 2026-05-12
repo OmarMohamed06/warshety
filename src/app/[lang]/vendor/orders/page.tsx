@@ -31,14 +31,17 @@ import {
   Package,
   Search,
   RefreshCw,
-  ChevronDown,
+  Truck,
+  ExternalLink,
 } from "lucide-react";
 
 const STATUS_CLS: Record<string, string> = {
   pending: "bg-amber-100 text-amber-700",
   paid: "bg-blue-100 text-blue-700",
+  processing: "bg-purple-100 text-purple-700",
   shipped: "bg-indigo-100 text-indigo-700",
   completed: "bg-green-100 text-green-700",
+  failed_delivery: "bg-orange-100 text-orange-700",
   cancelled: "bg-red-100 text-red-700",
 };
 
@@ -61,6 +64,48 @@ export default function VendorOrdersPage() {
   const [filter, setFilter] = useState<OrderStatus | "all">("all");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<any | null>(null);
+  const [shipping, setShipping] = useState(false);
+  const [shipMsg, setShipMsg] = useState<{ text: string; ok: boolean } | null>(
+    null,
+  );
+
+  async function handleShip(orderId: string) {
+    setShipping(true);
+    setShipMsg(null);
+    try {
+      const res = await fetch("/api/vendor/orders/ship", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setShipMsg({
+          text: json.error ?? "Failed to create shipment",
+          ok: false,
+        });
+      } else {
+        setShipMsg({
+          text: `Shipment created! Tracking: ${json.trackingNumber}`,
+          ok: true,
+        });
+        // Refresh order list and update selected order
+        await load();
+        if (selected) {
+          setSelected((prev: any) => ({
+            ...prev,
+            status: "processing",
+            tracking_number: json.trackingNumber,
+            bosta_shipment_id: json.bostaShipmentId,
+          }));
+        }
+      }
+    } catch {
+      setShipMsg({ text: "Network error. Please try again.", ok: false });
+    } finally {
+      setShipping(false);
+    }
+  }
 
   const load = useCallback(async () => {
     if (!vendor) return;
@@ -69,7 +114,7 @@ export default function VendorOrdersPage() {
       const { data } = await supabase
         .from("order_items")
         .select(
-          "*, order:orders(id,status,created_at,total_amount,delivery_address,payment_method,user:users(full_name,email,phone))",
+          "*, order:orders(id,status,created_at,total_amount,delivery_address,payment_method,tracking_number,bosta_shipment_id,bosta_state_code,user:users(full_name,email,phone))",
         )
         .eq("vendor_id", vendor.id)
         .order("created_at", { ascending: false });
@@ -309,7 +354,7 @@ export default function VendorOrdersPage() {
                   >
                     <div>
                       <p className="font-medium">
-                        {item.product_name ?? item.part_id ?? "Item"}
+                        {item.name ?? item.product_name ?? "Item"}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {t("vendor.qty")}: {item.quantity}
@@ -328,9 +373,61 @@ export default function VendorOrdersPage() {
                 </div>
               </div>
 
-              <Button className="w-full" onClick={() => setSelected(null)}>
-                {t("garage.cancel")}
-              </Button>
+              {/* Tracking info */}
+              {selected.tracking_number && (
+                <div className="rounded-lg border border-indigo-100 bg-indigo-50 dark:bg-indigo-900/20 dark:border-indigo-800 p-3 space-y-1">
+                  <p className="text-xs font-bold text-indigo-700 dark:text-indigo-400 flex items-center gap-1.5">
+                    <Truck className="h-3.5 w-3.5" /> Bosta Tracking
+                  </p>
+                  <p className="font-mono text-sm font-semibold">
+                    {selected.tracking_number}
+                  </p>
+                  <a
+                    href={`https://tracking.bosta.co/shipments/track/${selected.tracking_number}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                  >
+                    Track shipment <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+              )}
+
+              {/* Ship action */}
+              {shipMsg && (
+                <p
+                  className={`text-xs font-semibold rounded-lg px-3 py-2 ${
+                    shipMsg.ok
+                      ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400"
+                      : "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+                  }`}
+                >
+                  {shipMsg.text}
+                </p>
+              )}
+
+              <div className="flex gap-2">
+                {selected.status === "paid" && (
+                  <Button
+                    className="flex-1 gap-1.5 bg-indigo-600 hover:bg-indigo-700"
+                    disabled={shipping}
+                    onClick={() => handleShip(selected.id)}
+                  >
+                    <Truck className="h-4 w-4" />
+                    {shipping ? "Creating shipment…" : "Ship via Bosta"}
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setSelected(null);
+                    setShipMsg(null);
+                  }}
+                >
+                  {t("garage.cancel")}
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>

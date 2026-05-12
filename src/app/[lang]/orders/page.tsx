@@ -27,6 +27,30 @@ const STATUS_ICONS: Record<OrderStatus, string> = {
   failed_delivery: "report",
 };
 
+const BOSTA_STATE_LABELS: Record<number, string> = {
+  10: "Order Created",
+  20: "Route Assigned",
+  21: "Picked Up",
+  22: "Received at Warehouse",
+  23: "In-Hub Scanning",
+  24: "In-Hub",
+  25: "Transferred to Hub",
+  30: "In Transit",
+  40: "On Hold",
+  41: "Out for Delivery",
+  45: "Delivered",
+  46: "Returned to Business",
+  47: "Delivery Exception",
+  48: "Terminated",
+  49: "Cancelled",
+  100: "Lost",
+  101: "Damaged",
+};
+
+function bostaStateLabel(code: number): string {
+  return BOSTA_STATE_LABELS[code] ?? `State ${code}`;
+}
+
 export default function MyOrdersPage() {
   const { user, isLoading: authLoading } = useAuth();
   const { t } = useLanguage();
@@ -178,6 +202,47 @@ export default function MyOrdersPage() {
                     </span>
                     {order.delivery_name} — {order.delivery_address},{" "}
                     {order.delivery_city}
+                  </div>
+                )}
+
+                {/* Bosta tracking */}
+                {order.tracking_number && (
+                  <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-indigo-50 dark:bg-indigo-900/20 text-xs space-y-1.5">
+                    <div className="flex items-center gap-1.5 font-semibold text-indigo-700 dark:text-indigo-400">
+                      <span className="material-symbols-outlined text-[14px]">
+                        package_2
+                      </span>
+                      Bosta Tracking
+                    </div>
+                    <div className="flex items-center justify-between gap-4 flex-wrap">
+                      <span className="font-mono font-bold text-slate-700 dark:text-slate-300">
+                        {order.tracking_number}
+                      </span>
+                      {order.bosta_state_code && (
+                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-800 text-indigo-700 dark:text-indigo-300">
+                          {bostaStateLabel(Number(order.bosta_state_code))}
+                        </span>
+                      )}
+                    </div>
+                    {order.shipped_at && (
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Shipped: {new Date(order.shipped_at).toLocaleString()}
+                      </p>
+                    )}
+                    {order.delivered_at && (
+                      <p className="text-green-700 dark:text-green-400 font-semibold">
+                        Delivered:{" "}
+                        {new Date(order.delivered_at).toLocaleString()}
+                      </p>
+                    )}
+                    <a
+                      href={`https://tracking.bosta.co/shipments/track/${order.tracking_number}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
+                    >
+                      Track shipment →
+                    </a>
                   </div>
                 )}
               </div>

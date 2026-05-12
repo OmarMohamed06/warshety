@@ -4,19 +4,18 @@
  * Receives delivery status updates from Bosta.
  * Bosta retries delivery until it receives a 2xx response.
  *
- * Logic per state code:
- *   PICKED_UP / IN_TRANSIT / OUT_FOR_DELIVERY
- *     → order status = 'shipped', record shipped_at if first time
- *   DELIVERED
- *     → order status = 'completed', delivered_at = now()
- *     → trigger parts-seller payout (createPartsSellerTransaction per vendor)
- *     → notify buyer + each vendor
- *   DELIVERY_FAILED / RETURNED
- *     → order status = 'failed_delivery', increment delivery_attempts
- *     → notify buyer
- *   CANCELLED
- *     → order status = 'cancelled'
- *     → notify buyer
+ * Bosta sends numeric state codes in the `state` field:
+ *   20/21/24/30/41 → in-transit / shipped
+ *   45             → Delivered ✅ → complete order + trigger payout
+ *   46             → Returned to business
+ *   47             → Exception (NDR) → failed_delivery
+ *   48             → Terminated
+ *   49             → Cancelled
+ *   100/101        → Lost / Damaged → failed_delivery
+ *
+ * Webhook authentication: set a custom Authorization header in the Bosta
+ * dashboard (Settings → API Integration → Webhook) and mirror its value
+ * in the BOSTA_WEBHOOK_SECRET env var.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -55,15 +54,15 @@ async function sendNotification(
 }
 
 export async function POST(req: NextRequest) {
-  // 1. Read raw body for HMAC verification
+  // 1. Read raw body
   const rawBody = await req.text();
 
-  // 2. Verify signature
-  const signature = req.headers.get("x-bosta-signature");
-  const valid = await verifyWebhookSignature(rawBody, signature);
-  if (!valid) {
-    console.warn("[Bosta webhook] Invalid signature — rejected");
-    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+  // 2. Verify webhook authentication
+  // Bosta sends a custom Authorization header configured in the dashboard.
+  const authHeader = req.headers.get("authorization");
+  if (!verifyWebhookSignature(authHeader)) {
+    console.warn("[Bosta webhook] Invalid authorization — rejected");
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   // 3. Parse payload
@@ -76,9 +75,9 @@ export async function POST(req: NextRequest) {
 
   const supabase = adminSupabase();
   const orderId: string = payload.businessReference;
-  const stateCode = payload.state?.code;
+  const stateCode = payload.state; // numeric code from Bosta
 
-  if (!orderId || !stateCode) {
+  if (!orderId || stateCode == null) {
     // Not a payload we can action — still 200 to stop Bosta retrying
     return NextResponse.json({ ok: true });
   }
@@ -105,175 +104,172 @@ export async function POST(req: NextRequest) {
   }
 
   const now = new Date().toISOString();
+  const trackingNumber = payload.trackingNumber
+    ? String(payload.trackingNumber)
+    : null;
 
   // 5. Handle state transitions
-  switch (stateCode) {
-    // ── In-flight states → mark shipped ──────────────────────────────────────
-    case "PICKED_UP":
-    case "IN_TRANSIT":
-    case "OUT_FOR_DELIVERY": {
-      await supabase
-        .from("orders")
-        .update({
-          status: "shipped",
-          bosta_state_code: stateCode,
-          // Only set shipped_at the first time we see a transit event
-          ...(order.status !== "shipped" && order.status !== "completed"
-            ? { shipped_at: now }
-            : {}),
-          // Sync tracking info if not already stored
-          ...(payload.trackingNumber && !order.tracking_number
-            ? { tracking_number: payload.trackingNumber }
-            : {}),
-          ...(payload._id && !order.bosta_shipment_id
-            ? { bosta_shipment_id: payload._id }
-            : {}),
-        })
-        .eq("id", orderId);
+  // In-transit states: 20 (route assigned), 21 (picked up), 24 (at warehouse), 30 (inter-hub), 41 (out for delivery)
+  const IN_TRANSIT_STATES = new Set([20, 21, 24, 30, 41]);
+  // Terminal failure states
+  const FAILED_STATES = new Set([46, 47, 48, 100, 101]);
 
-      // Notify buyer the first time
-      if (order.status !== "shipped" && order.status !== "completed") {
-        const trackingUrl = payload.trackingNumber
-          ? `https://tracking.bosta.co/shipments/track/${payload.trackingNumber}`
-          : undefined;
-        await sendNotification(
-          order.user_id,
-          "order_shipped_bosta",
-          "Your Order is on the Way 🚚",
-          `Order #${orderId.slice(0, 8).toUpperCase()} has been shipped. Track: ${payload.trackingNumber ?? "—"}`,
-          trackingUrl ?? `/orders/${orderId}`,
-        );
-      }
-      break;
+  if (IN_TRANSIT_STATES.has(stateCode)) {
+    // ── In-flight → mark shipped ────────────────────────────────────────────
+    await supabase
+      .from("orders")
+      .update({
+        status: "shipped",
+        bosta_state_code: String(stateCode),
+        ...(order.status !== "shipped" && order.status !== "completed"
+          ? { shipped_at: now }
+          : {}),
+        ...(trackingNumber && !order.tracking_number
+          ? { tracking_number: trackingNumber }
+          : {}),
+        ...(payload._id && !order.bosta_shipment_id
+          ? { bosta_shipment_id: payload._id }
+          : {}),
+      })
+      .eq("id", orderId);
+
+    // Notify buyer only on first transit event
+    if (order.status !== "shipped" && order.status !== "completed") {
+      const trackingUrl = trackingNumber
+        ? `https://tracking.bosta.co/shipments/track/${trackingNumber}`
+        : undefined;
+      await sendNotification(
+        order.user_id,
+        "order_shipped_bosta",
+        "Your Order is on the Way 🚚",
+        `Order #${orderId.slice(0, 8).toUpperCase()} has been shipped. Track: ${trackingNumber ?? "—"}`,
+        trackingUrl ?? `/orders/${orderId}`,
+      );
+    }
+  } else if (stateCode === 45) {
+    // ── Delivered → complete order + trigger payout ─────────────────────────
+    await supabase
+      .from("orders")
+      .update({
+        status: "completed",
+        bosta_state_code: String(stateCode),
+        delivered_at: now,
+        ...(trackingNumber && !order.tracking_number
+          ? { tracking_number: trackingNumber }
+          : {}),
+      })
+      .eq("id", orderId);
+
+    // Trigger payout per vendor appearing in order_items
+    const items = (order.order_items ?? []) as {
+      id: string;
+      vendor_id: string | null;
+      unit_price: number;
+      quantity: number;
+    }[];
+
+    const vendorMap = new Map<string, number>();
+    for (const item of items) {
+      if (!item.vendor_id) continue;
+      vendorMap.set(
+        item.vendor_id,
+        (vendorMap.get(item.vendor_id) ?? 0) + item.unit_price * item.quantity,
+      );
     }
 
-    // ── Delivered → complete order + trigger payout ───────────────────────────
-    case "DELIVERED": {
-      await supabase
-        .from("orders")
-        .update({
-          status: "completed",
-          bosta_state_code: stateCode,
-          delivered_at: now,
-        })
-        .eq("id", orderId);
+    const vendorIds = [...vendorMap.keys()];
+    if (vendorIds.length > 0) {
+      const { data: vendors } = await supabase
+        .from("vendors")
+        .select("id, user_id, business_name")
+        .in("id", vendorIds);
 
-      // Trigger payout per vendor appearing in order_items
-      const items = (order.order_items ?? []) as {
-        id: string;
-        vendor_id: string | null;
-        unit_price: number;
-        quantity: number;
-      }[];
+      for (const vendor of vendors ?? []) {
+        const vendorTotal = vendorMap.get(vendor.id) ?? 0;
+        if (vendorTotal === 0) continue;
 
-      // Group items by vendor_id
-      const vendorMap = new Map<string, { total: number; userId?: string }>();
-      for (const item of items) {
-        if (!item.vendor_id) continue;
-        const existing = vendorMap.get(item.vendor_id) ?? { total: 0 };
-        existing.total += item.unit_price * item.quantity;
-        vendorMap.set(item.vendor_id, existing);
-      }
+        const discountShare =
+          order.total_amount > 0
+            ? (vendorTotal / order.total_amount) * (order.discount ?? 0)
+            : 0;
 
-      // Fetch vendor user_ids for notifications
-      const vendorIds = [...vendorMap.keys()];
-      if (vendorIds.length > 0) {
-        const { data: vendors } = await supabase
-          .from("vendors")
-          .select("id, user_id, business_name")
-          .in("id", vendorIds);
+        await createPartsSellerTransaction(
+          vendor.id,
+          orderId,
+          vendorTotal,
+          parseFloat(discountShare.toFixed(2)),
+        );
 
-        for (const vendor of vendors ?? []) {
-          const vendorTotal = vendorMap.get(vendor.id)?.total ?? 0;
-          if (vendorTotal === 0) continue;
-
-          // Pro-rata discount: discount proportional to this vendor's items
-          const discountShare =
-            order.total_amount > 0
-              ? (vendorTotal / order.total_amount) * (order.discount ?? 0)
-              : 0;
-
-          // Create / upsert billing transaction
-          await createPartsSellerTransaction(
-            vendor.id,
-            orderId,
-            vendorTotal,
-            parseFloat(discountShare.toFixed(2)),
+        if (vendor.user_id) {
+          await sendNotification(
+            vendor.user_id,
+            "order_delivered",
+            "Order Delivered — Payout Queued 💰",
+            `Order #${orderId.slice(0, 8).toUpperCase()} was delivered. Your payout has been queued for settlement.`,
+            `/vendor/billing`,
           );
-
-          // Notify vendor: payout triggered
-          if (vendor.user_id) {
-            await sendNotification(
-              vendor.user_id,
-              "order_delivered",
-              "Order Delivered — Payout Queued 💰",
-              `Order #${orderId.slice(0, 8).toUpperCase()} was delivered. Your payout has been queued for settlement.`,
-              `/vendor/billing`,
-            );
-          }
         }
       }
-
-      // Notify buyer
-      await sendNotification(
-        order.user_id,
-        "order_delivered",
-        "Order Delivered ✅",
-        `Your order #${orderId.slice(0, 8).toUpperCase()} has been delivered. Enjoy!`,
-        `/orders/${orderId}`,
-      );
-      break;
     }
 
-    // ── Failed delivery / returned ────────────────────────────────────────────
-    case "DELIVERY_FAILED":
-    case "RETURNED": {
-      const newAttempts = (order.delivery_attempts ?? 0) + 1;
-      await supabase
-        .from("orders")
-        .update({
-          status: "failed_delivery",
-          bosta_state_code: stateCode,
-          delivery_attempts: newAttempts,
-        })
-        .eq("id", orderId);
+    await sendNotification(
+      order.user_id,
+      "order_delivered",
+      "Order Delivered ✅",
+      `Your order #${orderId.slice(0, 8).toUpperCase()} has been delivered. Enjoy!`,
+      `/orders/${orderId}`,
+    );
+  } else if (FAILED_STATES.has(stateCode)) {
+    // ── Exception / returned / terminated / lost / damaged ──────────────────
+    const newAttempts = (order.delivery_attempts ?? 0) + 1;
+    await supabase
+      .from("orders")
+      .update({
+        status: "failed_delivery",
+        bosta_state_code: String(stateCode),
+        delivery_attempts: newAttempts,
+      })
+      .eq("id", orderId);
 
-      const reason = payload.reason ?? "Courier could not reach you";
-      await sendNotification(
-        order.user_id,
-        "order_status_changed",
-        stateCode === "RETURNED" ? "Order Returned" : "Delivery Attempt Failed",
-        `${reason}. Attempt #${newAttempts}. We will retry or contact you shortly.`,
-        `/orders/${orderId}`,
-      );
-      break;
-    }
+    const reason =
+      payload.exceptionReason ??
+      (stateCode === 100
+        ? "Shipment was lost"
+        : stateCode === 101
+          ? "Shipment was damaged"
+          : stateCode === 48
+            ? "Shipment was terminated after repeated failed attempts"
+            : "Courier could not complete delivery");
 
-    // ── Cancelled ─────────────────────────────────────────────────────────────
-    case "CANCELLED": {
-      await supabase
-        .from("orders")
-        .update({ status: "cancelled", bosta_state_code: stateCode })
-        .eq("id", orderId);
+    await sendNotification(
+      order.user_id,
+      "order_status_changed",
+      stateCode === 46 ? "Order Returned to Sender" : "Delivery Attempt Failed",
+      `${reason}. Attempt #${newAttempts}. We will retry or contact you shortly.`,
+      `/orders/${orderId}`,
+    );
+  } else if (stateCode === 49) {
+    // ── Cancelled ────────────────────────────────────────────────────────────
+    await supabase
+      .from("orders")
+      .update({ status: "cancelled", bosta_state_code: String(stateCode) })
+      .eq("id", orderId);
 
-      await sendNotification(
-        order.user_id,
-        "order_status_changed",
-        "Shipment Cancelled",
-        `The shipment for order #${orderId.slice(0, 8).toUpperCase()} has been cancelled. Please contact support.`,
-        `/orders/${orderId}`,
-      );
-      break;
-    }
-
-    default:
-      // Unknown state — just update the state code for audit trail
-      await supabase
-        .from("orders")
-        .update({ bosta_state_code: stateCode })
-        .eq("id", orderId);
+    await sendNotification(
+      order.user_id,
+      "order_status_changed",
+      "Shipment Cancelled",
+      `The shipment for order #${orderId.slice(0, 8).toUpperCase()} has been cancelled. Please contact support.`,
+      `/orders/${orderId}`,
+    );
+  } else {
+    // Unknown / informational state — persist for audit trail only
+    await supabase
+      .from("orders")
+      .update({ bosta_state_code: String(stateCode) })
+      .eq("id", orderId);
   }
 
-  // Always return 200 so Bosta stops retrying
+  // Always 200 so Bosta stops retrying
   return NextResponse.json({ ok: true });
 }
