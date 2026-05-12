@@ -10,7 +10,7 @@ export async function GET() {
     });
   }
 
-  const url = `${baseUrl}/deliveries`;
+  const url = `${baseUrl}/business`;
 
   try {
     const res = await fetch(url, {
