@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import PartsListingClient from "@/components/parts/PartsListingClient";
@@ -483,8 +484,8 @@ export default async function ProductListPage({ params }: Props) {
   const categoryTerm = SLUG_TO_CAT[category] ?? category.replace(/-/g, " ");
   const subcategoryTerm = SLUG_TO_SUB[slug] ?? slug.replace(/-/g, " ");
 
-  // Try subcategory-specific query first (exact equality on both fields)
-  let { data: products } = await supabase
+  // Subcategory-specific query — exact match on both category and subcategory
+  const { data: products } = await supabase
     .from("products")
     .select(
       "*, vendor:vendors(business_name, rating, city), product_vehicles(make, model, year_from, year_to)",
@@ -495,18 +496,9 @@ export default async function ProductListPage({ params }: Props) {
     .order("created_at", { ascending: false })
     .limit(60);
 
-  // Fallback: just category (subcategory may not match exactly)
+  // No products for this subcategory → real 404 (prevents Google soft 404)
   if (!products || products.length === 0) {
-    const { data: catProducts } = await supabase
-      .from("products")
-      .select(
-        "*, vendor:vendors(business_name, rating, city), product_vehicles(make, model, year_from, year_to)",
-      )
-      .eq("active", true)
-      .eq("category", categoryTerm)
-      .order("created_at", { ascending: false })
-      .limit(60);
-    products = catProducts;
+    notFound();
   }
 
   const parts: Part[] = (

@@ -7,9 +7,20 @@ interface Props {
   searchParams: Promise<{ code?: string }>;
 }
 
-export const metadata: Metadata = {
-  title: "Reward Validation | Warshety",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  return {
+    title:
+      lang === "ar"
+        ? "استخدام المكافأة | ورشتي"
+        : "Reward Validation | Warshety",
+    robots: { index: false },
+  };
+}
 
 export default async function RewardUseRoute({ searchParams }: Props) {
   const { code } = await searchParams;

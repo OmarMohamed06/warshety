@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Product Not Found | Warshety",
+  title: "المنتج غير موجود | Product Not Found | Warshety",
   robots: { index: false, follow: false },
 };
 

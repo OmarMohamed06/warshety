@@ -112,7 +112,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
         // English product URL uses slug_en (or fallback slug)
         entries.push({
-          url: `${BASE_URL}/en/parts/${enSlug}`,
+          url: `${BASE_URL}/en/products/${enSlug}`,
           lastModified: new Date(product.updated_at),
           changeFrequency: "monthly",
           priority: 0.8,
