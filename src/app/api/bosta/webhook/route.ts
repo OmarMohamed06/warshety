@@ -24,7 +24,6 @@ import {
   verifyWebhookSignature,
   type BostaWebhookPayload,
 } from "@/services/bostaService";
-import { createPartsSellerTransaction } from "@/services/billingService";
 
 // ── Service-role Supabase client (no RLS, safe for server-only use) ───────────
 function adminSupabase() {
@@ -193,11 +192,37 @@ export async function POST(req: NextRequest) {
             ? (vendorTotal / order.total_amount) * (order.discount ?? 0)
             : 0;
 
-        await createPartsSellerTransaction(
-          vendor.id,
-          orderId,
-          vendorTotal,
-          parseFloat(discountShare.toFixed(2)),
+        // Fetch commission rate for this vendor (uses admin client — no RLS issue)
+        const { data: billingSettings } = await supabase
+          .from("vendor_billing_settings")
+          .select("commission_rate")
+          .eq("vendor_id", vendor.id)
+          .maybeSingle();
+
+        const rate = billingSettings?.commission_rate ?? 15; // default 15%
+        const finalAmount = Math.max(0, vendorTotal - discountShare);
+        const platformShare = parseFloat(
+          ((finalAmount * rate) / 100).toFixed(2),
+        );
+        const vendorShare = parseFloat(
+          (finalAmount - platformShare).toFixed(2),
+        );
+
+        await supabase.from("parts_seller_transactions").upsert(
+          {
+            vendor_id: vendor.id,
+            order_id: orderId,
+            order_amount: vendorTotal,
+            discount: parseFloat(discountShare.toFixed(2)),
+            final_order_amount: finalAmount,
+            commission_rate: rate,
+            platform_share: platformShare,
+            vendor_share: vendorShare,
+            payment_status: "pending",
+            refunded: false,
+            refund_amount: 0,
+          },
+          { onConflict: "vendor_id,order_id" },
         );
 
         if (vendor.user_id) {
