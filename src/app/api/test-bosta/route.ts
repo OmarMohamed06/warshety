@@ -21,9 +21,28 @@ export async function GET() {
       },
     });
 
-    const data = await res.json();
+    const contentType = res.headers.get("content-type") ?? "";
+    const rawText = await res.text();
 
-    return Response.json({ status: res.status, url, data });
+    if (contentType.includes("application/json")) {
+      try {
+        return Response.json({
+          status: res.status,
+          url,
+          data: JSON.parse(rawText),
+        });
+      } catch {
+        // fall through to raw
+      }
+    }
+
+    // Bosta returned non-JSON (HTML error page, redirect, etc.)
+    return Response.json({
+      status: res.status,
+      url,
+      contentType,
+      rawResponse: rawText.slice(0, 500),
+    });
   } catch (err) {
     return Response.json({
       error: "Fetch failed",
