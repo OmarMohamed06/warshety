@@ -81,12 +81,15 @@ export default function VendorOrdersPage() {
       const json = await res.json();
       if (!res.ok) {
         setShipMsg({
-          text: json.error ?? "Failed to create shipment",
+          text: json.error ?? t("vendor.shipmentError"),
           ok: false,
         });
       } else {
         setShipMsg({
-          text: `Shipment created! Tracking: ${json.trackingNumber}`,
+          text: t("vendor.shipmentCreated").replace(
+            "{trackingNumber}",
+            json.trackingNumber ?? "",
+          ),
           ok: true,
         });
         // Refresh order list and update selected order
@@ -101,7 +104,7 @@ export default function VendorOrdersPage() {
         }
       }
     } catch {
-      setShipMsg({ text: "Network error. Please try again.", ok: false });
+      setShipMsg({ text: t("auth.networkError"), ok: false });
     } finally {
       setShipping(false);
     }
@@ -382,7 +385,8 @@ export default function VendorOrdersPage() {
               {selected.tracking_number && (
                 <div className="rounded-lg border border-indigo-100 bg-indigo-50 dark:bg-indigo-900/20 dark:border-indigo-800 p-3 space-y-1">
                   <p className="text-xs font-bold text-indigo-700 dark:text-indigo-400 flex items-center gap-1.5">
-                    <Truck className="h-3.5 w-3.5" /> Bosta Tracking
+                    <Truck className="h-3.5 w-3.5" />{" "}
+                    {t("vendor.bostaTracking")}
                   </p>
                   <p className="font-mono text-sm font-semibold">
                     {selected.tracking_number}
@@ -393,7 +397,8 @@ export default function VendorOrdersPage() {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
                   >
-                    Track shipment <ExternalLink className="h-3 w-3" />
+                    {t("vendor.trackShipment")}{" "}
+                    <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>
               )}
@@ -419,7 +424,9 @@ export default function VendorOrdersPage() {
                     onClick={() => handleShip(selected.id)}
                   >
                     <Truck className="h-4 w-4" />
-                    {shipping ? "Creating shipment…" : "Ship via Bosta"}
+                    {shipping
+                      ? t("vendor.creatingShipment")
+                      : t("vendor.shipViaBosta")}
                   </Button>
                 )}
                 <Button
