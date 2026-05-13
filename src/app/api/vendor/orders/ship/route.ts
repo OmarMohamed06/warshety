@@ -125,9 +125,16 @@ export async function POST(req: NextRequest) {
   }
 
   // 5. Build Bosta dropoff address (customer)
+  // delivery_city is stored as "city, governorate" (e.g. "New Cairo, Cairo")
+  const deliveryCityRaw = order.delivery_city ?? "Cairo";
+  const cityParts = deliveryCityRaw.split(",").map((s: string) => s.trim());
+  const districtName = cityParts[0] ?? deliveryCityRaw;
+  const cityName = cityParts[1] ?? cityParts[0] ?? "Cairo";
+
   const dropoffAddress: BostaAddress = {
     firstLine: order.delivery_address ?? "Delivery address not set",
-    city: order.delivery_city ?? "Cairo",
+    city: cityName,
+    districtName,
   };
 
   // 6. Calculate total items for this vendor

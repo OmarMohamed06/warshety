@@ -393,9 +393,9 @@ function formatAddress(addr: BostaAddress): Record<string, unknown> {
 
   if (addr.districtId) {
     out.districtId = addr.districtId;
-  } else if (addr.districtName && addr.cityId) {
-    out.cityId = addr.cityId;
+  } else if (addr.districtName) {
     out.districtName = addr.districtName;
+    if (addr.cityId) out.cityId = addr.cityId;
   }
 
   if (addr.zoneId) out.zoneId = addr.zoneId;
