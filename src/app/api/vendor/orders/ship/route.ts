@@ -25,7 +25,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as createServerClient } from "@supabase/supabase-js";
 import { createClient as createCookieClient } from "@/lib/supabase/server";
-import { createShipment } from "@/services/bostaService";
+import { createShipment, getBostaCityId } from "@/services/bostaService";
 import type { BostaAddress } from "@/services/bostaService";
 
 // ── Service-role client for privileged writes ─────────────────────────────────
@@ -131,10 +131,14 @@ export async function POST(req: NextRequest) {
   const districtName = cityParts[0] ?? deliveryCityRaw;
   const cityName = cityParts[1] ?? cityParts[0] ?? "Cairo";
 
+  // Bosta requires cityId alongside districtName (peer validation)
+  const bostaCityId = await getBostaCityId(cityName);
+
   const dropoffAddress: BostaAddress = {
     firstLine: order.delivery_address ?? "Delivery address not set",
     city: cityName,
     districtName,
+    ...(bostaCityId ? { cityId: bostaCityId } : {}),
   };
 
   // 6. Calculate total items for this vendor

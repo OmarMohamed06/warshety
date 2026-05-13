@@ -380,6 +380,33 @@ export function verifyWebhookSignature(
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
+ * Look up a Bosta city ID by name (case-insensitive).
+ * Required when using districtName without districtId.
+ * Returns null if the city is not found or the API call fails.
+ */
+export async function getBostaCityId(
+  cityName: string,
+): Promise<string | null> {
+  try {
+    const res = await fetch(`${baseUrl()}/cities`, { headers: headers() });
+    if (!res.ok) return null;
+    const json = await res.json();
+    // Bosta returns { data: { list: [...] } } or { list: [...] }
+    const list: Array<{ _id: string; name: string; nameAr?: string }> =
+      json?.data?.list ?? json?.list ?? [];
+    const lower = cityName.toLowerCase().trim();
+    const match = list.find(
+      (c) =>
+        c.name?.toLowerCase() === lower ||
+        c.nameAr?.toLowerCase() === lower,
+    );
+    return match?._id ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Build a Bosta address object.
  * Prefers districtId (most reliable).
  * Falls back to cityId + districtName when districtId is unavailable.
