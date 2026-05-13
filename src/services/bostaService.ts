@@ -277,7 +277,7 @@ export async function getShipment(bostaShipmentId: string): Promise<{
  * Creates a new business location in the Bosta account.
  * Returns the Bosta `businessLocationId` to store on the vendor record.
  *
- * Docs: POST /business/create-business-location
+ * Docs: POST /pickup-locations
  */
 export async function registerPickupAddress(input: {
   name: string; // e.g. business name
@@ -297,7 +297,7 @@ export async function registerPickupAddress(input: {
       },
     };
 
-    const res = await fetch(`${baseUrl()}/business/create-business-location`, {
+    const res = await fetch(`${baseUrl()}/pickup-locations`, {
       method: "POST",
       headers: headers(),
       body: JSON.stringify(body),
@@ -312,8 +312,9 @@ export async function registerPickupAddress(input: {
       };
     }
 
-    // Bosta returns the location id as _id or id
-    const locationId: string = json._id ?? json.id ?? json.locationId;
+    // Bosta returns the location _id (e.g. "oHCWTITNBG")
+    const locationId: string =
+      json?.data?._id ?? json?.data?.id ?? json._id ?? json.id ?? json.locationId;
     if (!locationId) {
       return {
         locationId: null,
