@@ -282,19 +282,17 @@ export async function getShipment(bostaShipmentId: string): Promise<{
 export async function registerPickupAddress(input: {
   name: string; // e.g. business name
   address: BostaAddress;
-  contactName: string;
-  contactPhone: string;
+  contactName?: string;
+  contactPhone?: string;
 }): Promise<
   { locationId: string; error: null } | { locationId: null; error: string }
 > {
   try {
+    // Note: Bosta does not allow setting contactPerson via the API —
+    // it uses the account's registered contact. Omit it to avoid 401.
     const body = {
       locationName: input.name,
       address: formatAddress(input.address),
-      contactPerson: {
-        name: input.contactName,
-        phone: input.contactPhone,
-      },
     };
 
     const res = await fetch(`${baseUrl()}/pickup-locations`, {
@@ -384,9 +382,7 @@ export function verifyWebhookSignature(
  * Required when using districtName without districtId.
  * Returns null if the city is not found or the API call fails.
  */
-export async function getBostaCityId(
-  cityName: string,
-): Promise<string | null> {
+export async function getBostaCityId(cityName: string): Promise<string | null> {
   try {
     const res = await fetch(`${baseUrl()}/cities`, { headers: headers() });
     if (!res.ok) return null;
@@ -397,8 +393,7 @@ export async function getBostaCityId(
     const lower = cityName.toLowerCase().trim();
     const match = list.find(
       (c) =>
-        c.name?.toLowerCase() === lower ||
-        c.nameAr?.toLowerCase() === lower,
+        c.name?.toLowerCase() === lower || c.nameAr?.toLowerCase() === lower,
     );
     return match?._id ?? null;
   } catch {
