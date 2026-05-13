@@ -31,11 +31,13 @@ export async function GET() {
     });
   }
 
-  const [business, pickupLocations, cities] = await Promise.all([
-    testEndpoint(baseUrl, apiKey, "/business"),
-    testEndpoint(baseUrl, apiKey, "/business/pickup-locations"),
+  const [businesses, pickupLocations, cities, citiesNoParam, users] = await Promise.all([
+    testEndpoint(baseUrl, apiKey, "/businesses"),
+    testEndpoint(baseUrl, apiKey, "/pickup-locations"),
     testEndpoint(baseUrl, apiKey, "/cities?countryId=EG"),
+    testEndpoint(baseUrl, apiKey, "/cities"),
+    testEndpoint(baseUrl, apiKey, "/users/profile"),
   ]);
 
-  return Response.json({ business, pickupLocations, cities });
+  return Response.json({ businesses, pickupLocations, cities, citiesNoParam, users });
 }
