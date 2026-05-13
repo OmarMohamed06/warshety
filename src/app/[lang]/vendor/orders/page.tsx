@@ -111,13 +111,18 @@ export default function VendorOrdersPage() {
     if (!vendor) return;
     setLoading(true);
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("order_items")
         .select(
           "*, order:orders(id,status,created_at,total_amount,delivery_address,payment_method,tracking_number,bosta_shipment_id,bosta_state_code,user:users(full_name,email,phone))",
         )
         .eq("vendor_id", vendor.id)
         .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("[VendorOrders] fetch error:", error);
+        return;
+      }
 
       // Group by order
       const map = new Map<string, any>();
