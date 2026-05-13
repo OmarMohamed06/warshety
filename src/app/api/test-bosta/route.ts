@@ -13,7 +13,12 @@ async function testEndpoint(baseUrl: string, apiKey: string, path: string) {
         // fall through
       }
     }
-    return { url, status: res.status, contentType, rawResponse: rawText.slice(0, 300) };
+    return {
+      url,
+      status: res.status,
+      contentType,
+      rawResponse: rawText.slice(0, 300),
+    };
   } catch (err) {
     return { url, error: err instanceof Error ? err.message : String(err) };
   }
@@ -31,13 +36,20 @@ export async function GET() {
     });
   }
 
-  const [businesses, pickupLocations, cities, citiesNoParam, users] = await Promise.all([
-    testEndpoint(baseUrl, apiKey, "/businesses"),
-    testEndpoint(baseUrl, apiKey, "/pickup-locations"),
-    testEndpoint(baseUrl, apiKey, "/cities?countryId=EG"),
-    testEndpoint(baseUrl, apiKey, "/cities"),
-    testEndpoint(baseUrl, apiKey, "/users/profile"),
-  ]);
+  const [businesses, pickupLocations, cities, citiesNoParam, users] =
+    await Promise.all([
+      testEndpoint(baseUrl, apiKey, "/businesses"),
+      testEndpoint(baseUrl, apiKey, "/pickup-locations"),
+      testEndpoint(baseUrl, apiKey, "/cities?countryId=EG"),
+      testEndpoint(baseUrl, apiKey, "/cities"),
+      testEndpoint(baseUrl, apiKey, "/users/profile"),
+    ]);
 
-  return Response.json({ businesses, pickupLocations, cities, citiesNoParam, users });
+  return Response.json({
+    businesses,
+    pickupLocations,
+    cities,
+    citiesNoParam,
+    users,
+  });
 }

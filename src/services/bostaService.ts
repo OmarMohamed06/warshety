@@ -314,7 +314,11 @@ export async function registerPickupAddress(input: {
 
     // Bosta returns the location _id (e.g. "oHCWTITNBG")
     const locationId: string =
-      json?.data?._id ?? json?.data?.id ?? json._id ?? json.id ?? json.locationId;
+      json?.data?._id ??
+      json?.data?.id ??
+      json._id ??
+      json.id ??
+      json.locationId;
     if (!locationId) {
       return {
         locationId: null,
