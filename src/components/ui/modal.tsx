@@ -123,6 +123,7 @@ export function Modal({
             "w-full bg-white dark:bg-slate-900 rounded-2xl shadow-2xl",
             "border border-slate-100 dark:border-slate-800",
             "transition-transform duration-200",
+            "flex flex-col max-h-[calc(100dvh-2rem)]",
             open ? "scale-100" : "scale-95",
             sizeMap[size],
             className,
@@ -173,7 +174,7 @@ export function Modal({
 
           {/* ── Body ── */}
           {children && (
-            <div className="px-6 py-5 text-sm text-slate-700 dark:text-slate-300">
+            <div className="px-6 py-5 text-sm text-slate-700 dark:text-slate-300 overflow-y-auto flex-1">
               {children}
             </div>
           )}
