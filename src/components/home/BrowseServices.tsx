@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { SERVICE_CATEGORIES } from "@/lib/serviceCategories";
+import Image from "next/image";
 
 export default function BrowseServices() {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -59,10 +60,12 @@ export default function BrowseServices() {
               >
                 {/* Background image */}
                 <div className="aspect-[4/3] relative overflow-hidden">
-                  <img
+                  <Image
                     src={cat.image}
                     alt={t(`home.serviceCategories.${cat.key}`)}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    fill
+                    sizes="(max-width: 640px) 260px, 300px"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   {/* Dark gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />

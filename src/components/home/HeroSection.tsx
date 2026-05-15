@@ -18,6 +18,8 @@ export default function HeroSection() {
         aria-hidden
         width={600}
         height={400}
+        priority
+        sizes="38vw"
         className="pointer-events-none absolute bottom-0 left-0 hidden h-[90%] w-auto max-w-[38%] select-none object-contain object-bottom md:block"
         style={{ transform: "translateX(-44%) translateY(-10%)" }}
       />
@@ -27,6 +29,8 @@ export default function HeroSection() {
         aria-hidden
         width={600}
         height={400}
+        priority
+        sizes="38vw"
         className="pointer-events-none absolute bottom-0 right-0 hidden h-[90%] w-auto max-w-[38%] select-none object-contain object-bottom md:block"
         style={{ transform: "translateX(44%)" }}
       />
@@ -57,6 +61,7 @@ export default function HeroSection() {
               width={400}
               height={260}
               priority
+              sizes="70vw"
               className="pointer-events-none w-full h-auto object-contain object-bottom select-none drop-shadow-2xl rtl:[transform:scaleX(-1)]"
               style={{ maxHeight: "260px" }}
             />

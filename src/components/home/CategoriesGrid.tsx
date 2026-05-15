@@ -5,6 +5,7 @@ import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import Image from "next/image";
 
 // Shown in the scrollable carousel (most popular)
 const FEATURED = [
@@ -25,11 +26,13 @@ function CategoryCard({ cat }: { cat: (typeof FEATURED)[0] }) {
       href={`/parts/${cat.slug}`}
       className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-700 hover:border-[#FF4B19] hover:shadow-xl transition-all group flex flex-col"
     >
-      <div className="w-full aspect-[4/3] bg-slate-100 dark:bg-slate-700 overflow-hidden flex items-center justify-center">
-        <img
+      <div className="w-full aspect-[4/3] bg-slate-100 dark:bg-slate-700 overflow-hidden relative">
+        <Image
           src={cat.image}
           alt={t(`home.categories.${cat.slug}`)}
-          className="w-full h-full object-contain p-3 transition-transform duration-300 group-hover:scale-105"
+          fill
+          sizes="(max-width: 640px) 140px, 160px"
+          className="object-contain p-3 transition-transform duration-300 group-hover:scale-105"
         />
       </div>
       <div className="px-3 py-2.5 text-center">
