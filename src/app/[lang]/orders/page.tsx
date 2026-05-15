@@ -54,7 +54,7 @@ function bostaStateLabel(code: number): string {
 export default function MyOrdersPage() {
   const { user, isLoading: authLoading } = useAuth();
   const { t } = useLanguage();
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

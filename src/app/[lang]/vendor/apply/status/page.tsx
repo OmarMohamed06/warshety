@@ -18,7 +18,7 @@ interface VendorApplication {
 export default function VendorStatusPage() {
   const { t } = useLanguage();
   const { session, isLoading: authLoading } = useAuth();
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   const [app, setApp] = useState<VendorApplication | null>(null);
   const [appLoading, setAppLoading] = useState(true);
@@ -40,7 +40,7 @@ export default function VendorStatusPage() {
         setApp(data ?? null);
         setAppLoading(false);
       });
-  }, [authLoading, session]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [authLoading, session, supabase]);
 
   // ── Loading ───────────────────────────────────────────────────────────────
   if (authLoading || appLoading) {

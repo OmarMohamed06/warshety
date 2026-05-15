@@ -166,35 +166,11 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
   }, [authUser, loadProfile]);
 
   // ── Bootstrap session on mount ────────────────────────────────────────────
+  // Rely solely on onAuthStateChange — it fires INITIAL_SESSION synchronously
+  // on mount before any async getSession() could resolve, so a parallel
+  // getSession() call would race against it and double-invoke loadProfile.
   useEffect(() => {
     isMountedRef.current = true;
-
-    supabase.auth
-      .getSession()
-      .then(({ data: { session: s } }) => {
-        if (!isMountedRef.current) return;
-        setSession(s);
-        setAuthUser(s?.user ?? null);
-        if (s?.user) {
-          loadProfile(s.user.id).finally(() => {
-            if (isMountedRef.current) {
-              profileLoadedRef.current = true;
-              setIsLoading(false);
-            }
-          });
-        } else {
-          // No session — profile is not loaded; a future SIGNED_IN should block.
-          profileLoadedRef.current = false;
-          setIsLoading(false);
-        }
-      })
-      .catch(() => {
-        // AuthRetryableFetchError during DB recovery or network issue
-        if (isMountedRef.current) {
-          profileLoadedRef.current = false;
-          setIsLoading(false);
-        }
-      });
 
     const {
       data: { subscription },
@@ -203,13 +179,15 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
       setSession(s);
       setAuthUser(s?.user ?? null);
       if (s?.user) {
-        if (event === "SIGNED_IN" || event === "USER_UPDATED") {
-          // Only block the UI when no profile is currently loaded:
-          //   • Fresh sign-in after being logged out → profileLoadedRef = false → block.
-          //   • Page reload replaying a cookie session → getSession() already
-          //     set profileLoadedRef = true before this event fires → no block.
-          // Using a ref avoids the stale-closure problem (state would always be
-          // null inside this effect because user is not in the deps array).
+        if (
+          event === "INITIAL_SESSION" ||
+          event === "SIGNED_IN" ||
+          event === "USER_UPDATED"
+        ) {
+          // Block the UI only when no profile is currently loaded:
+          //   • INITIAL_SESSION on page reload → profileLoadedRef = false → block.
+          //   • Fresh sign-in → profileLoadedRef = false → block.
+          //   • TOKEN_REFRESHED after profile is loaded → profileLoadedRef = true → no block.
           if (!profileLoadedRef.current) {
             setIsLoading(true);
           }
@@ -220,17 +198,15 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
             }
           });
         } else {
-          // TOKEN_REFRESHED, INITIAL_SESSION, etc. — profile already loaded,
-          // just silently refresh it in the background.
+          // TOKEN_REFRESHED — profile already loaded; silently refresh in background.
           loadProfile(s.user.id);
         }
       } else {
-        // Sign-out: mark profile as unloaded so the next SIGNED_IN blocks correctly.
+        // SIGNED_OUT / no session on INITIAL_SESSION.
         profileLoadedRef.current = false;
         setUser(null);
         setVendor(null);
         setManagedBranchId(null);
-        // Always clear loading state on sign-out so auth guards don't spin forever.
         if (isMountedRef.current) setIsLoading(false);
       }
     });

@@ -123,6 +123,10 @@ async function middlewareInner(request: NextRequest) {
     VENDOR_ROUTES.some((r) => internalPath.startsWith(r)) ||
     ADMIN_ROUTES.some((r) => internalPath.startsWith(r));
 
+  // Holds the role fetched during the guard check so the cookie-caching
+  // block below can reuse it without a second DB round-trip.
+  let fetchedRole: string | undefined;
+
   if (needsVendorOrAdmin) {
     if (!user) {
       return localeRedirect("/vendor/login", `?next=/${locale}${internalPath}`);
@@ -140,6 +144,7 @@ async function middlewareInner(request: NextRequest) {
         .eq("id", user.id)
         .single();
       role = profile?.role ?? undefined;
+      fetchedRole = role; // capture for cookie-caching below
     }
 
     if (
@@ -196,25 +201,17 @@ async function middlewareInner(request: NextRequest) {
     sameSite: "lax",
   });
 
-  // Cache role for 5 minutes so repeat navigations skip the DB query
+  // Cache role for 5 minutes so repeat navigations skip the DB query.
+  // Reuse `fetchedRole` from the guard block above — no second DB call needed.
   if (user && needsVendorOrAdmin) {
     const cachedRole = request.cookies.get("_role")?.value;
-    if (!cachedRole) {
-      const roleRes = await supabase
-        .from("users")
-        .select("role")
-        .eq("id", user.id)
-        .single();
-      const resolvedRole =
-        (roleRes.data as { role?: string } | null)?.role ?? "";
-      if (resolvedRole) {
-        response.cookies.set("_role", resolvedRole, {
-          path: "/",
-          maxAge: 60 * 5,
-          sameSite: "lax",
-          httpOnly: true,
-        });
-      }
+    if (!cachedRole && fetchedRole) {
+      response.cookies.set("_role", fetchedRole, {
+        path: "/",
+        maxAge: 60 * 5,
+        sameSite: "lax",
+        httpOnly: true,
+      });
     }
   } else if (!user) {
     // Clear stale role cookie on logout

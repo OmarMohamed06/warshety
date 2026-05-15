@@ -40,7 +40,7 @@ function canCancelBooking(booking: any): boolean {
 export default function MyBookingsPage() {
   const { user, isLoading: authLoading } = useAuth();
   const { t } = useLanguage();
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
