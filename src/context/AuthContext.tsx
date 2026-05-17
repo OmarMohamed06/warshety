@@ -285,15 +285,20 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
 
   const signOut = useCallback(async () => {
     try {
-      await supabase.auth.signOut();
+      // Use the server-side route so cookies are cleared via Set-Cookie headers.
+      // The browser client's signOut() cannot reliably delete cookies that were
+      // written by the middleware, causing the session to survive until reload.
+      await fetch("/api/auth/signout", { method: "POST" });
     } catch {
-      // Ignore network errors — always clear local state
+      // Network error — state will still be cleared below so the UI updates.
     }
+    // Clear React state immediately so the UI reflects the sign-out now.
     setSession(null);
     setAuthUser(null);
     setUser(null);
     setVendor(null);
-  }, [supabase]);
+    setManagedBranchId(null);
+  }, []);
 
   // ── Value ─────────────────────────────────────────────────────────────────
   const value: AuthContextValue = {

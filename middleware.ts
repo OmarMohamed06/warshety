@@ -92,7 +92,7 @@ async function middlewareInner(request: NextRequest) {
     const url = new URL(`/${locale}${path}${search}`, request.url);
     const res = NextResponse.redirect(url);
     for (const cookie of supabaseResponse.cookies.getAll()) {
-      res.cookies.set(cookie.name, cookie.value);
+      res.cookies.set(cookie); // pass full cookie object to preserve httpOnly/secure flags
     }
     return res;
   }
@@ -180,45 +180,39 @@ async function middlewareInner(request: NextRequest) {
   }
 
   // ── Step 5: pass through — inject locale headers for root layout SSR ────────
-  // No rewrite needed: /en/services maps natively to app/[lang]/services
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-locale", locale);
-  requestHeaders.set("x-pathname", pathname); // e.g. /ar/services
-
-  const response = NextResponse.next({
-    request: { headers: requestHeaders },
-  });
-
-  // Transfer Supabase session cookies to the response
-  for (const cookie of supabaseResponse.cookies.getAll()) {
-    response.cookies.set(cookie.name, cookie.value);
-  }
+  // Mutate supabaseResponse directly rather than creating a new NextResponse.
+  // A new NextResponse.next() breaks the Supabase cookie chain — the refreshed
+  // session tokens that updateSession baked into supabaseResponse are lost.
+  supabaseResponse.headers.set("x-locale", locale);
+  supabaseResponse.headers.set("x-pathname", pathname); // e.g. /ar/services
 
   // Persist locale cookie (1 year)
-  response.cookies.set("NEXT_LOCALE", locale, {
+  supabaseResponse.cookies.set("NEXT_LOCALE", locale, {
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
     sameSite: "lax",
   });
 
-  // Cache role for 5 minutes so repeat navigations skip the DB query.
+  // Cache role for 1 minute so repeat navigations skip the DB query.
   // Reuse `fetchedRole` from the guard block above — no second DB call needed.
-  if (user && needsVendorOrAdmin) {
-    const cachedRole = request.cookies.get("_role")?.value;
-    if (!cachedRole && fetchedRole) {
-      response.cookies.set("_role", fetchedRole, {
-        path: "/",
-        maxAge: 60 * 5,
-        sameSite: "lax",
-        httpOnly: true,
-      });
-    }
+  if (
+    user &&
+    needsVendorOrAdmin &&
+    !request.cookies.get("_role")?.value &&
+    fetchedRole
+  ) {
+    supabaseResponse.cookies.set("_role", fetchedRole, {
+      path: "/",
+      maxAge: 60,
+      sameSite: "lax",
+      httpOnly: true,
+    });
   } else if (!user) {
     // Clear stale role cookie on logout
-    response.cookies.delete("_role");
+    supabaseResponse.cookies.delete("_role");
   }
 
-  return response;
+  return supabaseResponse;
 }
 
 export const config = {
