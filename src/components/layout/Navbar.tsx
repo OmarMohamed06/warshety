@@ -406,7 +406,10 @@ function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
                   </div>
 
                   {/* Qty + Price */}
-                  <div className="flex items-center justify-between mt-3">
+                  <div
+                    className="flex items-center justify-between mt-3"
+                    dir="ltr"
+                  >
                     <div className="flex items-center gap-1 bg-background rounded-lg border overflow-hidden">
                       <Button
                         variant="ghost"
