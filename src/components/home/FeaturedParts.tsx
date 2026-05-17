@@ -14,6 +14,7 @@ interface FeaturedPart {
   name: string;
   brand: string;
   category: string;
+  partType: string | null;
   price: number;
   originalPrice: number | null;
   rating: number;
@@ -60,6 +61,7 @@ export interface RawProduct {
   brand: string | null;
   category: string;
   subcategory: string | null;
+  part_type: string | null;
   price: number;
   original_price: number | null;
   image_url: string | null;
@@ -89,6 +91,7 @@ function mapRawProducts(data: RawProduct[]): FeaturedPart[] {
       name: p.name,
       brand: p.brand ?? "",
       category: p.subcategory ?? p.category,
+      partType: p.part_type ?? null,
       price: Number(p.price),
       originalPrice: p.original_price ? Number(p.original_price) : null,
       rating: 4.5 + (i % 5) * 0.1,
@@ -131,7 +134,7 @@ export default function FeaturedParts({ initialData }: Props = {}) {
       supabase
         .from("products")
         .select(
-          "id, name, brand, category, subcategory, price, original_price, image_url, vendor_id",
+          "id, name, brand, category, subcategory, part_type, price, original_price, image_url, vendor_id",
         )
         .eq("active", true)
         .gt("stock", 0)
@@ -151,7 +154,7 @@ export default function FeaturedParts({ initialData }: Props = {}) {
             (soldMap[item.product_id] ?? 0) + (item.quantity ?? 1);
       }
       // Attach sold_count and sort descending
-      const withSold = (products as RawProduct[]).map((p) => ({
+      const withSold = (products as unknown as RawProduct[]).map((p) => ({
         ...p,
         sold_count: soldMap[p.id] ?? 0,
       }));
@@ -262,12 +265,39 @@ export default function FeaturedParts({ initialData }: Props = {}) {
                             {part.category}
                           </p>
 
-                          {/* Rating / sold count */}
-                          <div className="flex items-center gap-1 mt-1">
-                            <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                            <span className="text-[11px] font-bold">
-                              {part.rating}
+                          {/* Part type badge */}
+                          {part.partType && (
+                            <span
+                              className={`self-start mt-0.5 inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide ${
+                                part.partType === "oem"
+                                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+                                  : part.partType === "original"
+                                    ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
+                                    : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
+                              }`}
+                            >
+                              {part.partType === "oem"
+                                ? "OEM"
+                                : part.partType === "original"
+                                  ? "Original"
+                                  : "Aftermarket"}
                             </span>
+                          )}
+
+                          {/* Rating / New badge */}
+                          <div className="flex items-center gap-1 mt-1">
+                            {part.reviews > 0 ? (
+                              <>
+                                <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                                <span className="text-[11px] font-bold">
+                                  {part.rating.toFixed(1)}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide bg-slate-800 text-white dark:bg-white dark:text-slate-900">
+                                New
+                              </span>
+                            )}
                           </div>
                         </div>
 

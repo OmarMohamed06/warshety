@@ -391,12 +391,6 @@ function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
                   </p>
 
                   <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                    <Badge
-                      variant="secondary"
-                      className="text-[10px] h-4 px-1.5"
-                    >
-                      {item.sku}
-                    </Badge>
                     {item.badge && (
                       <Badge
                         variant={item.badge === "OEM" ? "default" : "outline"}
@@ -434,7 +428,7 @@ function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
                         <Plus className="w-3 h-3" />
                       </Button>
                     </div>
-                    <p className="text-sm font-black">
+                    <p className="text-sm font-black whitespace-nowrap">
                       EGP{" "}
                       {(item.price * item.qty).toLocaleString(
                         locale === "ar" ? "ar-EG" : "en-EG",
