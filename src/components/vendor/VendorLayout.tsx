@@ -111,8 +111,7 @@ function SidebarContent({ onNavigate }: SidebarProps) {
 
   const handleSignOut = async () => {
     await signOut();
-    router.refresh();
-    router.replace(localePath("/auth/login"));
+    window.location.href = localePath("/auth/login");
   };
 
   const initials = (vendor?.business_name ?? user?.full_name ?? "V")

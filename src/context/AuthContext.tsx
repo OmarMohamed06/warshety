@@ -271,10 +271,13 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
   );
 
   const signInWithGoogle = useCallback(async (): Promise<string | null> => {
+    const origin =
+      process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+      (typeof window !== "undefined" ? window.location.origin : "");
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+        redirectTo: `${origin}/auth/callback`,
       },
     });
     return error?.message ?? null;

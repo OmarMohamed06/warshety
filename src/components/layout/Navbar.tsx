@@ -790,8 +790,7 @@ export default function Navbar() {
                       className="text-destructive focus:text-destructive"
                       onClick={async () => {
                         await signOut();
-                        router.refresh();
-                        router.push(localePath("/"));
+                        window.location.href = localePath("/");
                       }}
                     >
                       <LogOut className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
@@ -1278,9 +1277,7 @@ export default function Navbar() {
               <button
                 onClick={async () => {
                   await signOut();
-                  setMoreSheetOpen(false);
-                  router.refresh();
-                  router.push(localePath("/"));
+                  window.location.href = localePath("/");
                 }}
                 className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-destructive hover:bg-destructive/10 transition-colors"
               >
