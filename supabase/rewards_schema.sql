@@ -149,7 +149,6 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
-  v_service_id    uuid;
   v_points_reward integer := 0;
 BEGIN
   -- Only fire when transitioning TO 'completed'
@@ -157,17 +156,37 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  -- Look up service by service_key (services.name matches) or use a direct join
-  -- Prefer looking up via booking's service_key mapped to services table
-  SELECT s.points_reward
-    INTO v_points_reward
-    FROM public.services s
-   WHERE s.vendor_id = NEW.vendor_id
-     AND (
-           s.id::text = NEW.service_key
-        OR s.name     = NEW.service_key
-     )
-   LIMIT 1;
+  -- Step 1: Try to find service by explicit service_key
+  IF NEW.service_key IS NOT NULL THEN
+    SELECT s.points_reward
+      INTO v_points_reward
+      FROM public.services s
+     WHERE s.vendor_id = NEW.vendor_id
+       AND (
+             s.id::text = NEW.service_key
+          OR s.name     = NEW.service_key
+       )
+     LIMIT 1;
+  END IF;
+
+  -- Step 2: Fallback — match by booking_type keyword when service_key is missing
+  -- (BookingSidebar always sets service_key = NULL, so this fallback is essential)
+  IF v_points_reward IS NULL OR v_points_reward <= 0 THEN
+    SELECT s.points_reward
+      INTO v_points_reward
+      FROM public.services s
+     WHERE s.vendor_id = NEW.vendor_id
+       AND s.points_reward > 0
+       AND (
+             (NEW.booking_type::text = 'inspection'
+              AND lower(s.name) LIKE '%inspection%')
+          OR (NEW.booking_type::text = 'routine_maintenance'
+              AND (lower(s.name) LIKE '%oil%' OR lower(s.name) LIKE '%maintenance%'))
+          OR lower(s.name) LIKE '%' || replace(lower(NEW.booking_type::text), '_', ' ') || '%'
+       )
+     ORDER BY s.points_reward DESC
+     LIMIT 1;
+  END IF;
 
   IF v_points_reward IS NULL OR v_points_reward <= 0 THEN
     RETURN NEW;
