@@ -1,12 +1,18 @@
 import { createBrowserClient } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 
 /**
  * Browser-side Supabase client.
  * Safe to use in Client Components and hooks.
- * Creates one instance per module load (singleton pattern).
+ * Module-level singleton — all callers share one instance so that
+ * onAuthStateChange listeners and the cookie store are never split.
  */
-export function createClient() {
+let _client: SupabaseClient<Database> | null = null;
+
+export function createClient(): SupabaseClient<Database> {
+  if (_client) return _client;
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -17,5 +23,6 @@ export function createClient() {
     );
   }
 
-  return createBrowserClient<Database>(url, key);
+  _client = createBrowserClient<Database>(url, key);
+  return _client;
 }

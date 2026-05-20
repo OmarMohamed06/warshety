@@ -293,6 +293,7 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
       // Network error — state will still be cleared below so the UI updates.
     }
     // Clear React state immediately so the UI reflects the sign-out now.
+    profileLoadedRef.current = false;
     setSession(null);
     setAuthUser(null);
     setUser(null);

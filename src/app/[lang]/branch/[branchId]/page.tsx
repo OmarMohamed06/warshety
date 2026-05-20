@@ -357,6 +357,7 @@ export default function BranchManagementPage({
   const handleSignOut = async () => {
     await signOut();
     router.replace(localePath("/auth/login"));
+    router.refresh();
   };
 
   if (

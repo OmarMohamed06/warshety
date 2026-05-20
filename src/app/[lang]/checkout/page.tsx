@@ -820,7 +820,7 @@ export default function CheckoutPage() {
     promo,
     total,
   } = useCart();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { t, localePath } = useLanguage();
 
   const [step, setStep] = useState<Step>("delivery");
@@ -1064,7 +1064,7 @@ export default function CheckoutPage() {
     }
   }
 
-  if (!isHydrated) {
+  if (authLoading || !isHydrated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-9 h-9 text-primary animate-spin" />
