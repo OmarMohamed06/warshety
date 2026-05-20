@@ -388,10 +388,17 @@ export default function VendorBookingsPage() {
                               : (b.booking_type ?? "—")}
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm">{b.branch?.name ?? "—"}</span>
+                        <span className="text-sm">
+                          {b.branch?.name ?? vendor?.business_name ?? "—"}
+                        </span>
                         {b.branch?.city && (
                           <span className="block text-xs text-muted-foreground">
                             {b.branch.city}
+                          </span>
+                        )}
+                        {!b.branch && (
+                          <span className="block text-xs text-muted-foreground">
+                            {t("vendor.mainLocation") || "Main Location"}
                           </span>
                         )}
                       </TableCell>
