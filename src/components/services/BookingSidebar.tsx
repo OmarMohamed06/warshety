@@ -530,6 +530,7 @@ export default function BookingSidebar({
               "Used for booking confirmation and updates via SMS."}
           </p>
         </div>
+        <Separator />
         {/* ── Date picker ──────────────────────────────────────────────────── */}
         <div className="space-y-1.5">
           <label className="text-xs font-bold uppercase text-muted-foreground tracking-wider flex items-center gap-1.5">

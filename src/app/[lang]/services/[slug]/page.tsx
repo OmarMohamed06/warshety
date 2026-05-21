@@ -266,7 +266,7 @@ export default async function ServiceCenterPage({ params }: Props) {
           <div className="absolute inset-0 bg-gradient-to-br from-slate-700 to-slate-900" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-        <div className="absolute top-6 left-6">
+        <div className="absolute top-6 start-6">
           <Button
             asChild
             variant="ghost"
@@ -274,12 +274,12 @@ export default async function ServiceCenterPage({ params }: Props) {
             className="text-white/80 hover:text-white hover:bg-white/10"
           >
             <Link href={`/${lang}/services`}>
-              <ArrowLeft className="w-4 h-4 mr-1" />
+              <ArrowLeft className="w-4 h-4 me-1 rtl:-scale-x-100" />
               {sc.backToCenters}
             </Link>
           </Button>
         </div>
-        <div className="absolute bottom-6 left-6 text-white">
+        <div className="absolute bottom-6 start-6 text-white">
           <h1 className="text-4xl font-black mb-1">{center.name}</h1>
           <div className="flex items-center gap-3 text-sm flex-wrap">
             {center.reviewCount > 0 ? (
