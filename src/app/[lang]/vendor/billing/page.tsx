@@ -482,8 +482,14 @@ export default function VendorBillingPage() {
                     </thead>
                     <tbody className="divide-y divide-border">
                       {/* ── Current in-progress period (live) ─────────────── */}
+                      {/* Only show the live row if there is NO billing record for the current period yet */}
                       {currentPeriod &&
                         currentPeriodCount !== null &&
+                        !bills.find(
+                          (b) =>
+                            b.period_start === currentPeriod.start &&
+                            b.period_end === currentPeriod.end,
+                        ) &&
                         (() => {
                           // find the booking_fee from the most recent bill, or fall back to 75
                           const fee = bills[0]?.booking_fee ?? 75;
