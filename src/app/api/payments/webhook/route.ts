@@ -13,6 +13,7 @@ import {
  *
  * On confirmed payment (`obj.success === true`):
  *  - Updates the pre-saved order status from "pending" → "paid"
+ *  - Creates parts_seller_transactions rows for each parts-seller vendor
  *  - Sends order confirmation notifications
  *
  * Always returns HTTP 200 so Paymob does not retry unnecessarily.
@@ -90,12 +91,12 @@ export async function POST(req: NextRequest) {
       const origin = req.nextUrl.origin;
       const orderId = order.id;
 
-      // Fetch order user info and items in parallel
+      // Fetch order user info, discount and items in parallel
       const [{ data: fullOrder }, { data: orderItems }] = await Promise.all([
         db
           .from("orders")
           .select(
-            `id, total_amount, delivery_name, user_id, user:users!inner(phone, email, full_name)`,
+            `id, total_amount, discount, delivery_name, user_id, user:users!inner(phone, email, full_name)`,
           )
           .eq("id", orderId)
           .single(),
@@ -105,7 +106,116 @@ export async function POST(req: NextRequest) {
           .eq("order_id", orderId),
       ]);
 
-      const user = (fullOrder as { user?: { phone?: string; email?: string; full_name?: string } } | null)?.user ?? null;
+      // ── 8a. Create parts-seller billing transactions ─────────────────────
+      // For each unique parts-seller vendor, record a commission transaction.
+      const vendorIds = [
+        ...new Set(
+          (orderItems ?? [])
+            .map((i: { vendor_id: string }) => i.vendor_id)
+            .filter(Boolean),
+        ),
+      ] as string[];
+
+      const orderDiscount = Number(
+        (fullOrder as { discount?: number } | null)?.discount ?? 0,
+      );
+
+      for (const vendorId of vendorIds) {
+        try {
+          // Only create transactions for parts_seller vendors
+          const { data: vendorRow } = await db
+            .from("vendors")
+            .select("id, vendor_type")
+            .eq("id", vendorId)
+            .eq("vendor_type", "parts_seller")
+            .maybeSingle();
+
+          if (!vendorRow) continue;
+
+          // Sum up this vendor's items for the order
+          const vendorItems = (orderItems ?? []).filter(
+            (i: { vendor_id: string }) => i.vendor_id === vendorId,
+          );
+          const vendorOrderAmount = vendorItems.reduce(
+            (s: number, i: { unit_price: number; quantity: number }) =>
+              s + i.unit_price * i.quantity,
+            0,
+          );
+
+          // Fetch this vendor's commission rate (falls back to 15 % if not set)
+          const { data: billingSettings } = await db
+            .from("vendor_billing_settings")
+            .select("commission_rate")
+            .eq("vendor_id", vendorId)
+            .maybeSingle();
+
+          const { data: platformDefault } = await db
+            .from("system_settings")
+            .select("value")
+            .eq("key", "parts_seller_commission_pct")
+            .maybeSingle();
+
+          const commissionRate =
+            (billingSettings as { commission_rate?: number } | null)
+              ?.commission_rate ??
+            parseFloat(
+              (platformDefault as { value?: string } | null)?.value ?? "15",
+            );
+
+          // Apportion any order-level discount proportionally to this vendor
+          const totalOrderAmount = (orderItems ?? []).reduce(
+            (s: number, i: { unit_price: number; quantity: number }) =>
+              s + i.unit_price * i.quantity,
+            0,
+          );
+          const vendorDiscount =
+            totalOrderAmount > 0
+              ? parseFloat(
+                  (
+                    (orderDiscount * vendorOrderAmount) /
+                    totalOrderAmount
+                  ).toFixed(2),
+                )
+              : 0;
+
+          const finalAmount = Math.max(0, vendorOrderAmount - vendorDiscount);
+          const platformShare = parseFloat(
+            ((finalAmount * commissionRate) / 100).toFixed(2),
+          );
+          const vendorShare = parseFloat(
+            (finalAmount - platformShare).toFixed(2),
+          );
+
+          await db.from("parts_seller_transactions").upsert(
+            {
+              vendor_id: vendorId,
+              order_id: orderId,
+              order_amount: vendorOrderAmount,
+              discount: vendorDiscount,
+              final_order_amount: finalAmount,
+              commission_rate: commissionRate,
+              platform_share: platformShare,
+              vendor_share: vendorShare,
+              payment_status: "pending",
+              refunded: false,
+              refund_amount: 0,
+            },
+            { onConflict: "vendor_id,order_id" },
+          );
+        } catch (e) {
+          console.error(
+            `[Paymob webhook] billing transaction for vendor ${vendorId} failed:`,
+            e,
+          );
+        }
+      }
+
+      const user =
+        (
+          fullOrder as {
+            user?: { phone?: string; email?: string; full_name?: string };
+          } | null
+        )?.user ?? null;
       const customerPhone = user?.phone ?? "";
       const customerEmail = user?.email ?? "";
       const customerName =
@@ -113,11 +223,13 @@ export async function POST(req: NextRequest) {
         (fullOrder as { delivery_name?: string } | null)?.delivery_name ??
         "Customer";
       const orderNumber = orderId.slice(0, 8).toUpperCase();
-      const items = (orderItems ?? []).map((i) => ({
-        name: i.name,
-        qty: i.quantity,
-        price: i.unit_price,
-      }));
+      const items = (orderItems ?? []).map(
+        (i: { name: string; quantity: number; unit_price: number }) => ({
+          name: i.name,
+          qty: i.quantity,
+          price: i.unit_price,
+        }),
+      );
 
       // Notify customer
       if (customerPhone || customerEmail) {
@@ -127,19 +239,18 @@ export async function POST(req: NextRequest) {
           email: customerEmail,
           orderNumber,
           items,
-          totalAmount: (fullOrder as { total_amount?: number } | null)?.total_amount ?? 0,
+          totalAmount:
+            (fullOrder as { total_amount?: number } | null)?.total_amount ?? 0,
           orderLink: `${origin}/en/orders/${orderId}`,
         }).catch((e) =>
-          console.error("[Paymob webhook] customer order notification failed:", e),
+          console.error(
+            "[Paymob webhook] customer order notification failed:",
+            e,
+          ),
         );
       }
 
       // Notify vendor(s)
-      const vendorIds = [
-        ...new Set(
-          (orderItems ?? []).map((i) => i.vendor_id).filter(Boolean),
-        ),
-      ];
       for (const vendorId of vendorIds) {
         try {
           const { data: vendor } = await db
@@ -162,9 +273,19 @@ export async function POST(req: NextRequest) {
           if (!vendor || !vendorEmail) continue;
 
           const vendorItems = (orderItems ?? [])
-            .filter((i) => i.vendor_id === vendorId)
-            .map((i) => ({ name: i.name, qty: i.quantity, price: i.unit_price }));
-          const vendorTotal = vendorItems.reduce((s, i) => s + i.price * i.qty, 0);
+            .filter((i: { vendor_id: string }) => i.vendor_id === vendorId)
+            .map(
+              (i: { name: string; quantity: number; unit_price: number }) => ({
+                name: i.name,
+                qty: i.quantity,
+                price: i.unit_price,
+              }),
+            );
+          const vendorTotal = vendorItems.reduce(
+            (s: number, i: { price: number; qty: number }) =>
+              s + i.price * i.qty,
+            0,
+          );
 
           await notifyVendorNewOrder({
             vendorUserId: vendor.user_id ?? undefined,

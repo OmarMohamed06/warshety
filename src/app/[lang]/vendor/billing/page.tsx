@@ -62,13 +62,47 @@ function PaymentModal({
   bill,
   open,
   onClose,
+  onSubmitted,
 }: {
   bill: ServiceCenterBillingRecord | null;
   open: boolean;
   onClose: () => void;
+  onSubmitted: (billingId: string) => void;
 }) {
   const { t } = useLanguage();
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  // Reset state when a new bill is opened
+  useEffect(() => {
+    if (open) {
+      setSubmitted(false);
+      setSubmitting(false);
+    }
+  }, [open, bill?.id]);
+
   if (!bill) return null;
+
+  async function handleGotIt() {
+    if (!bill) return;
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/vendor/billing/submit-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ billingId: bill.id }),
+      });
+      if (res.ok) {
+        setSubmitted(true);
+        onSubmitted(bill.id);
+      }
+    } catch {
+      // Non-fatal — the modal still closes
+    }
+    setSubmitting(false);
+    onClose();
+  }
+
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="w-full max-w-md sm:max-w-md">
@@ -120,13 +154,21 @@ function PaymentModal({
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            After transferring, our team will verify and mark your invoice as
-            paid within 1–2 business days. No action needed on your end.
+            After transferring, click the button below. Our team will verify and
+            mark your invoice as paid within 1–2 business days.
           </p>
         </div>
 
-        <Button onClick={onClose} className="w-full">
-          Got it
+        <Button
+          onClick={handleGotIt}
+          disabled={submitting || submitted}
+          className="w-full"
+        >
+          {submitting
+            ? "Submitting…"
+            : submitted
+              ? "Payment Submitted ✓"
+              : "I've Transferred — Notify Team"}
         </Button>
       </DialogContent>
     </Dialog>
@@ -579,6 +621,17 @@ export default function VendorBillingPage() {
           bill={payBill}
           open={!!payBill}
           onClose={() => setPayBill(null)}
+          onSubmitted={(billingId) => {
+            // Optimistically update local state so badge changes immediately
+            setBills((prev) =>
+              prev.map((b) =>
+                b.id === billingId
+                  ? { ...b, payment_status: "payment_submitted" }
+                  : b,
+              ),
+            );
+            setPayBill(null);
+          }}
         />
 
         {/* Period detail dialog */}

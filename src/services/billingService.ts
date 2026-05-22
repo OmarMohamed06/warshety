@@ -418,6 +418,23 @@ export async function generateServiceCenterBilling(
 }
 
 /**
+ * Mark a service center billing record as payment_submitted.
+ * Called by the vendor after they initiate a bank transfer.
+ */
+export async function markBillingPaymentSubmitted(
+  billingId: string,
+): Promise<{ error: string | null }> {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("service_center_billing")
+    .update({ payment_status: "payment_submitted" })
+    .eq("id", billingId)
+    .eq("payment_status", "pending"); // only update if still pending
+
+  return { error: error?.message ?? null };
+}
+
+/**
  * Mark a service center billing record as paid.
  */
 export async function markServiceCenterBillingPaid(
