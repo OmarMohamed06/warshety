@@ -61,11 +61,7 @@ const FAQS = [
   },
   {
     q: "What documents do I need?",
-    a: "A valid commercial registration (سجل تجاري), national ID of the owner, and your business contact details.",
-  },
-  {
-    q: "How will I receive payments?",
-    a: "Payouts are processed weekly via bank transfer or Instapay. You can track all earnings in your vendor dashboard.",
+    a: "A valid national ID of the owner and your business contact details.",
   },
 ];
 
