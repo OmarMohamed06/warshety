@@ -202,6 +202,17 @@ export default function VendorBookingsPage() {
         /* non-fatal */
       });
     }
+
+    // Fire-and-forget: notify customer booking completed + points earned
+    if (status === "completed") {
+      fetch("/api/bookings/notify-completed", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId }),
+      }).catch(() => {
+        /* non-fatal */
+      });
+    }
   };
 
   const vendorCancelBooking = async (bookingId: string) => {

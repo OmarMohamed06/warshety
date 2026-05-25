@@ -23,7 +23,11 @@ import { createClient as createAdminSupabaseClient } from "@supabase/supabase-js
 import { generateSlugEn, generateSlugAr } from "@/utils/seo";
 import enMessages from "@/../messages/en.json";
 import arMessages from "@/../messages/ar.json";
-import { notifyVendorApprovedEmail } from "@/services/outboundNotificationService";
+import {
+  notifyApplicationReceived,
+  notifyVendorApprovedEmail,
+  notifyVendorRejectedEmail,
+} from "@/services/outboundNotificationService";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -260,6 +264,15 @@ export async function submitVendorApplication(params: {
     };
   }
 
+  // Send confirmation email to applicant — non-fatal
+  await notifyApplicationReceived({
+    applicantEmail: params.email,
+    ownerName: params.owner_name,
+    businessName: params.business_name,
+  }).catch((e) =>
+    console.error("[submitVendorApplication] confirmation email:", e),
+  );
+
   return { applicationId: appData.id, error: null };
 }
 
@@ -485,10 +498,10 @@ export async function rejectVendorApplication(
 
   const admin = adminClient();
 
-  // Fetch to get user_id and current status
+  // Fetch to get user_id, current status, and contact details for rejection email
   const { data: app } = await admin
     .from("vendor_applications")
-    .select("user_id, status")
+    .select("user_id, status, email, owner_name, business_name")
     .eq("id", applicationId)
     .maybeSingle();
 
@@ -510,6 +523,18 @@ export async function rejectVendorApplication(
       reviewed_by: adminUser?.id ?? null,
     })
     .eq("id", applicationId);
+
+  // Send rejection email — non-fatal
+  if (app?.email) {
+    await notifyVendorRejectedEmail({
+      vendorEmail: app.email,
+      ownerName: app.owner_name ?? undefined,
+      businessName: app.business_name ?? "your business",
+      reason: undefined,
+    }).catch((e) =>
+      console.error("[rejectVendorApplication] rejection email:", e),
+    );
+  }
 
   return { error: null };
 }

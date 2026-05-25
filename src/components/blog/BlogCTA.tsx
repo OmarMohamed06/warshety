@@ -50,22 +50,6 @@ export default function BlogCTA({ isAr, lang }: Props) {
             </svg>
             {isAr ? "احجز خدمة الآن" : "Book a Service"}
           </Link>
-
-          <Link
-            href={`/${lang}/parts`}
-            className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white border border-white/20 font-semibold px-7 py-3.5 rounded-xl text-sm transition-colors"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              className="w-4 h-4 flex-shrink-0"
-              aria-hidden
-            >
-              <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-            </svg>
-            {isAr ? "ابحث عن قطع غيار" : "Find Parts"}
-          </Link>
         </div>
       </div>
     </section>

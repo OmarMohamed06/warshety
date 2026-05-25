@@ -38,12 +38,16 @@ const FROM = `${process.env.RESEND_FROM_NAME ?? "Warshety"} <${process.env.RESEN
 export type OutboundEventType =
   | "booking_confirmed"
   | "booking_cancelled"
+  | "booking_completed"
   | "booking_reminder"
   | "car_ready"
   | "new_booking_vendor"
+  | "vendor_booking_cancelled"
   | "payment_due"
   | "payment_overdue"
-  | "vendor_approved";
+  | "vendor_approved"
+  | "vendor_rejected"
+  | "application_received";
 
 export type NotificationChannel = "sms" | "email";
 
@@ -885,6 +889,303 @@ export async function notifyVendorApprovedEmail({
       eventType: "vendor_approved",
       windowHours: 0,
       idempotencyKey: vendorUserId ?? vendorEmail,
+    },
+  );
+}
+
+/**
+ * Booking Completed + Points Earned — combined notification.
+ * Sent when vendor marks a booking as 'completed'. Points are awarded by a
+ * DB trigger; this function reads the latest total after the update.
+ */
+export async function notifyCustomerBookingCompleted({
+  userId,
+  phone,
+  email,
+  customerName,
+  centerName,
+  bookingId,
+  pointsEarned,
+}: {
+  userId?: string;
+  phone?: string;
+  email?: string;
+  customerName?: string;
+  centerName: string;
+  bookingId?: string;
+  pointsEarned?: number;
+}): Promise<void> {
+  const hasPoints = typeof pointsEarned === "number" && pointsEarned > 0;
+  const pointsSuffix = hasPoints ? ` You earned ${pointsEarned} points!` : "";
+
+  if (phone) {
+    await sendSMS(
+      phone,
+      `Your service at ${centerName} is complete.${pointsSuffix} Thank you for choosing Warshety!`,
+      {
+        userId,
+        eventType: "booking_completed",
+        windowHours: 0,
+        idempotencyKey: bookingId,
+      },
+    );
+  }
+
+  if (email) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://warshety.com";
+    const bookingLink = bookingId
+      ? `${appUrl}/en/bookings/${bookingId}`
+      : `${appUrl}/en/bookings`;
+    const rewardsLink = `${appUrl}/en/rewards`;
+    const greeting = customerName ? `Hi ${customerName},` : "Hi,";
+    const pointsHtml = hasPoints
+      ? `<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px 18px;margin:20px 0;text-align:center">
+          <p style="font-size:13px;font-weight:600;color:#166534;margin:0 0 4px;font-family:Arial,sans-serif">🏆 Loyalty Points Earned</p>
+          <p style="font-size:30px;font-weight:800;color:#16a34a;margin:0;font-family:Arial,sans-serif">+${pointsEarned} pts</p>
+          <p style="font-size:12px;color:#4ade80;margin:4px 0 0;font-family:Arial,sans-serif">Redeemable in your rewards wallet</p>
+        </div>`
+      : "";
+    const rewardsCtaHtml = hasPoints
+      ? `<div style="text-align:center;margin-top:8px"><a href="${rewardsLink}" style="font-size:13px;color:#f97316;font-family:Arial,sans-serif">View your rewards wallet →</a></div>`
+      : "";
+
+    const html = emailWrapper(
+      "Service Completed ✓",
+      `<span style="${S.badge("#dcfce7", "#166534")}">✓ Service Completed</span>
+    <p style="${S.title}">Your service is done!</p>
+    <p style="${S.subtitle}">${greeting} your vehicle service at <strong>${centerName}</strong> has been completed successfully.</p>
+    ${infoRow("Service Center", centerName)}
+    ${bookingId ? infoRow("Booking ID", `<span style="font-size:13px;font-weight:500;color:#64748b">${bookingId.slice(0, 8).toUpperCase()}</span>`) : ""}
+    ${pointsHtml}
+    ${ctaButton(bookingLink, "View Booking")}
+    ${rewardsCtaHtml}`,
+    );
+
+    await sendEmail(email, `Your service at ${centerName} is complete`, html, {
+      userId,
+      eventType: "booking_completed",
+      windowHours: 0,
+      idempotencyKey: bookingId,
+    });
+  }
+}
+
+/**
+ * Vendor notified when a customer cancels their own booking.
+ * Separate from notifyCustomerBookingCancelled (which tells the customer
+ * that the vendor cancelled).
+ */
+export async function notifyVendorBookingCancelledByCustomer({
+  vendorUserId,
+  vendorPhone,
+  vendorEmail,
+  customerName,
+  service,
+  dateTime,
+  bookingId,
+  dashboardLink,
+}: {
+  vendorUserId?: string;
+  vendorPhone?: string;
+  vendorEmail: string;
+  customerName?: string;
+  service?: string;
+  dateTime?: string;
+  bookingId: string;
+  dashboardLink?: string;
+}): Promise<void> {
+  if (vendorPhone) {
+    const smsMsg = [
+      "Booking cancelled by customer",
+      customerName ? `(${customerName})` : null,
+      service ? `for ${service}` : null,
+    ]
+      .filter(Boolean)
+      .join(" ");
+    await sendSMS(vendorPhone, smsMsg, {
+      userId: vendorUserId,
+      eventType: "vendor_booking_cancelled",
+      idempotencyKey: bookingId,
+    });
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://warshety.com";
+  const link = dashboardLink ?? `${appUrl}/en/vendor/bookings`;
+
+  const html = emailWrapper(
+    "Booking Cancelled by Customer",
+    `<span style="${S.badge("#fee2e2", "#991b1b")}">✕ Booking Cancelled</span>
+    <p style="${S.title}">A customer has cancelled their booking</p>
+    <p style="${S.subtitle}">The following appointment was cancelled by the customer.</p>
+    ${customerName ? infoRow("Customer", customerName) : ""}
+    ${service ? infoRow("Service", service) : ""}
+    ${dateTime ? infoRow("Date &amp; Time", dateTime) : ""}
+    ${infoRow("Booking ID", `<span style="font-size:13px;font-weight:500;color:#64748b">${bookingId.slice(0, 8).toUpperCase()}</span>`)}
+    ${ctaButton(link, "View Bookings")}`,
+  );
+
+  await sendEmail(vendorEmail, "Booking Cancelled by Customer", html, {
+    userId: vendorUserId,
+    eventType: "vendor_booking_cancelled",
+    idempotencyKey: bookingId,
+  });
+}
+
+/**
+ * Application Received — confirmation email sent to vendor applicant immediately
+ * after their application is submitted. Lets them know it's under review.
+ */
+export async function notifyApplicationReceived({
+  applicantEmail,
+  ownerName,
+  businessName,
+}: {
+  applicantEmail: string;
+  ownerName?: string;
+  businessName: string;
+}): Promise<void> {
+  const greeting = ownerName ? `Hi ${ownerName},` : "Hi,";
+
+  const html = emailWrapper(
+    "Application Received",
+    `<span style="${S.badge("#fef3c7", "#92400e")}">📋 Application Received</span>
+    <p style="${S.title}">We've received your application!</p>
+    <p style="${S.subtitle}">${greeting} thank you for applying to join Warshety as a service center.</p>
+    ${infoRow("Business Name", businessName)}
+    ${infoRow("Status", '<span style="color:#92400e;font-weight:700">⏳ Under Review</span>')}
+    <div style="background:#fefce8;border:1px solid #fde68a;border-radius:10px;padding:16px 18px;margin:20px 0">
+      <p style="font-size:13px;color:#92400e;margin:0;line-height:1.6;font-family:Arial,sans-serif">
+        Our team will review your application within 2–3 business days. You will receive an email notification once a decision has been made. No action is required from you at this time.
+      </p>
+    </div>`,
+  );
+
+  await sendEmail(
+    applicantEmail,
+    `Application received — ${businessName}`,
+    html,
+    {
+      eventType: "application_received",
+      windowHours: 0,
+      // Idempotency key = email so re-submissions don't spam the applicant
+      idempotencyKey: applicantEmail,
+    },
+  );
+}
+
+/**
+ * Vendor Application Rejected — outbound email to the applicant.
+ * Only sends once per email address (idempotencyKey = vendorEmail).
+ */
+export async function notifyVendorRejectedEmail({
+  vendorEmail,
+  ownerName,
+  businessName,
+  reason,
+}: {
+  vendorEmail: string;
+  ownerName?: string;
+  businessName: string;
+  reason?: string;
+}): Promise<void> {
+  const greeting = ownerName ? `Hi ${ownerName},` : "Hi,";
+  const reasonHtml = reason ? infoRow("Reason", reason) : "";
+
+  const html = emailWrapper(
+    "Application Update — Warshety",
+    `<span style="${S.badge("#fee2e2", "#991b1b")}">Application Update</span>
+    <p style="${S.title}">Your application was not approved</p>
+    <p style="${S.subtitle}">${greeting} after reviewing your application for <strong>${businessName}</strong>, we are unable to approve it at this time.</p>
+    ${reasonHtml}
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:16px 18px;margin:20px 0">
+      <p style="font-size:13px;color:#991b1b;margin:0;line-height:1.6;font-family:Arial,sans-serif">
+        If you believe this decision was made in error or would like to address the concerns raised, please contact our support team.
+      </p>
+    </div>`,
+  );
+
+  await sendEmail(
+    vendorEmail,
+    `Your Warshety vendor application — ${businessName}`,
+    html,
+    {
+      eventType: "vendor_rejected",
+      windowHours: 0,
+      idempotencyKey: vendorEmail,
+    },
+  );
+}
+
+/**
+ * Vendor Daily Booking Summary — one email per vendor listing all tomorrow's bookings.
+ * Called by the /api/cron/reminders route each morning.
+ */
+export async function notifyVendorDailyBookingSummary({
+  vendorUserId,
+  vendorEmail,
+  businessName,
+  bookings,
+  date,
+  dashboardLink,
+}: {
+  vendorUserId?: string;
+  vendorEmail: string;
+  businessName: string;
+  bookings: Array<{
+    customerName: string;
+    service: string;
+    time: string;
+    bookingId: string;
+  }>;
+  date: string;
+  dashboardLink?: string;
+}): Promise<void> {
+  if (bookings.length === 0) return;
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://warshety.com";
+  const link = dashboardLink ?? `${appUrl}/en/vendor/bookings`;
+
+  const bookingRows = bookings
+    .map(
+      (b) =>
+        `<tr>
+          <td style="padding:10px 14px;font-size:13px;color:#1e293b;font-family:Arial,sans-serif;border-bottom:1px solid #f1f5f9">${b.time}</td>
+          <td style="padding:10px 14px;font-size:13px;color:#1e293b;font-family:Arial,sans-serif;border-bottom:1px solid #f1f5f9">${b.customerName}</td>
+          <td style="padding:10px 14px;font-size:13px;color:#64748b;font-family:Arial,sans-serif;border-bottom:1px solid #f1f5f9">${b.service}</td>
+        </tr>`,
+    )
+    .join("");
+
+  const tableHtml = `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:20px 0;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0">
+      <thead>
+        <tr style="background:#f8fafc">
+          <th style="padding:10px 14px;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.6px;text-align:left;font-family:Arial,sans-serif">Time</th>
+          <th style="padding:10px 14px;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.6px;text-align:left;font-family:Arial,sans-serif">Customer</th>
+          <th style="padding:10px 14px;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.6px;text-align:left;font-family:Arial,sans-serif">Service</th>
+        </tr>
+      </thead>
+      <tbody>${bookingRows}</tbody>
+    </table>`;
+
+  const html = emailWrapper(
+    `Tomorrow's Bookings — ${businessName}`,
+    `<span style="${S.badge("#dbeafe", "#1e40af")}">📅 Daily Summary</span>
+    <p style="${S.title}">Tomorrow's schedule for ${businessName}</p>
+    <p style="${S.subtitle}">You have <strong>${bookings.length} booking${bookings.length !== 1 ? "s" : ""}</strong> scheduled for <strong>${date}</strong>.</p>
+    ${tableHtml}
+    ${ctaButton(link, "Open Dashboard")}`,
+  );
+
+  await sendEmail(
+    vendorEmail,
+    `Tomorrow's bookings (${bookings.length}) — ${businessName}`,
+    html,
+    {
+      userId: vendorUserId,
+      eventType: "booking_reminder",
+      windowHours: 20, // Don't re-send within 20h (once per day)
+      idempotencyKey: `${vendorEmail}::daily::${date}`,
     },
   );
 }

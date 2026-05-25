@@ -9,7 +9,9 @@
 import { createClient } from "@supabase/supabase-js";
 import {
   notifyCustomerBookingCancelled,
+  notifyCustomerBookingCompleted,
   notifyCustomerBookingConfirmed,
+  notifyVendorBookingCancelledByCustomer,
   notifyVendorNewBooking,
   resolveBookingRecipient,
 } from "@/services/outboundNotificationService";
@@ -184,5 +186,147 @@ export async function notifyBookingConfirmedAction(
     }
   } catch (err) {
     console.error("[notifyBookingConfirmedAction] unexpected error:", err);
+  }
+}
+
+/**
+ * Notify customer (outbound SMS + Email) when THEY cancel their own booking,
+ * AND notify the vendor so they can free the slot.
+ * Call this from useBooking after a successful customer-initiated cancellation.
+ */
+export async function notifyCustomerCancelledBookingAction(
+  bookingId: string,
+  reason?: string,
+): Promise<void> {
+  try {
+    const supabase = getServiceClient();
+
+    const { data: booking } = await supabase
+      .from("bookings")
+      .select(
+        `id, user_id, booking_date, booking_time, booking_type, service_key, vendor_id, branch_id,
+         user:users!inner(phone, email, full_name),
+         vendor:vendors!inner(business_name)`,
+      )
+      .eq("id", bookingId)
+      .single();
+
+    if (!booking) return;
+
+    const userRow = booking.user as {
+      phone?: string;
+      email?: string;
+      full_name?: string;
+    } | null;
+    const centerName =
+      (booking.vendor as { business_name?: string } | null)?.business_name ??
+      "the service center";
+
+    // 1. Confirm cancellation to the customer
+    if (userRow?.phone || userRow?.email) {
+      await notifyCustomerBookingCancelled({
+        userId: booking.user_id,
+        phone: userRow?.phone ?? undefined,
+        email: userRow?.email ?? undefined,
+        customerName: userRow?.full_name ?? undefined,
+        centerName,
+        reason,
+        bookingId,
+      }).catch((e) =>
+        console.error("[notifyCustomerCancelledBookingAction] customer:", e),
+      );
+    }
+
+    // 2. Alert the vendor / branch manager
+    const recipient = await resolveBookingRecipient(
+      booking.branch_id,
+      booking.vendor_id,
+    );
+    if (recipient.email) {
+      const service = booking.service_key
+        ? (booking.service_key as string)
+            .replace(/_/g, " ")
+            .replace(/\b\w/g, (c: string) => c.toUpperCase())
+        : (booking.booking_type as string)
+            .replace(/_/g, " ")
+            .replace(/\b\w/g, (c: string) => c.toUpperCase());
+      const dateTime = `${booking.booking_date} at ${(booking.booking_time as string) ?? ""}`;
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://warshety.com";
+      await notifyVendorBookingCancelledByCustomer({
+        vendorUserId: recipient.userId ?? undefined,
+        vendorPhone: recipient.phone ?? undefined,
+        vendorEmail: recipient.email,
+        customerName: userRow?.full_name ?? undefined,
+        service,
+        dateTime,
+        bookingId,
+        dashboardLink: `${appUrl}/en/vendor/bookings`,
+      }).catch((e) =>
+        console.error("[notifyCustomerCancelledBookingAction] vendor:", e),
+      );
+    }
+  } catch (err) {
+    console.error(
+      "[notifyCustomerCancelledBookingAction] unexpected error:",
+      err,
+    );
+  }
+}
+
+/**
+ * Notify customer (SMS + Email) when a booking is marked completed and points awarded.
+ * pointsEarned is fetched from the points_transactions table (set by DB trigger).
+ * Call this from the /api/bookings/notify-completed API route.
+ */
+export async function notifyBookingCompletedAction(
+  bookingId: string,
+): Promise<void> {
+  try {
+    const supabase = getServiceClient();
+
+    const { data: booking } = await supabase
+      .from("bookings")
+      .select(
+        `id, user_id, vendor_id,
+         user:users!inner(phone, email, full_name),
+         vendor:vendors!inner(business_name)`,
+      )
+      .eq("id", bookingId)
+      .single();
+
+    if (!booking) return;
+
+    const userRow = booking.user as {
+      phone?: string;
+      email?: string;
+      full_name?: string;
+    } | null;
+    const centerName =
+      (booking.vendor as { business_name?: string } | null)?.business_name ??
+      "the service center";
+
+    // Read points awarded by the DB trigger for this specific booking
+    const { data: txn } = await supabase
+      .from("points_transactions")
+      .select("points")
+      .eq("reference_id", bookingId)
+      .eq("type", "booking_reward")
+      .maybeSingle();
+
+    const pointsEarned = (txn as { points?: number } | null)?.points ?? 0;
+
+    if (!userRow?.phone && !userRow?.email) return;
+
+    await notifyCustomerBookingCompleted({
+      userId: booking.user_id,
+      phone: userRow?.phone ?? undefined,
+      email: userRow?.email ?? undefined,
+      customerName: userRow?.full_name ?? undefined,
+      centerName,
+      bookingId,
+      pointsEarned: pointsEarned > 0 ? pointsEarned : undefined,
+    });
+  } catch (err) {
+    console.error("[notifyBookingCompletedAction] unexpected error:", err);
   }
 }

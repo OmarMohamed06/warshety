@@ -113,7 +113,6 @@ export default function Footer() {
                 <a
                   href="tel:+201022116644"
                   className="flex items-center gap-2 hover:text-[#FF4B19] transition-colors"
-                  dir="ltr"
                 >
                   <span
                     className="material-symbols-outlined text-[#FF4B19]"

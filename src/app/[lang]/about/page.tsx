@@ -215,10 +215,10 @@ export default async function AboutPage({ params }: Props) {
                 : "We provide a transparent platform connecting car owners with verified vendors and certified workshops, guaranteeing quality and delivery to all Egyptian governorates."}
             </p>
             <Link
-              href={`/${lang}/parts`}
+              href={`/${lang}/services`}
               className="inline-flex items-center gap-2 bg-[#FF4B19] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#e04316] transition-colors"
             >
-              {isAr ? "تسوق الآن" : "Start Shopping"}
+              {isAr ? "احجز خدمة" : "Book a Service"}
               <span className="material-symbols-outlined text-base">
                 {isAr ? "arrow_back" : "arrow_forward"}
               </span>
@@ -370,10 +370,10 @@ export default async function AboutPage({ params }: Props) {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href={`/${lang}/parts`}
+              href={`/${lang}/services`}
               className="bg-[#FF4B19] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#e04316] transition-colors"
             >
-              {isAr ? "تسوق قطع الغيار" : "Shop Car Parts"}
+              {isAr ? "احجز خدمة" : "Book a Service"}
             </Link>
             <Link
               href={`/${lang}/vendor/apply`}

@@ -36,7 +36,10 @@ import {
   notifyBookingConfirmed,
   notifyBookingCancelled,
 } from "@/services/notificationService";
-import { notifyBookingConfirmedAction } from "@/app/actions/bookingActions";
+import {
+  notifyBookingConfirmedAction,
+  notifyCustomerCancelledBookingAction,
+} from "@/app/actions/bookingActions";
 import type { DbBooking, BookingStatus } from "@/types/database";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -166,8 +169,10 @@ export function useBooking(): UseBookingReturn {
       const { error } = await _cancel(bookingId, user.id, reason);
 
       if (!error) {
-        // Notify user of cancellation
+        // In-app notification
         await notifyBookingCancelled(user.id, bookingId, "your booking");
+        // Outbound SMS + Email to customer, and alert the vendor
+        await notifyCustomerCancelledBookingAction(bookingId).catch(() => {});
         await refreshBookings();
       }
 

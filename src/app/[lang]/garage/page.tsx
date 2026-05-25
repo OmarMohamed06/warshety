@@ -262,17 +262,6 @@ export default function GaragePage() {
                         size="sm"
                         className="flex-1 gap-1.5 text-xs h-8 rounded-xl border-border hover:border-primary/30 hover:text-primary hover:bg-primary/5"
                       >
-                        <Link href={`/parts?vehicle=${v.id}`}>
-                          <Settings className="w-3 h-3" />
-                          {t("garage.findParts")}
-                        </Link>
-                      </Button>
-                      <Button
-                        asChild
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 gap-1.5 text-xs h-8 rounded-xl border-border hover:border-primary/30 hover:text-primary hover:bg-primary/5"
-                      >
                         <Link href="/services">
                           <Wrench className="w-3 h-3" />
                           {t("garage.bookService")}

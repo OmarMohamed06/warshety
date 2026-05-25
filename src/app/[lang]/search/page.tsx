@@ -247,13 +247,6 @@ export default function SearchPage() {
             </div>
             <div className="flex gap-2 flex-wrap justify-center">
               <Link
-                href={`/${locale}/parts`}
-                className="text-sm text-primary font-semibold hover:underline"
-              >
-                {isAr ? "تصفح قطع الغيار" : "Browse Parts"}
-              </Link>
-              <span className="text-muted-foreground">·</span>
-              <Link
                 href={`/${locale}/services`}
                 className="text-sm text-primary font-semibold hover:underline"
               >
