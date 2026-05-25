@@ -5,8 +5,6 @@
  *   • Static pages (home, services, blog, about, legal)
  *   • Blog article pages (both /ar/ and /en/)
  *   • Service center detail pages (both languages)
- *   • All product category pages (both languages)
- *   • All product pages (both /ar/ and /en/)
  *
  * Arabic pages carry higher priority because the primary market is Egypt.
  */
@@ -15,28 +13,6 @@ import type { MetadataRoute } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { BASE_URL } from "@/utils/seo";
 import { getAllArticles } from "@/lib/blog";
-
-// ─────────────────────────────────────────────────────────────────────────────
-// STATIC CATEGORIES (mirrors the SUBCATEGORY_DATA in the category page)
-// ─────────────────────────────────────────────────────────────────────────────
-const CATEGORIES = [
-  "brake-system",
-  "filters",
-  "suspension",
-  "steering",
-  "wipers-washers",
-  "engine-parts",
-  "fuel-system",
-  "exhaust-system",
-  "electric-system",
-  "engine-cooling",
-  "heating-ventilation",
-  "transmission-clutch",
-  "car-body-interior",
-  "lighting",
-  "oils-fluids",
-  "accessories-equipment",
-];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [];
@@ -108,22 +84,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  // ── Category pages ────────────────────────────────────────────────────────
-  for (const cat of CATEGORIES) {
-    entries.push({
-      url: `${BASE_URL}/ar/parts/${cat}`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.85,
-    });
-    entries.push({
-      url: `${BASE_URL}/en/parts/${cat}`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.75,
-    });
-  }
-
   // ── Service center detail pages from Supabase ──────────────────────────────
   try {
     const supabase = await createClient();
@@ -158,62 +118,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   } catch {
     // If DB is unavailable during build, continue
-  }
-
-  // ── Product pages from Supabase ───────────────────────────────────────────
-  try {
-    const supabase = await createClient();
-
-    // Paginate to handle large catalogs without memory issues
-    const PAGE_SIZE = 1000;
-    let from = 0;
-    let hasMore = true;
-
-    while (hasMore) {
-      type ProductRow = {
-        slug: string;
-        slug_ar: string | null;
-        slug_en: string | null;
-        updated_at: string;
-      };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = (await supabase
-        .from("catalog_products")
-        .select("slug, slug_ar, slug_en, updated_at")
-        .range(from, from + PAGE_SIZE - 1)
-        .order("updated_at", { ascending: false })) as unknown as {
-        data: ProductRow[] | null;
-        error: unknown;
-      };
-
-      if (error || !data || data.length === 0) break;
-
-      for (const product of data) {
-        const enSlug = product.slug_en ?? product.slug;
-        const arSlug = product.slug_ar ?? product.slug;
-
-        // English product URL uses slug_en (or fallback slug)
-        entries.push({
-          url: `${BASE_URL}/en/products/${enSlug}`,
-          lastModified: new Date(product.updated_at),
-          changeFrequency: "monthly",
-          priority: 0.8,
-        });
-
-        // Arabic product URL uses slug_ar (or fallback slug)
-        entries.push({
-          url: `${BASE_URL}/ar/قطع-غيار/${arSlug}`,
-          lastModified: new Date(product.updated_at),
-          changeFrequency: "monthly",
-          priority: 0.9, // Arabic pages have higher priority
-        });
-      }
-
-      hasMore = data.length === PAGE_SIZE;
-      from += PAGE_SIZE;
-    }
-  } catch {
-    // If DB is unavailable during build, return what we have
   }
 
   return entries;
