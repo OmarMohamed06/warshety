@@ -39,7 +39,7 @@ function canCancelBooking(booking: any): boolean {
 
 export default function MyBookingsPage() {
   const { user, isLoading: authLoading } = useAuth();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const [supabase] = useState(() => createClient());
 
   const [bookings, setBookings] = useState<any[]>([]);
@@ -57,7 +57,9 @@ export default function MyBookingsPage() {
 
     let q = supabase
       .from("bookings")
-      .select("*, vendor:vendors(business_name,city), vehicle:vehicles(*)")
+      .select(
+        "*, vendor:vendors(business_name,business_name_ar,city,city_ar), vehicle:vehicles(*)",
+      )
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
@@ -231,13 +233,19 @@ export default function MyBookingsPage() {
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1 min-w-0">
                           <p className="font-black text-base truncate">
-                            {b.vendor?.business_name ?? "Service Center"}
+                            {locale === "ar"
+                              ? b.vendor?.business_name_ar ||
+                                b.vendor?.business_name
+                              : (b.vendor?.business_name ??
+                                t("bookings.serviceCenter"))}
                           </p>
                           <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
                             <span className="material-symbols-outlined text-[12px]">
                               location_on
                             </span>
-                            {b.vendor?.city ?? ""}
+                            {locale === "ar"
+                              ? b.vendor?.city_ar || b.vendor?.city
+                              : (b.vendor?.city ?? "")}
                           </p>
                         </div>
                         <span

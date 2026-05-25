@@ -107,16 +107,12 @@ export default function BookingSidebar({
   const [success, setSuccess] = useState(false);
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
-  const [activeBookingId, setActiveBookingId] = useState<
-    string | null | undefined
-  >(undefined); // undefined = loading
+  // null = no active booking (or not yet checked). A string ID means blocked.
+  const [activeBookingId, setActiveBookingId] = useState<string | null>(null);
 
-  // Check for existing active booking
+  // Check for existing active booking in the background — does not block render.
   useEffect(() => {
-    if (!user?.id) {
-      setActiveBookingId(null);
-      return;
-    }
+    if (!user?.id) return;
     const supabase = createClient();
     supabase
       .from("bookings")
@@ -269,17 +265,6 @@ export default function BookingSidebar({
           <p className="text-muted-foreground text-sm">
             {t("bookingSidebar.redirecting")}
           </p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Active booking block — shown while loading or when blocked
-  if (activeBookingId === undefined) {
-    return (
-      <Card className="sticky top-24">
-        <CardContent className="flex items-center justify-center py-16">
-          <Loader2 className="w-7 h-7 animate-spin text-muted-foreground" />
         </CardContent>
       </Card>
     );

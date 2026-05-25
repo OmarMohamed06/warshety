@@ -617,7 +617,9 @@ export async function getAvailableSlotsForBranch(
   const supabase = createClient() as any;
   const isToday = new Date().toISOString().slice(0, 10) === date;
 
-  // Fetch working hours, booked slot counts, overrides, and vendor slot settings in parallel
+  // Fetch all data in a single parallel round trip.
+  // vendor_branches embeds vendors → vendor_slot_settings to avoid a
+  // sequential second query just to get slot interval + capacity.
   const [hoursRes, bookedRes, overridesRes, branchRes] = await Promise.all([
     supabase
       .from("branch_working_hours")
@@ -635,28 +637,26 @@ export async function getAvailableSlotsForBranch(
       .eq("date", date),
     supabase
       .from("vendor_branches")
-      .select("vendor_id")
+      .select(
+        "vendor_id, vendors(vendor_slot_settings(slot_interval_minutes, cars_per_slot))",
+      )
       .eq("id", branchId)
       .maybeSingle(),
   ]);
 
-  // Fetch vendor slot settings once we have the vendor_id
-  const vendorId: string | null = branchRes?.data?.vendor_id ?? null;
-  let settingsData: {
-    slot_interval_minutes: number;
-    cars_per_slot: number;
-  } | null = null;
-  if (vendorId) {
-    const { data } = await supabase
-      .from("vendor_slot_settings")
-      .select("slot_interval_minutes, cars_per_slot")
-      .eq("vendor_id", vendorId)
-      .maybeSingle();
-    settingsData = data ?? null;
-  }
+  // Extract slot settings from the embedded join — no extra round trip needed.
+  const rawSettings =
+    (
+      branchRes?.data?.vendors as {
+        vendor_slot_settings?: {
+          slot_interval_minutes: number;
+          cars_per_slot: number;
+        } | null;
+      } | null
+    )?.vendor_slot_settings ?? null;
   const effectiveInterval: number =
-    settingsData?.slot_interval_minutes ?? intervalMin;
-  const carsPerSlot: number = settingsData?.cars_per_slot ?? 1;
+    rawSettings?.slot_interval_minutes ?? intervalMin;
+  const carsPerSlot: number = rawSettings?.cars_per_slot ?? 1;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let branchHours: WorkingHours[] = DEFAULT_WORKING_HOURS;

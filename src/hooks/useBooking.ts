@@ -146,12 +146,15 @@ export function useBooking(): UseBookingReturn {
         return { bookingId: null, error };
       }
 
-      // In-app notification (client-safe)
-      await notifyBookingConfirmed(user.id, booking!.id, input.vendorId);
+      // In-app notification (client-safe) — fire-and-forget, non-blocking
+      notifyBookingConfirmed(user.id, booking!.id, input.vendorId).catch(
+        () => {},
+      );
 
-      // Email + SMS via server action (must be awaited — un-awaited server actions
-      // get aborted by the browser during page navigation before they can fire).
-      await notifyBookingConfirmedAction(booking!.id).catch(() => {});
+      // Email + SMS via server action — fire-and-forget so the user sees
+      // success immediately. keepalive is not needed here since no navigation
+      // happens before the action completes on the server.
+      notifyBookingConfirmedAction(booking!.id).catch(() => {});
 
       await refreshBookings();
       return { bookingId: booking!.id, error: null };
@@ -169,10 +172,12 @@ export function useBooking(): UseBookingReturn {
       const { error } = await _cancel(bookingId, user.id, reason);
 
       if (!error) {
-        // In-app notification
-        await notifyBookingCancelled(user.id, bookingId, "your booking");
-        // Outbound SMS + Email to customer, and alert the vendor
-        await notifyCustomerCancelledBookingAction(bookingId).catch(() => {});
+        // In-app notification — fire-and-forget
+        notifyBookingCancelled(user.id, bookingId, "your booking").catch(
+          () => {},
+        );
+        // Outbound SMS + Email to customer, and alert the vendor — fire-and-forget
+        notifyCustomerCancelledBookingAction(bookingId).catch(() => {});
         await refreshBookings();
       }
 

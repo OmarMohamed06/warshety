@@ -18,6 +18,7 @@ interface ServiceCenter {
   id: string;
   slug: string | null;
   name: string;
+  name_ar: string | null;
   city: string | null;
   rating: number;
   reviews: number;
@@ -31,6 +32,7 @@ export interface RawVendor {
   id: string;
   slug?: string | null;
   business_name: string;
+  business_name_ar?: string | null;
   city: string | null;
   rating: number | null;
   total_reviews: number | null;
@@ -44,6 +46,7 @@ function mapRawVendors(data: RawVendor[]): ServiceCenter[] {
     id: v.id,
     slug: v.slug ?? null,
     name: v.business_name,
+    name_ar: v.business_name_ar ?? null,
     city: v.city,
     rating: Number(v.rating) || 0,
     reviews: v.total_reviews ?? 0,
@@ -69,7 +72,7 @@ export default function FeaturedServiceCenters({ initialData }: Props = {}) {
     return [];
   });
   const [loading, setLoading] = useState(initialData === undefined);
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
 
   useEffect(() => {
     // Skip client-side fetch when server already provided data
@@ -78,7 +81,7 @@ export default function FeaturedServiceCenters({ initialData }: Props = {}) {
     supabase
       .from("vendors")
       .select(
-        "id, slug, business_name, city, rating, total_reviews, cover_image_url, supported_makes, completed_bookings",
+        "id, slug, business_name, business_name_ar, city, rating, total_reviews, cover_image_url, supported_makes, completed_bookings",
       )
       .in("status", ["approved", "pending"])
       .eq("vendor_type", "service_center")
@@ -146,7 +149,11 @@ export default function FeaturedServiceCenters({ initialData }: Props = {}) {
                       {center.image ? (
                         <Image
                           src={center.image}
-                          alt={center.name}
+                          alt={
+                            locale === "ar"
+                              ? center.name_ar || center.name
+                              : center.name
+                          }
                           fill
                           sizes="220px"
                           className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -176,7 +183,9 @@ export default function FeaturedServiceCenters({ initialData }: Props = {}) {
                     {/* Info */}
                     <div className="p-3 flex flex-col gap-2 flex-1">
                       <p className="text-sm font-bold leading-tight line-clamp-2 group-hover:text-[#FF4B19] transition-colors">
-                        {center.name}
+                        {locale === "ar"
+                          ? center.name_ar || center.name
+                          : center.name}
                       </p>
                       <div className="flex items-center gap-1 text-muted-foreground text-[11px]">
                         <MapPin className="h-3 w-3 flex-shrink-0" />

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useLanguage } from "@/context/LanguageContext";
 import type { BookingStatus } from "@/types/database";
 
 interface Booking {
@@ -11,7 +12,12 @@ interface Booking {
   service_date: string | null;
   service_time: string | null;
   note: string | null;
-  vendor?: { business_name: string; city: string | null } | null;
+  vendor?: {
+    business_name: string;
+    business_name_ar: string | null;
+    city: string | null;
+    city_ar: string | null;
+  } | null;
   service?: { name: string } | null;
 }
 
@@ -38,6 +44,7 @@ const STATUS_LABELS: Record<BookingStatus, string> = {
 
 export default function BookingTracker({ bookingId }: { bookingId: string }) {
   const supabase = createClient();
+  const { locale } = useLanguage();
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +54,7 @@ export default function BookingTracker({ bookingId }: { bookingId: string }) {
       const { data, error } = await supabase
         .from("bookings")
         .select(
-          "id, display_id, status, service_date, service_time, note, vendor:vendors(business_name, city), service:services(name)",
+          "id, display_id, status, service_date, service_time, note, vendor:vendors(business_name, business_name_ar, city, city_ar), service:services(name)",
         )
         .eq("id", bookingId)
         .single();
@@ -93,9 +100,18 @@ export default function BookingTracker({ bookingId }: { bookingId: string }) {
         </div>
         {booking.vendor && (
           <div>
-            <p className="font-semibold">{booking.vendor.business_name}</p>
+            <p className="font-semibold">
+              {locale === "ar"
+                ? booking.vendor.business_name_ar ||
+                  booking.vendor.business_name
+                : booking.vendor.business_name}
+            </p>
             {booking.vendor.city && (
-              <p className="text-sm text-slate-500">{booking.vendor.city}</p>
+              <p className="text-sm text-slate-500">
+                {locale === "ar"
+                  ? booking.vendor.city_ar || booking.vendor.city
+                  : booking.vendor.city}
+              </p>
             )}
           </div>
         )}

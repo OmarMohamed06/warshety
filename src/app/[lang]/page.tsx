@@ -34,7 +34,7 @@ export default async function HomePage() {
   const centersResult = await supabase
     .from("vendors")
     .select(
-      "id, business_name, city, rating, total_reviews, cover_image_url, supported_makes, completed_bookings",
+      "id, business_name, business_name_ar, city, rating, total_reviews, cover_image_url, supported_makes, completed_bookings",
     )
     .in("status", ["approved", "pending"])
     .eq("vendor_type", "service_center")

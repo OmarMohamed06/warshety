@@ -37,6 +37,7 @@ export interface ServiceCenterDisplay {
   id: string;
   slug: string | null;
   name: string;
+  name_ar?: string | null;
   badge: string | null;
   governorate: string;
   district?: string;
@@ -263,7 +264,10 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
 
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
-        const nameMatch = sc.name.toLowerCase().includes(q);
+        const displayName = (
+          isAr ? sc.name_ar || sc.name : sc.name
+        ).toLowerCase();
+        const nameMatch = displayName.includes(q);
         const locationMatch =
           sc.governorate.toLowerCase().includes(q) ||
           (sc.district ?? "").toLowerCase().includes(q);
@@ -584,7 +588,7 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                     <div>
                       <div className="flex items-start justify-between gap-2 mb-1">
                         <h3 className="font-bold text-base leading-tight">
-                          {sc.name}
+                          {isAr ? sc.name_ar || sc.name : sc.name}
                         </h3>
                         <div className="flex items-center gap-1 font-bold text-sm shrink-0">
                           {sc.reviewCount > 0 ? (

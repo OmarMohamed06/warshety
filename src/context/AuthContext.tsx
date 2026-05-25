@@ -151,11 +151,25 @@ function AuthProviderInner({
   const loadProfile = useCallback(
     async (uid: string) => {
       try {
-        const { data: profile, error } = await supabase
-          .from("users")
-          .select("*")
-          .eq("id", uid)
-          .single();
+        // Fire all three queries in parallel — we use the role from the
+        // users row to decide which result to apply, but we don't wait for
+        // role before starting the other fetches. This cuts auth init from
+        // 2 sequential round trips down to 1.
+        const [
+          { data: profile, error },
+          { data: vendorData },
+          { data: assignment },
+        ] = await Promise.all([
+          supabase.from("users").select("*").eq("id", uid).single(),
+          supabase.from("vendors").select("*").eq("user_id", uid).maybeSingle(),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (supabase as any)
+            .from("branch_users")
+            .select("branch_id")
+            .eq("user_id", uid)
+            .limit(1)
+            .maybeSingle(),
+        ]);
 
         if (error) {
           console.error(
@@ -167,37 +181,18 @@ function AuthProviderInner({
         if (!isMountedRef.current) return;
         if (profile) {
           setUser(profile);
-          // Only vendors have a row in the vendors table — skip the extra
-          // round-trip for every customer and admin.
           if (profile.role === "vendor") {
-            const { data: vendorData } = await supabase
-              .from("vendors")
-              .select("*")
-              .eq("user_id", uid)
-              .single();
-            if (isMountedRef.current) {
-              setVendor(vendorData ?? null);
-              setManagedBranchId(null);
-            }
+            setVendor(vendorData ?? null);
+            setManagedBranchId(null);
           } else if (profile.role === "manager") {
-            // Manager: get their branch_id directly (RLS allows user_id = auth.uid())
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { data: assignment } = await (supabase as any)
-              .from("branch_users")
-              .select("branch_id")
-              .eq("user_id", uid)
-              .limit(1)
-              .maybeSingle();
-            if (isMountedRef.current) {
-              setManagedBranchId(assignment?.branch_id ?? null);
-              setVendor(null);
-            }
+            setManagedBranchId(
+              (assignment as { branch_id?: string } | null)?.branch_id ?? null,
+            );
+            setVendor(null);
           } else {
             // customer / admin — no vendor, no managed branch
-            if (isMountedRef.current) {
-              setManagedBranchId(null);
-              setVendor(null);
-            }
+            setManagedBranchId(null);
+            setVendor(null);
           }
         }
       } catch {
