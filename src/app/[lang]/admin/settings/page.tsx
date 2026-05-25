@@ -22,10 +22,7 @@ const SETTING_GROUPS: Record<string, string[]> = {
     "max_advance_booking_days",
     "booking_reminder_hours",
   ],
-  "Platform Commerce": [
-    "platform_commission_pct",
-    "min_payout_amount",
-  ],
+  "Platform Commerce": ["platform_commission_pct", "min_payout_amount"],
   "System Behaviour": ["maintenance_mode", "max_images_per_listing"],
 };
 

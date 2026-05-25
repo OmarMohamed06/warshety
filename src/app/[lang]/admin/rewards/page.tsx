@@ -703,8 +703,6 @@ export default function AdminRewardsPage() {
                   ))}
                 </div>
               </div>
-
-
             </div>
 
             {/* Points + Value row */}
@@ -795,7 +793,10 @@ export default function AdminRewardsPage() {
                     }}
                   />
                   {uploadingImage ? (
-                    <Loader2 size={22} className="animate-spin text-slate-400" />
+                    <Loader2
+                      size={22}
+                      className="animate-spin text-slate-400"
+                    />
                   ) : (
                     <>
                       <Upload size={22} className="text-slate-400 mb-1" />
