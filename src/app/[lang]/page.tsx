@@ -2,7 +2,8 @@ export const dynamic = "force-dynamic";
 
 import type { Metadata } from "next";
 import HeroSection from "@/components/home/HeroSection";
-import VehicleConfigurator from "@/components/home/VehicleConfigurator";
+import TrustBadges from "@/components/home/TrustBadges";
+import HowItWorks from "@/components/home/HowItWorks";
 import BrowseServices from "@/components/home/BrowseServices";
 import FeaturedServiceCenters from "@/components/home/FeaturedServiceCenters";
 import { generateSeoMeta } from "@/utils/seo";
@@ -43,6 +44,8 @@ export default async function HomePage() {
   return (
     <div className="w-full overflow-x-hidden">
       <HeroSection />
+      <TrustBadges />
+      <HowItWorks />
       <BrowseServices />
       <FeaturedServiceCenters initialData={centersResult.data ?? undefined} />
     </div>

@@ -61,6 +61,7 @@
     "completedBookings": "bookings completed",
     "egypt": "Egypt",
     "vehicleFilterLabel": "Find parts & services for your car",
+    "bookAService": "Book a Service",
     "make": "Make",
     "model": "Model",
     "engine": "Engine",
@@ -69,6 +70,26 @@
     "year": "Year",
     "yearPlaceholder": "Year",
     "enginePlaceholder": "Engine",
+    "trust": {
+      "cheaperTitle": "Up to 47% cheaper",
+      "cheaperDesc": "Versus franchise garages",
+      "vettedTitle": "Vetted & certified centers",
+      "vettedDesc": "Every center is reviewed",
+      "warrantyTitle": "1-year warranty",
+      "warrantyDesc": "On all parts & repairs",
+      "bookingTitle": "Same or next-day",
+      "bookingDesc": "Fast, flexible bookings"
+    },
+    "how": {
+      "label": "How It Works",
+      "heading": "Book in 3 simple steps",
+      "step1Title": "Find a trusted center",
+      "step1Desc": "Browse vetted service centers near you",
+      "step2Title": "Book your appointment",
+      "step2Desc": "Pick a time that works for you",
+      "step3Title": "Service your car",
+      "step3Desc": "Certified mechanics do the rest"
+    },
     "categories": {
       "brake-system": "Brake System",
       "engine-parts": "Engine Parts",

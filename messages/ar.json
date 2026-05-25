@@ -61,6 +61,7 @@
     "completedBookings": "حجز مكتمل",
     "egypt": "مصر",
     "vehicleFilterLabel": "ابحث عن قطع وخدمات لسيارتك",
+    "bookAService": "احجز خدمة",
     "make": "الماركة",
     "model": "الموديل",
     "engine": "المحرك",
@@ -69,6 +70,26 @@
     "year": "السنة",
     "yearPlaceholder": "السنة",
     "enginePlaceholder": "المحرك",
+    "trust": {
+      "cheaperTitle": "أرخص بنسبة 47%",
+      "cheaperDesc": "مقارنةً بالكراجات الرسمية",
+      "vettedTitle": "مراكز معتمدة ومفحوصة",
+      "vettedDesc": "كل مركز تم مراجعته",
+      "warrantyTitle": "ضمان سنة كاملة",
+      "warrantyDesc": "على جميع القطع والإصلاحات",
+      "bookingTitle": "نفس اليوم أو الغد",
+      "bookingDesc": "حجز سريع ومرن"
+    },
+    "how": {
+      "label": "كيف يعمل",
+      "heading": "احجز في 3 خطوات بسيطة",
+      "step1Title": "ابحث عن مركز موثوق",
+      "step1Desc": "تصفح مراكز الخدمة المعتمدة بالقرب منك",
+      "step2Title": "احجز موعدك",
+      "step2Desc": "اختر الوقت المناسب لك",
+      "step3Title": "اخدم سيارتك",
+      "step3Desc": "الفنيون المعتمدون يتولون الباقي"
+    },
     "categories": {
       "brake-system": "نظام الفرامل",
       "engine-parts": "قطع المحرك",

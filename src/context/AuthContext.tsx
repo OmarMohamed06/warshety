@@ -158,7 +158,11 @@ function AuthProviderInner({
           .single();
 
         if (error) {
-          console.error("[AuthContext] loadProfile error:", error.message, error.code);
+          console.error(
+            "[AuthContext] loadProfile error:",
+            error.message,
+            error.code,
+          );
         }
         if (!isMountedRef.current) return;
         if (profile) {

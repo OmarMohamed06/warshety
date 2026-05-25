@@ -106,7 +106,7 @@ export default function VehicleFilterBar() {
     setYear("");
   }
 
-  function handleSearch() {
+  function saveAndGo(path: string) {
     if (!selectedMakeName) return;
     const id = addVehicle({
       brand: selectedMakeName,
@@ -114,7 +114,11 @@ export default function VehicleFilterBar() {
       year: year ? Number(year) : currentYear,
     });
     setActiveVehicle(id);
-    router.push(localePath("/parts"));
+    router.push(localePath(path));
+  }
+
+  function handleSearch() {
+    saveAndGo("/services");
   }
 
   const canSearch = !!selectedMakeName;
@@ -179,6 +183,21 @@ export default function VehicleFilterBar() {
           </span>
         </button>
       </div>
+
+      {/* Book a Service CTA */}
+      <button
+        onClick={() => saveAndGo("/services")}
+        disabled={!canSearch}
+        className="mt-3 w-full flex items-center justify-center gap-2 rounded-xl bg-[#FF4B19] py-2.5 text-[13px] font-bold uppercase tracking-wider text-white shadow-md transition-all hover:bg-[#e03d10] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        <span
+          className="material-symbols-outlined text-[17px]"
+          style={{ fontVariationSettings: "'FILL' 1" }}
+        >
+          build
+        </span>
+        {t("home.bookAService")}
+      </button>
     </div>
   );
 }
