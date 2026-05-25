@@ -131,7 +131,7 @@ export default function VehicleFilterBar() {
       </p>
 
       {/* Filter pill */}
-      <div className="flex items-stretch overflow-hidden rounded-2xl border border-border bg-background shadow-lg ring-0 transition-shadow focus-within:shadow-xl focus-within:ring-1 focus-within:ring-[#FF4B19]/30">
+      <div className="flex items-stretch overflow-hidden rounded-t-2xl rounded-b-none border border-b-0 border-border bg-background shadow-lg ring-0 transition-shadow focus-within:shadow-xl focus-within:ring-1 focus-within:ring-[#FF4B19]/30">
         {/* Make */}
         <FilterSelect
           label={t("home.make")}
@@ -167,35 +167,14 @@ export default function VehicleFilterBar() {
           disabled={!model}
           placeholder={t("home.yearPlaceholder")}
         />
-
-        {/* Search button */}
-        <button
-          onClick={handleSearch}
-          disabled={!canSearch}
-          aria-label="Search"
-          className="flex shrink-0 items-center justify-center self-stretch bg-[#FF4B19] px-4 transition-all hover:bg-[#e03d10] active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <span
-            className="material-symbols-outlined text-[22px] text-white"
-            style={{ fontVariationSettings: "'FILL' 1" }}
-          >
-            search
-          </span>
-        </button>
       </div>
 
       {/* Book a Service CTA */}
       <button
         onClick={() => saveAndGo("/services")}
         disabled={!canSearch}
-        className="mt-3 w-full flex items-center justify-center gap-2 rounded-xl bg-[#FF4B19] py-2.5 text-[13px] font-bold uppercase tracking-wider text-white shadow-md transition-all hover:bg-[#e03d10] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+        className="w-full flex items-center justify-center rounded-b-2xl rounded-t-none bg-[#FF4B19] py-2.5 text-[13px] font-bold uppercase tracking-wider text-white shadow-md transition-all hover:bg-[#e03d10] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
       >
-        <span
-          className="material-symbols-outlined text-[17px]"
-          style={{ fontVariationSettings: "'FILL' 1" }}
-        >
-          build
-        </span>
         {t("home.bookAService")}
       </button>
     </div>

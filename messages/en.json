@@ -45,9 +45,9 @@
     "terms": "Terms of Service"
   },
   "home": {
-    "heroTitle1": "Everything Your",
-    "heroTitle2": "Car Needs.",
-    "heroSubtitle": "Find trusted garages, book services, and order car parts — all in one place.",
+    "heroTitle1": "Book a Trusted",
+    "heroTitle2": "Service Center.",
+    "heroSubtitle": "Select your car, pick a time, and let certified service centers handle the rest.",
     "bookService": "BOOK A SERVICE",
     "getOffers": "GET OFFERS",
     "viewAll": "View All",
@@ -71,12 +71,12 @@
     "yearPlaceholder": "Year",
     "enginePlaceholder": "Engine",
     "trust": {
-      "cheaperTitle": "Up to 47% cheaper",
-      "cheaperDesc": "Versus franchise garages",
       "vettedTitle": "Vetted & certified centers",
       "vettedDesc": "Every center is reviewed",
-      "warrantyTitle": "1-year warranty",
-      "warrantyDesc": "On all parts & repairs",
+      "diagTitle": "Computer diagnostics",
+      "diagDesc": "OBD scan on every visit",
+      "warrantyTitle": "Service guarantee",
+      "warrantyDesc": "Quality assured on every job",
       "bookingTitle": "Same or next-day",
       "bookingDesc": "Fast, flexible bookings"
     },

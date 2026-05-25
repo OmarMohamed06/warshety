@@ -45,9 +45,9 @@
     "terms": "شروط الخدمة"
   },
   "home": {
-    "heroTitle1": "كل ما تحتاجه",
-    "heroTitle2": "سيارتك.",
-    "heroSubtitle": "ابحث عن كراجات موثوقة، احجز خدمات، واطلب قطع سيارات — كل شيء في مكان واحد.",
+    "heroTitle1": "احجز مركز خدمة",
+    "heroTitle2": "موثوق.",
+    "heroSubtitle": "اختر سيارتك، حدد الوقت، ودع مراكز الخدمة المعتمدة تتولى الباقي.",
     "bookService": "احجز خدمة",
     "getOffers": "احصل على عروض",
     "viewAll": "عرض الكل",
@@ -71,12 +71,12 @@
     "yearPlaceholder": "السنة",
     "enginePlaceholder": "المحرك",
     "trust": {
-      "cheaperTitle": "أرخص بنسبة 47%",
-      "cheaperDesc": "مقارنةً بالكراجات الرسمية",
       "vettedTitle": "مراكز معتمدة ومفحوصة",
       "vettedDesc": "كل مركز تم مراجعته",
-      "warrantyTitle": "ضمان سنة كاملة",
-      "warrantyDesc": "على جميع القطع والإصلاحات",
+      "diagTitle": "تشخيص كمبيوتر",
+      "diagDesc": "فحص OBD في كل زيارة",
+      "warrantyTitle": "ضمان الخدمة",
+      "warrantyDesc": "جودة مضمونة في كل عمل",
       "bookingTitle": "نفس اليوم أو الغد",
       "bookingDesc": "حجز سريع ومرن"
     },

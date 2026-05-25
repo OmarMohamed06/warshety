@@ -4,14 +4,14 @@ import { useLanguage } from "@/context/LanguageContext";
 
 const badges = [
   {
-    icon: "savings",
-    titleKey: "home.trust.cheaperTitle",
-    descKey: "home.trust.cheaperDesc",
-  },
-  {
     icon: "verified_user",
     titleKey: "home.trust.vettedTitle",
     descKey: "home.trust.vettedDesc",
+  },
+  {
+    icon: "build_circle",
+    titleKey: "home.trust.diagTitle",
+    descKey: "home.trust.diagDesc",
   },
   {
     icon: "workspace_premium",
