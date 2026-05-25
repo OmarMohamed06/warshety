@@ -30,6 +30,9 @@ import {
   AlertTriangle,
   ToggleLeft,
   ToggleRight,
+  Upload,
+  Loader2,
+  X,
 } from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -41,7 +44,7 @@ type RewardCategory =
   | "inspection"
   | "parts"
   | "other";
-type RewardType = "service_reward" | "parts_reward";
+type RewardType = "service_reward";
 type ValueType = "fixed" | "percent";
 
 interface Reward {
@@ -104,11 +107,9 @@ const EMPTY_FORM = {
   description_ar: "",
   points_required: "",
   category: "other" as RewardCategory,
-  type: "service_reward" as RewardType,
   image_url: "",
   value: "",
   value_type: "fixed" as ValueType,
-  promo_code: "",
   is_active: true,
 };
 
@@ -124,6 +125,7 @@ export default function AdminRewardsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [filterCategory, setFilterCategory] = useState<RewardCategory | "all">(
@@ -169,6 +171,25 @@ export default function AdminRewardsPage() {
     setDialogOpen(true);
   }
 
+  async function handleImageUpload(file: File) {
+    setUploadingImage(true);
+    const ext = file.name.split(".").pop();
+    const path = `rewards/${Date.now()}.${ext}`;
+    const { error: uploadErr } = await supabase.storage
+      .from("rewards")
+      .upload(path, file, { upsert: true, contentType: file.type });
+    if (uploadErr) {
+      setError(`Image upload failed: ${uploadErr.message}`);
+      setUploadingImage(false);
+      return;
+    }
+    const { data: urlData } = supabase.storage
+      .from("rewards")
+      .getPublicUrl(path);
+    setForm((f) => ({ ...f, image_url: urlData.publicUrl }));
+    setUploadingImage(false);
+  }
+
   function openEdit(r: Reward) {
     setEditingId(r.id);
     setForm({
@@ -178,11 +199,9 @@ export default function AdminRewardsPage() {
       description_ar: r.description_ar ?? "",
       points_required: String(r.points_required),
       category: r.category,
-      type: r.type,
       image_url: r.image_url ?? "",
       value: r.value !== null ? String(r.value) : "",
       value_type: r.value_type,
-      promo_code: r.promo_code ?? "",
       is_active: r.is_active,
     });
     setError(null);
@@ -205,11 +224,6 @@ export default function AdminRewardsPage() {
     setSaving(true);
     setError(null);
 
-    if (form.type === "parts_reward" && !form.promo_code.trim()) {
-      setError("Promo code is required for parts rewards.");
-      return;
-    }
-
     const payload = {
       title: form.title.trim(),
       title_ar: form.title_ar.trim() || null,
@@ -217,14 +231,11 @@ export default function AdminRewardsPage() {
       description_ar: form.description_ar.trim() || null,
       points_required: pts,
       category: form.category,
-      type: form.type,
+      type: "service_reward" as RewardType,
       image_url: form.image_url.trim() || null,
       value: form.value !== "" ? Number(form.value) : null,
       value_type: form.value_type,
-      promo_code:
-        form.type === "parts_reward"
-          ? form.promo_code.trim().toUpperCase() || null
-          : null,
+      promo_code: null,
       is_active: form.is_active,
     };
 
@@ -356,9 +367,9 @@ export default function AdminRewardsPage() {
             color: "text-slate-400",
           },
           {
-            label: "Service",
-            value: rewards.filter((r) => r.type === "service_reward").length,
-            color: "text-blue-600",
+            label: "Parts",
+            value: rewards.filter((r) => r.category === "parts").length,
+            color: "text-orange-600",
           },
         ].map(({ label, value, color }) => (
           <div
@@ -395,30 +406,6 @@ export default function AdminRewardsPage() {
               {c === "all"
                 ? "All categories"
                 : CATEGORY_META[c as RewardCategory].label}
-            </button>
-          ))}
-        </div>
-
-        <div className="w-px h-5 bg-slate-200 dark:bg-slate-700 hidden sm:block" />
-
-        {/* Type */}
-        <div className="flex items-center gap-1">
-          {(["all", "service_reward", "parts_reward"] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setFilterType(t as typeof filterType)}
-              className={cn(
-                "px-3 py-1 text-xs font-bold rounded-lg capitalize transition-colors",
-                filterType === t
-                  ? "bg-slate-700 text-white"
-                  : "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700",
-              )}
-            >
-              {t === "all"
-                ? "All types"
-                : t === "service_reward"
-                  ? "Service"
-                  : "Parts"}
             </button>
           ))}
         </div>
@@ -482,11 +469,10 @@ export default function AdminRewardsPage() {
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-700 overflow-x-auto">
             {/* Desktop header */}
-            <div className="hidden md:grid grid-cols-[auto_1fr_auto_auto_auto_auto_auto] items-center gap-4 px-5 py-2 text-[11px] font-black uppercase tracking-wider text-slate-400">
+            <div className="hidden md:grid grid-cols-[auto_1fr_auto_auto_auto_auto] items-center gap-4 px-5 py-2 text-[11px] font-black uppercase tracking-wider text-slate-400">
               <span className="w-12" />
               <span>Reward</span>
               <span className="w-24 text-center">Category</span>
-              <span className="w-20 text-center">Type</span>
               <span className="w-20 text-center">Points</span>
               <span className="w-20 text-center">Status</span>
               <span className="w-24 text-right">Actions</span>
@@ -505,7 +491,7 @@ export default function AdminRewardsPage() {
                 <div
                   key={r.id}
                   className={cn(
-                    "grid md:grid-cols-[auto_1fr_auto_auto_auto_auto_auto] items-center gap-4 px-5 py-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/30",
+                    "grid md:grid-cols-[auto_1fr_auto_auto_auto_auto] items-center gap-4 px-5 py-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/30",
                     !r.is_active && "opacity-60",
                   )}
                 >
@@ -541,11 +527,6 @@ export default function AdminRewardsPage() {
                     <p className="text-[11px] font-bold text-orange-500 mt-0.5">
                       {valueLabel}
                     </p>
-                    {r.type === "parts_reward" && r.promo_code && (
-                      <p className="mt-0.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 text-[10px] font-mono font-bold tracking-widest">
-                        {r.promo_code}
-                      </p>
-                    )}
                   </div>
 
                   {/* Category */}
@@ -559,16 +540,6 @@ export default function AdminRewardsPage() {
                       {cat.icon}
                       {cat.label}
                     </span>
-                  </div>
-
-                  {/* Type */}
-                  <div className="w-20 flex justify-center">
-                    <Badge
-                      variant="outline"
-                      className="text-[11px] font-bold capitalize"
-                    >
-                      {r.type === "service_reward" ? "Service" : "Parts"}
-                    </Badge>
                   </div>
 
                   {/* Points */}
@@ -733,33 +704,7 @@ export default function AdminRewardsPage() {
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold">Reward Type</Label>
-                <div className="flex gap-2">
-                  {(["service_reward", "parts_reward"] as const).map((rt) => (
-                    <button
-                      key={rt}
-                      type="button"
-                      onClick={() => setForm((f) => ({ ...f, type: rt }))}
-                      className={cn(
-                        "flex-1 py-2 rounded-lg border text-xs font-bold transition-colors",
-                        form.type === rt
-                          ? "bg-slate-800 text-white border-slate-800 dark:bg-slate-200 dark:text-slate-900 dark:border-slate-200"
-                          : "text-slate-500 border-slate-200 hover:bg-slate-50",
-                      )}
-                    >
-                      {rt === "service_reward"
-                        ? "🔧 Service reward"
-                        : "📦 Parts promo"}
-                    </button>
-                  ))}
-                </div>
-                <p className="text-[11px] text-slate-400">
-                  {form.type === "service_reward"
-                    ? "Customer scans QR code at a partner service center."
-                    : "Customer gets a promo code to apply at parts checkout."}
-                </p>
-              </div>
+
             </div>
 
             {/* Points + Value row */}
@@ -814,55 +759,55 @@ export default function AdminRewardsPage() {
               </div>
             </div>
 
-            {/* Promo code — only for parts_reward */}
-            {form.type === "parts_reward" && (
-              <div className="space-y-1.5 rounded-xl border-2 border-orange-200 bg-orange-50 dark:bg-orange-950/20 dark:border-orange-800 px-4 py-3">
-                <Label className="text-xs font-bold text-orange-700 dark:text-orange-400">
-                  Promo Code <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  placeholder="e.g. PARTS100 or TIRE50"
-                  value={form.promo_code}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      promo_code: e.target.value
-                        .toUpperCase()
-                        .replace(/\s/g, ""),
-                    }))
-                  }
-                  className="font-mono font-bold tracking-widest uppercase"
-                />
-                <p className="text-[11px] text-orange-600 dark:text-orange-400">
-                  This is the discount code customers will receive after
-                  redeeming their points. They apply it at parts checkout.
-                </p>
-              </div>
-            )}
-
-            {/* Image URL */}
+            {/* Image Upload */}
             <div className="space-y-1.5">
-              <Label className="text-xs font-bold">Image URL</Label>
-              <Input
-                type="url"
-                placeholder="https://example.com/reward-image.jpg"
-                value={form.image_url}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, image_url: e.target.value }))
-                }
-              />
-              {form.image_url && (
-                <div className="mt-2 flex items-center gap-3">
+              <Label className="text-xs font-bold">Reward Image</Label>
+              {form.image_url ? (
+                <div className="flex items-center gap-3">
                   <img
                     src={form.image_url}
                     alt="Preview"
-                    className="w-16 h-16 object-cover rounded-xl border border-slate-200"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = "none";
+                    className="w-20 h-20 object-cover rounded-xl border border-slate-200"
+                  />
+                  <div className="flex flex-col gap-1.5">
+                    <p className="text-xs text-slate-500 truncate max-w-[220px]">
+                      {form.image_url.split("/").pop()}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, image_url: "" }))}
+                      className="inline-flex items-center gap-1 text-xs text-red-500 hover:text-red-700 font-semibold"
+                    >
+                      <X size={13} /> Remove
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center w-full h-28 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-primary cursor-pointer transition-colors bg-slate-50 dark:bg-slate-900/30">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={uploadingImage}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleImageUpload(file);
                     }}
                   />
-                  <p className="text-xs text-slate-400">Image preview</p>
-                </div>
+                  {uploadingImage ? (
+                    <Loader2 size={22} className="animate-spin text-slate-400" />
+                  ) : (
+                    <>
+                      <Upload size={22} className="text-slate-400 mb-1" />
+                      <span className="text-xs text-slate-400 font-semibold">
+                        Click to upload image
+                      </span>
+                      <span className="text-[11px] text-slate-300">
+                        PNG, JPG, WebP
+                      </span>
+                    </>
+                  )}
+                </label>
               )}
             </div>
 
