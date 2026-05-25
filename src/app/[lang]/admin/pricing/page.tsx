@@ -15,21 +15,6 @@ interface Setting {
   updated_at: string;
 }
 
-const PRICING_KEYS = [
-  {
-    key: "delivery_base_fee",
-    label: "Delivery Base Fee",
-    unit: "EGP",
-    description: "Base delivery fee charged to customers",
-  },
-  {
-    key: "free_delivery_threshold",
-    label: "Free Delivery Threshold",
-    unit: "EGP",
-    description: "Order value above which delivery is free",
-  },
-];
-
 /** Billing rate keys — shown in a separate dedicated section */
 const BILLING_RATE_KEYS = [
   {
@@ -39,14 +24,6 @@ const BILLING_RATE_KEYS = [
     type: "fixed" as const,
     description:
       "Fixed fee charged to a service center per booking. Monthly bill = bookings × this fee.",
-  },
-  {
-    key: "parts_seller_commission_pct",
-    label: "Parts Seller Commission Rate",
-    unit: "%",
-    type: "pct" as const,
-    description:
-      "Commission % deducted from each parts order. Platform share = final order amount × rate / 100.",
   },
 ];
 
@@ -76,7 +53,6 @@ export default function PricingPage() {
   const load = useCallback(async () => {
     setLoading(true);
     const keys = [
-      ...PRICING_KEYS.map((p) => p.key),
       ...BILLING_RATE_KEYS.map((p) => p.key),
       ...OTHER_PRICING_KEYS,
     ];
@@ -217,86 +193,7 @@ export default function PricingPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          {/* Main pricing controls */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-2">
-              <span
-                className="material-symbols-outlined text-[#FF4B19]"
-                style={{ fontSize: 20 }}
-              >
-                percent
-              </span>
-              <h2 className="font-black">{t("admin.feeStructure")}</h2>
-            </div>
-            <div className="divide-y divide-slate-50 dark:divide-slate-700/50">
-              {PRICING_KEYS.map(({ key, label, unit, description }) => {
-                const s = settings[key];
-                const current = edited[key] ?? s?.value ?? "";
-                const isDirty =
-                  edited[key] !== undefined && edited[key] !== s?.value;
-                return (
-                  <div
-                    key={key}
-                    className="flex items-center justify-between px-6 py-5 gap-6"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="font-black">{label}</p>
-                      <p className="text-xs text-slate-400 mt-0.5">
-                        {description}
-                      </p>
-                      {s?.updated_at && (
-                        <p className="text-xs text-slate-300 dark:text-slate-600 mt-0.5">
-                          {t("admin.lastUpdated")}:{" "}
-                          {new Date(s.updated_at).toLocaleDateString("en-EG", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      <div className="relative">
-                        <input
-                          type="number"
-                          value={current}
-                          min={0}
-                          step={unit === "%" ? 0.5 : 1}
-                          onChange={(e) =>
-                            setEdited((prev) => ({
-                              ...prev,
-                              [key]: e.target.value,
-                            }))
-                          }
-                          className="w-28 pr-12 pl-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-[#FF4B19]/30 text-right font-bold"
-                        />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-semibold">
-                          {unit}
-                        </span>
-                      </div>
-                      {isDirty && (
-                        <button
-                          onClick={() => save(key)}
-                          disabled={saving === key}
-                          className="px-3 py-2 bg-[#FF4B19] text-white text-xs font-bold rounded-xl hover:bg-[#e04416] disabled:opacity-60 transition-colors flex items-center gap-1"
-                        >
-                          <span
-                            className="material-symbols-outlined"
-                            style={{ fontSize: 14 }}
-                          >
-                            save
-                          </span>
-                          {saving === key ? "…" : t("admin.save")}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Billing rates — service centers (fixed fee) vs parts sellers (commission %) */}
+          {/* Billing rates — service centers */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-2">
               <span

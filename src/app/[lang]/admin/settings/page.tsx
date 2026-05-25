@@ -25,8 +25,6 @@ const SETTING_GROUPS: Record<string, string[]> = {
   "Platform Commerce": [
     "platform_commission_pct",
     "min_payout_amount",
-    "delivery_base_fee",
-    "free_delivery_threshold",
   ],
   "System Behaviour": ["maintenance_mode", "max_images_per_listing"],
 };
