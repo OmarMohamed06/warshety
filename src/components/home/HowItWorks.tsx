@@ -37,7 +37,10 @@ export default function HowItWorks() {
         {/* Steps */}
         <div className="relative flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:gap-0">
           {steps.map((step, i) => (
-            <div key={step.titleKey} className="relative flex flex-1 flex-col items-center gap-3 px-4">
+            <div
+              key={step.titleKey}
+              className="relative flex flex-1 flex-col items-center gap-3 px-4"
+            >
               {/* Connector line between steps */}
               {i < steps.length - 1 && (
                 <div className="absolute left-[calc(50%+36px)] top-5 hidden h-px w-[calc(100%-72px)] bg-border sm:block" />

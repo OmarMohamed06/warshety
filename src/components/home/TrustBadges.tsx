@@ -24,24 +24,24 @@ export default function TrustBadges() {
   const { t } = useLanguage();
 
   return (
-    <section className="border-y border-border/60 bg-muted/30 py-5">
-      <div className="mx-auto max-w-5xl px-6">
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-6">
+    <section className="border-y border-border/60 bg-muted/30 py-4">
+      <div className="mx-auto max-w-5xl px-4">
+        <div className="flex items-start justify-around gap-2">
           {badges.map((b) => (
             <div
               key={b.titleKey}
-              className="flex flex-col items-center gap-1.5 text-center"
+              className="flex flex-1 flex-col items-center gap-1 text-center"
             >
               <span
-                className="material-symbols-outlined text-[28px] text-[#FF4B19]"
+                className="material-symbols-outlined text-[22px] sm:text-[28px] text-[#FF4B19]"
                 style={{ fontVariationSettings: "'FILL' 1" }}
               >
                 {b.icon}
               </span>
-              <p className="text-[13px] font-bold leading-tight text-foreground">
+              <p className="text-[11px] sm:text-[13px] font-bold leading-tight text-foreground">
                 {t(b.titleKey)}
               </p>
-              <p className="text-[11px] leading-snug text-muted-foreground">
+              <p className="hidden sm:block text-[11px] leading-snug text-muted-foreground">
                 {t(b.descKey)}
               </p>
             </div>
