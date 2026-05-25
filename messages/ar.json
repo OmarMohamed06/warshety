@@ -45,8 +45,8 @@
     "terms": "شروط الخدمة"
   },
   "home": {
-    "heroTitle1": "احجز مركز خدمة",
-    "heroTitle2": "موثوق.",
+    "heroTitle1": "احجز مركز",
+    "heroTitle2": "خدمة.",
     "heroSubtitle": "اختر سيارتك، حدد الوقت، ودع مراكز الخدمة المعتمدة تتولى الباقي.",
     "bookService": "احجز خدمة",
     "getOffers": "احصل على عروض",
@@ -60,7 +60,7 @@
     "sold": "مباع",
     "completedBookings": "حجز مكتمل",
     "egypt": "مصر",
-    "vehicleFilterLabel": "ابحث عن قطع وخدمات لسيارتك",
+    "vehicleFilterLabel": "ابحث عن مركز خدمة",
     "bookAService": "احجز خدمة",
     "make": "الماركة",
     "model": "الموديل",

@@ -45,7 +45,7 @@
     "terms": "Terms of Service"
   },
   "home": {
-    "heroTitle1": "Book a Trusted",
+    "heroTitle1": "Book a",
     "heroTitle2": "Service Center.",
     "heroSubtitle": "Select your car, pick a time, and let certified service centers handle the rest.",
     "bookService": "BOOK A SERVICE",
@@ -60,7 +60,7 @@
     "sold": "sold",
     "completedBookings": "bookings completed",
     "egypt": "Egypt",
-    "vehicleFilterLabel": "Find parts & services for your car",
+    "vehicleFilterLabel": "Find a Service Center",
     "bookAService": "Book a Service",
     "make": "Make",
     "model": "Model",
