@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { globalSearch, type SearchResult } from "@/services/searchService";
-import { Search, Wrench, Settings, Store, X } from "lucide-react";
+import { Search, Wrench, Store, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -14,11 +14,6 @@ const TYPE_LABELS: Record<
   { ar: string; en: string; icon: React.ReactNode }
 > = {
   all: { ar: "الكل", en: "All", icon: <Search className="w-3.5 h-3.5" /> },
-  part: {
-    ar: "قطع الغيار",
-    en: "Parts",
-    icon: <Settings className="w-3.5 h-3.5" />,
-  },
   vendor: {
     ar: "مراكز الخدمة",
     en: "Service Centers",
@@ -34,7 +29,6 @@ const TYPE_LABELS: Record<
 const TYPE_EMOJI: Record<string, string> = {
   vendor: "🏪",
   service: "🔧",
-  part: "⚙️",
 };
 
 export default function SearchPage() {
@@ -46,7 +40,7 @@ export default function SearchPage() {
   const initialQ = searchParams.get("q") ?? "";
   const [query, setQuery] = useState(initialQ);
   const [activeType, setActiveType] = useState<
-    "all" | "part" | "vendor" | "service"
+    "all" | "vendor" | "service"
   >("all");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -100,7 +94,6 @@ export default function SearchPage() {
       : results.filter((r) => r.type === activeType);
   const counts = {
     all: results.length,
-    part: results.filter((r) => r.type === "part").length,
     vendor: results.filter((r) => r.type === "vendor").length,
     service: results.filter((r) => r.type === "service").length,
   };
@@ -141,7 +134,7 @@ export default function SearchPage() {
           {/* Type Filter Tabs */}
           {hasSearched && (
             <div className="flex gap-2 mt-3 overflow-x-auto pb-1 scrollbar-none">
-              {(["all", "part", "vendor", "service"] as const).map((type) => (
+              {(["all", "vendor", "service"] as const).map((type) => (
                 <button
                   key={type}
                   onClick={() => setActiveType(type)}

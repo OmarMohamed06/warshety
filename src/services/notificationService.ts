@@ -19,16 +19,10 @@ export type NotificationType =
   | "booking_confirmed"
   | "booking_cancelled"
   | "booking_status_changed"
-  | "order_shipped"
-  | "order_status_changed"
-  | "order_processing"
-  | "order_shipped_bosta"
-  | "order_delivered"
   | "message_received"
   | "review_reply"
   | "vendor_approved"
-  | "vendor_rejected"
-  | "payout_request";
+  | "vendor_rejected";
 
 export interface DbNotification {
   id: string;
@@ -146,18 +140,6 @@ export async function notifyBookingCancelled(
   );
 }
 
-export async function notifyOrderShipped(
-  userId: string,
-  orderId: string,
-): Promise<void> {
-  await createNotification(
-    userId,
-    "order_shipped",
-    "Order Shipped 🚚",
-    `Your order #${orderId.slice(0, 8).toUpperCase()} has been shipped.`,
-    `/orders/${orderId}`,
-  );
-}
 
 export async function notifyVendorApproved(userId: string): Promise<void> {
   await createNotification(
@@ -182,80 +164,3 @@ export async function notifyVendorRejected(
   );
 }
 
-// ── Bosta / shipping event helpers ────────────────────────────────────────────
-
-/**
- * Notify buyer that the vendor has confirmed readiness and Bosta pickup is scheduled.
- */
-export async function notifyOrderProcessing(
-  buyerUserId: string,
-  orderId: string,
-  trackingNumber: string,
-  trackingUrl: string,
-): Promise<void> {
-  await createNotification(
-    buyerUserId,
-    "order_processing",
-    "Your Order is Being Prepared 📦",
-    `Order #${orderId.slice(0, 8).toUpperCase()} is being packed. Tracking: ${trackingNumber}`,
-    trackingUrl,
-  );
-}
-
-/**
- * Notify buyer that the package has been picked up and is in transit.
- * Optionally notify the vendor as well.
- */
-export async function notifyOrderShippedBosta(
-  buyerUserId: string,
-  orderId: string,
-  trackingNumber: string,
-  trackingUrl: string,
-  vendorUserId?: string,
-): Promise<void> {
-  await createNotification(
-    buyerUserId,
-    "order_shipped_bosta",
-    "Your Order is on the Way 🚚",
-    `Order #${orderId.slice(0, 8).toUpperCase()} has been shipped. Track: ${trackingNumber}`,
-    trackingUrl,
-  );
-
-  if (vendorUserId) {
-    await createNotification(
-      vendorUserId,
-      "order_shipped_bosta",
-      "Order Shipped 🚚",
-      `Order #${orderId.slice(0, 8).toUpperCase()} has been picked up by Bosta.`,
-      `/vendor/orders`,
-    );
-  }
-}
-
-/**
- * Notify buyer that the order was delivered.
- * Optionally notify the vendor that their payout has been queued.
- */
-export async function notifyOrderDelivered(
-  buyerUserId: string,
-  orderId: string,
-  vendorUserId?: string,
-): Promise<void> {
-  await createNotification(
-    buyerUserId,
-    "order_delivered",
-    "Order Delivered ✅",
-    `Your order #${orderId.slice(0, 8).toUpperCase()} has been delivered. Enjoy!`,
-    `/orders/${orderId}`,
-  );
-
-  if (vendorUserId) {
-    await createNotification(
-      vendorUserId,
-      "order_delivered",
-      "Order Delivered — Payout Queued 💰",
-      `Order #${orderId.slice(0, 8).toUpperCase()} was delivered. Your payout has been queued for settlement.`,
-      `/vendor/billing`,
-    );
-  }
-}

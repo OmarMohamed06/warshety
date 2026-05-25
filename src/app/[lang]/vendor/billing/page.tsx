@@ -7,10 +7,8 @@ import { useLanguage } from "@/context/LanguageContext";
 import { createClient } from "@/lib/supabase/client";
 import {
   getMyBillingHistory,
-  getMyTransactionHistory,
   currentBillingPeriod,
   type ServiceCenterBillingRecord,
-  type PartsSellerTransaction,
 } from "@/services/billingService";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -195,13 +193,6 @@ export default function VendorBillingPage() {
     null,
   );
 
-  // PS state
-  const [transactions, setTransactions] = useState<PartsSellerTransaction[]>(
-    [],
-  );
-  const [psPending, setPsPending] = useState(0);
-  const [psPaid, setPsPaid] = useState(0);
-
   // SC payment modal
   const [payBill, setPayBill] = useState<ServiceCenterBillingRecord | null>(
     null,
@@ -323,13 +314,6 @@ export default function VendorBillingPage() {
     if (isService) {
       const { data } = await getMyBillingHistory(vendor.id);
       setBills(data);
-    } else {
-      const { data, pendingTotal, paidTotal } = await getMyTransactionHistory(
-        vendor.id,
-      );
-      setTransactions(data);
-      setPsPending(pendingTotal);
-      setPsPaid(paidTotal);
     }
 
     setLoading(false);
@@ -746,159 +730,6 @@ export default function VendorBillingPage() {
     );
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // PARTS SELLER view  (commission earned, paid by platform)
-  // ─────────────────────────────────────────────────────────────────────────
-  return (
-    <VendorLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl font-black tracking-tight flex items-center gap-2">
-            <TrendingUp className="h-6 w-6" />
-            {t("vendor.billing.title")}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            {t("vendor.billing.psSubtitle")}
-          </p>
-        </div>
-
-        {/* Summary cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Card>
-            <CardContent className="pt-5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
-                  <Clock className="h-5 w-5 text-amber-600" />
-                </div>
-                <div>
-                  <p className="text-xl font-black">{egp(psPending)}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {t("vendor.billing.pendingPayout")}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
-                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                </div>
-                <div>
-                  <p className="text-xl font-black">{egp(psPaid)}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {t("vendor.billing.totalReceived")}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Info box */}
-        <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-2xl p-4 flex gap-3">
-          <AlertCircle className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
-          <p className="text-sm text-blue-800 dark:text-blue-200">
-            {t("vendor.billing.psInfo")}
-          </p>
-        </div>
-
-        {/* Transactions table */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
-              {t("vendor.billing.transactionsTitle")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            {transactions.length === 0 ? (
-              <div className="py-16 text-center text-muted-foreground text-sm">
-                <Receipt className="h-10 w-10 mx-auto mb-3 opacity-20" />
-                {t("vendor.billing.noTransactions")}
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="border-b border-border bg-muted/50">
-                    <tr>
-                      {[
-                        t("vendor.billing.colDate"),
-                        t("vendor.billing.colOrderAmount"),
-                        t("vendor.billing.colCommission"),
-                        t("vendor.billing.colYourShare"),
-                        t("vendor.billing.colStatus"),
-                      ].map((h, i) => (
-                        <th
-                          key={i}
-                          className="text-left px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider whitespace-nowrap"
-                        >
-                          {h}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {transactions.map((tx) => (
-                      <tr
-                        key={tx.id}
-                        className={cn(
-                          "hover:bg-muted/30 transition-colors",
-                          tx.refunded && "opacity-60",
-                        )}
-                      >
-                        <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">
-                          {fmt(tx.created_at)}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          {egp(tx.final_order_amount)}
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground">
-                          {tx.commission_rate}%{" "}
-                          <span className="text-xs">
-                            ({egp(tx.platform_share)})
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 font-bold text-emerald-700 dark:text-emerald-400">
-                          {egp(tx.vendor_share)}
-                        </td>
-                        <td className="px-4 py-3">
-                          {tx.refunded ? (
-                            <Badge
-                              variant="secondary"
-                              className="bg-red-100 text-red-700 hover:bg-red-100"
-                            >
-                              Refunded
-                            </Badge>
-                          ) : (
-                            <Badge
-                              variant={
-                                tx.payment_status === "paid"
-                                  ? "default"
-                                  : "secondary"
-                              }
-                              className={cn(
-                                tx.payment_status === "paid"
-                                  ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
-                                  : "bg-amber-100 text-amber-700 hover:bg-amber-100",
-                              )}
-                            >
-                              {tx.payment_status === "paid"
-                                ? t("vendor.billing.statusPaid")
-                                : t("vendor.billing.statusPending")}
-                            </Badge>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </VendorLayout>
-  );
+  // All vendors are service centers — no parts seller view needed
+  return null;
 }

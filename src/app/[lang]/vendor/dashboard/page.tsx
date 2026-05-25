@@ -22,8 +22,6 @@ import {
 } from "@/components/ui/table";
 import {
   DollarSign,
-  Package,
-  ShoppingCart,
   Star,
   Users,
   CalendarDays,
@@ -32,9 +30,7 @@ import {
   TrendingDown,
   Clock,
   Wrench,
-  Boxes,
   PlusCircle,
-  AlertTriangle,
 } from "lucide-react";
 
 // ── Stat card ─────────────────────────────────────────────────────────────────
@@ -123,14 +119,6 @@ const BOOKING_STATUS_CLS: Record<string, string> = {
   cancelled: "bg-red-100 text-red-700",
 };
 
-const ORDER_STATUS_CLS: Record<string, string> = {
-  pending: "bg-amber-100 text-amber-700",
-  paid: "bg-blue-100 text-blue-700",
-  shipped: "bg-indigo-100 text-indigo-700",
-  completed: "bg-green-100 text-green-700",
-  cancelled: "bg-red-100 text-red-700",
-};
-
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 
 /** Parse a Postgres numeric/text value to a JS number safely */
@@ -155,7 +143,6 @@ export default function VendorDashboardPage() {
   const [chartData, setChartData] = useState<{ day: string; amount: number }[]>(
     [],
   );
-  const [lowStock, setLowStock] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [pendingFees, setPendingFees] = useState(0);
   // For service centers: fee per booking (from vendor_billing_settings)
@@ -260,102 +247,6 @@ export default function VendorDashboardPage() {
         });
         setRecent(recentData ?? []);
         setChartData(days);
-      } else {
-        // Parts seller: fetch order_items, low stock and vendor rating in parallel
-        const [{ data: items }, { data: lowStockData }, { data: vendorData }] =
-          await Promise.all([
-            supabase
-              .from("order_items")
-              .select(
-                "quantity,unit_price,order:orders(status,created_at,user_id)",
-              )
-              .eq("vendor_id", vendor.id),
-            supabase
-              .from("products")
-              .select("id,name,stock,price")
-              .eq("vendor_id", vendor.id)
-              .lt("stock", 5)
-              .order("stock")
-              .limit(5),
-            supabase
-              .from("vendors")
-              .select("rating")
-              .eq("id", vendor.id)
-              .single(),
-          ]);
-
-        const all = items ?? [];
-        const revenue = all.reduce(
-          (s: number, i: any) => s + n(i.quantity) * n(i.unit_price),
-          0,
-        );
-        const customers = new Set(
-          all.map((i: any) => i.order?.user_id).filter(Boolean),
-        ).size;
-
-        const todayItems = all.filter((i: any) =>
-          i.order?.created_at?.startsWith(todayStr),
-        );
-        const monthItems = all.filter(
-          (i: any) => i.order?.created_at >= firstOfMonth,
-        );
-
-        // Recent orders
-        const { data: recentOrders } = await supabase
-          .from("orders")
-          .select(
-            "id,display_id,status,created_at,total_amount,user:users(full_name,email)",
-          )
-          .in(
-            "id",
-            [
-              ...new Set(all.map((i: any) => i.order?.id).filter(Boolean)),
-            ].slice(0, 8),
-          );
-
-        // Chart
-        const days: { day: string; amount: number }[] = [];
-        for (let i = 13; i >= 0; i--) {
-          const d = new Date();
-          d.setDate(d.getDate() - i);
-          const ds = d.toISOString().split("T")[0];
-          const dayTotal = all
-            .filter((i: any) => i.order?.created_at?.startsWith(ds))
-            .reduce(
-              (s: number, item: any) =>
-                s + n(item.quantity) * n(item.unit_price),
-              0,
-            );
-          days.push({
-            day: d.toLocaleDateString("en", { weekday: "short" }),
-            amount: dayTotal,
-          });
-        }
-
-        // Pending commission for this parts seller
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const db = supabase as any;
-        const { data: psTx } = await db
-          .from("parts_seller_transactions")
-          .select("platform_share")
-          .eq("vendor_id", vendor.id)
-          .eq("payment_status", "pending");
-        const psPendingTotal = (psTx ?? []).reduce(
-          (s: number, r: any) => s + n(r.platform_share),
-          0,
-        );
-        setPendingFees(psPendingTotal);
-
-        setStats({
-          revenue,
-          ordersToday: todayItems.length,
-          ordersMonth: monthItems.length,
-          rating: n(vendorData?.rating), // parse numeric string from Postgres
-          customers,
-        });
-        setRecent(recentOrders ?? []);
-        setLowStock(lowStockData ?? []);
-        setChartData(days);
       }
     } catch {
       // silently degrade — partial data already set above
@@ -368,7 +259,8 @@ export default function VendorDashboardPage() {
     load();
   }, [load]);
 
-  const isService = vendorType === "service_center";
+  // isService is always true for this service-center-only platform
+  const isService = true;
 
   return (
     <VendorLayout>
@@ -384,44 +276,28 @@ export default function VendorDashboardPage() {
             </p>
           </div>
           <Button asChild>
-            <Link href={isService ? "/vendor/services" : "/vendor/products"}>
+            <Link href="/vendor/services">
               <PlusCircle className="h-4 w-4 mr-2" />
-              {isService ? t("vendor.newService") : t("vendor.addProduct")}
+              {t("vendor.newService")}
             </Link>
           </Button>
         </div>
 
         {/* Stat cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {!isService && (
-            <StatCard
-              title={t("vendor.revenueThisMonth")}
-              value={`EGP ${stats.revenue.toLocaleString()}`}
-              sub={t("vendor.fromCompleted")}
-              icon={DollarSign}
-              trend="up"
-              loading={loading}
-            />
-          )}
           <StatCard
-            title={
-              isService ? t("vendor.bookingsToday") : t("vendor.ordersToday")
-            }
+            title={t("vendor.bookingsToday")}
             value={stats.ordersToday}
             sub={t("vendor.sinceMidnight")}
-            icon={isService ? CalendarDays : ShoppingCart}
+            icon={CalendarDays}
             trend="neutral"
             loading={loading}
           />
           <StatCard
-            title={
-              isService
-                ? t("vendor.bookingsThisMonth")
-                : t("vendor.ordersThisMonth")
-            }
+            title={t("vendor.bookingsThisMonth")}
             value={stats.ordersMonth}
             sub={t("vendor.thisCalendarMonth")}
-            icon={isService ? Clock : Boxes}
+            icon={Clock}
             trend="up"
             loading={loading}
           />
@@ -439,47 +315,21 @@ export default function VendorDashboardPage() {
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground font-medium">
-                    {isService
-                      ? t("vendor.feesThisMonthBill")
-                      : t("vendor.feesStatus")}
+                    {t("vendor.feesThisMonthBill")}
                   </p>
                   {loading ? (
                     <Skeleton className="h-8 w-28" />
                   ) : (
-                    <p
-                      className={`text-2xl font-black ${
-                        isService
-                          ? "text-amber-600"
-                          : pendingFees > 0
-                            ? ""
-                            : "text-green-600"
-                      }`}
-                    >
-                      {isService || pendingFees > 0
-                        ? `EGP ${pendingFees.toLocaleString()}`
-                        : t("vendor.feesAllClear")}
+                    <p className="text-2xl font-black text-amber-600">
+                      {`EGP ${pendingFees.toLocaleString()}`}
                     </p>
                   )}
                   {loading ? (
                     <Skeleton className="h-4 w-20" />
-                  ) : isService ? (
-                    // SC: show the per-booking breakdown
+                  ) : (
                     <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
                       {stats.ordersMonth} {t("vendor.feesBookingsTimes")} EGP{" "}
                       {bookingFee}
-                    </span>
-                  ) : (
-                    // PS: show paid/pending badge
-                    <span
-                      className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full ${
-                        pendingFees > 0
-                          ? "bg-amber-100 text-amber-700"
-                          : "bg-green-100 text-green-700"
-                      }`}
-                    >
-                      {pendingFees > 0
-                        ? t("vendor.feesPending")
-                        : t("vendor.feesAllClear")}
                     </span>
                   )}
                   {!loading && (
@@ -488,24 +338,8 @@ export default function VendorDashboardPage() {
                     </p>
                   )}
                 </div>
-                <div
-                  className={`rounded-xl p-3 ${
-                    isService
-                      ? "bg-amber-100"
-                      : pendingFees > 0
-                        ? "bg-amber-100"
-                        : "bg-green-100"
-                  }`}
-                >
-                  <DollarSign
-                    className={`h-5 w-5 ${
-                      isService
-                        ? "text-amber-600"
-                        : pendingFees > 0
-                          ? "text-amber-600"
-                          : "text-green-600"
-                    }`}
-                  />
+                <div className="rounded-xl p-3 bg-amber-100">
+                  <DollarSign className="h-5 w-5 text-amber-600" />
                 </div>
               </div>
             </CardContent>
@@ -513,8 +347,8 @@ export default function VendorDashboardPage() {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Revenue chart — parts sellers only */}
-          {!isService && (
+          {/* Revenue chart — removed for parts-sellers only */}
+          {false && (
             <Card className="lg:col-span-2">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
@@ -548,48 +382,15 @@ export default function VendorDashboardPage() {
           )}
 
           {/* Quick actions / Low stock */}
-          <Card className={isService ? "lg:col-span-3" : ""}>
+          <Card className="lg:col-span-3">
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-bold">
-                {isService
-                  ? t("vendor.quickActions")
-                  : lowStock.length > 0
-                    ? t("vendor.lowStockAlert")
-                    : t("vendor.quickActions")}
+                {t("vendor.quickActions")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {!isService && lowStock.length > 0 ? (
-                <>
-                  {lowStock.map((p) => (
-                    <div key={p.id} className="flex items-center gap-2 py-1.5">
-                      <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-                      <span className="text-sm flex-1 truncate">{p.name}</span>
-                      <Badge
-                        variant="outline"
-                        className="text-amber-600 border-amber-200 bg-amber-50 text-[10px]"
-                      >
-                        {p.stock} {t("vendor.left")}
-                      </Badge>
-                    </div>
-                  ))}
-                  <Separator />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full gap-1.5"
-                    asChild
-                  >
-                    <Link href="/vendor/inventory">
-                      <Boxes className="h-3.5 w-3.5" />{" "}
-                      {t("vendor.viewInventory")}
-                    </Link>
-                  </Button>
-                </>
-              ) : (
-                <div className="space-y-2">
-                  {(isService
-                    ? [
+              <div className="space-y-2">
+                  {([
                         {
                           href: "/vendor/bookings",
                           icon: CalendarDays,
@@ -611,28 +412,6 @@ export default function VendorDashboardPage() {
                           label: t("vendor.viewCustomers"),
                         },
                       ]
-                    : [
-                        {
-                          href: "/vendor/products",
-                          icon: Package,
-                          label: t("vendor.manageProducts"),
-                        },
-                        {
-                          href: "/vendor/orders",
-                          icon: ShoppingCart,
-                          label: t("vendor.viewOrders"),
-                        },
-                        {
-                          href: "/vendor/inventory",
-                          icon: Boxes,
-                          label: t("vendor.checkInventory"),
-                        },
-                        {
-                          href: "/vendor/customers",
-                          icon: Users,
-                          label: t("vendor.viewCustomers"),
-                        },
-                      ]
                   ).map(({ href, icon: Icon, label }) => (
                     <Button
                       key={href}
@@ -647,7 +426,6 @@ export default function VendorDashboardPage() {
                     </Button>
                   ))}
                 </div>
-              )}
             </CardContent>
           </Card>
         </div>
@@ -657,9 +435,7 @@ export default function VendorDashboardPage() {
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-bold">
-                {isService
-                  ? t("vendor.recentBookings")
-                  : t("vendor.recentOrders")}
+                {t("vendor.recentBookings")}
               </CardTitle>
               <Button
                 variant="ghost"
@@ -667,7 +443,7 @@ export default function VendorDashboardPage() {
                 className="h-7 text-xs gap-1"
                 asChild
               >
-                <Link href={isService ? "/vendor/bookings" : "/vendor/orders"}>
+                <Link href="/vendor/bookings">
                   {t("vendor.viewAll")} <ArrowRight className="h-3 w-3" />
                 </Link>
               </Button>
@@ -684,12 +460,10 @@ export default function VendorDashboardPage() {
               <div className="text-center py-12 text-muted-foreground">
                 <p className="font-semibold">{t("vendor.noActivity")}</p>
                 <p className="text-sm mt-1">
-                  {isService
-                    ? t("vendor.bookingsWillAppear")
-                    : t("vendor.ordersWillAppear")}
+                  {t("vendor.bookingsWillAppear")}
                 </p>
               </div>
-            ) : isService ? (
+            ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -736,47 +510,6 @@ export default function VendorDashboardPage() {
                         >
                           {t(`vendor.statusLabels.${b.status}`) ||
                             b.status?.replace(/_/g, " ")}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t("vendor.orderId")}</TableHead>
-                    <TableHead>{t("vendor.customer")}</TableHead>
-                    <TableHead>{t("vendor.amount")}</TableHead>
-                    <TableHead>{t("vendor.date")}</TableHead>
-                    <TableHead>{t("vendor.status")}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recent.map((o) => (
-                    <TableRow key={o.id}>
-                      <TableCell className="font-mono text-xs">
-                        #{o.display_id ?? o.id.slice(0, 8)}
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {o.user?.full_name ?? o.user?.email ?? "—"}
-                      </TableCell>
-                      <TableCell>
-                        {o.total_amount
-                          ? `EGP ${o.total_amount.toLocaleString()}`
-                          : "—"}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {o.created_at
-                          ? new Date(o.created_at).toLocaleDateString()
-                          : "—"}
-                      </TableCell>
-                      <TableCell>
-                        <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${ORDER_STATUS_CLS[o.status] ?? "bg-muted text-foreground"}`}
-                        >
-                          {t(`vendor.statusLabels.${o.status}`) || o.status}
                         </span>
                       </TableCell>
                     </TableRow>

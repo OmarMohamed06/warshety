@@ -13,15 +13,13 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import {
   LayoutDashboard,
   CalendarDays,
   Wrench,
   CalendarCheck,
-  Package,
-  ShoppingCart,
-  Warehouse,
   Settings,
   Menu,
   Bell,
@@ -47,12 +45,6 @@ const SERVICE_CENTER_DEFS = [
   { href: "/vendor/branches", icon: GitBranch, key: "navBranches" },
   { href: "/vendor/services", icon: Wrench, key: "navServices" },
   { href: "/vendor/calendar", icon: CalendarCheck, key: "navCalendar" },
-];
-
-const PARTS_SELLER_DEFS = [
-  { href: "/vendor/products", icon: Package, key: "navProducts" },
-  { href: "/vendor/orders", icon: ShoppingCart, key: "navOrders" },
-  { href: "/vendor/inventory", icon: Warehouse, key: "navInventory" },
 ];
 
 const MANAGE_DEFS = [
@@ -84,22 +76,11 @@ function SidebarContent({ onNavigate }: SidebarProps) {
 
   const isManager = role === "manager";
 
-  const dynamicItems = (
-    vendorType === "service_center"
-      ? SERVICE_CENTER_DEFS
-      : vendorType === "parts_seller"
-        ? PARTS_SELLER_DEFS
-        : []
-  )
+  const dynamicItems = SERVICE_CENTER_DEFS
     .filter((d) => !isManager || !OWNER_ONLY_HREFS.includes(d.href))
     .map((d) => ({ ...d, label: t(`vendor.${d.key}`) }));
 
-  const dynamicLabel =
-    vendorType === "service_center"
-      ? t("vendor.navGroupService")
-      : vendorType === "parts_seller"
-        ? t("vendor.navGroupStore")
-        : "";
+  const dynamicLabel = t("vendor.navGroupService");
 
   const sharedTop = SHARED_TOP_DEFS.map((d) => ({
     ...d,
@@ -181,16 +162,9 @@ function SidebarContent({ onNavigate }: SidebarProps) {
         <div className="px-3 pt-3 pb-1 shrink-0">
           <Badge
             variant="outline"
-            className={cn(
-              "text-[10px] font-bold uppercase tracking-wider",
-              vendorType === "service_center"
-                ? "border-blue-200 text-blue-700 bg-blue-50 dark:bg-blue-950 dark:text-blue-400 dark:border-blue-800"
-                : "border-primary/30 text-primary bg-primary/5",
-            )}
+            className="text-[10px] font-bold uppercase tracking-wider border-blue-200 text-blue-700 bg-blue-50 dark:bg-blue-950 dark:text-blue-400 dark:border-blue-800"
           >
-            {vendorType === "service_center"
-              ? t("vendor.navServiceCenterBadge")
-              : t("vendor.navPartsSellerBadge")}
+            {t("vendor.navServiceCenterBadge")}
           </Badge>
         </div>
       )}
@@ -262,9 +236,44 @@ export default function VendorLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { vendor, vendorType } = useAuth();
+  const { vendor, vendorType, isLoading } = useAuth();
   const { t } = useLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Show a skeleton while auth is still resolving to prevent a flash of
+  // empty sidebar and unauthenticated content on first page load.
+  if (isLoading) {
+    return (
+      <div className="flex h-screen bg-muted/30 overflow-hidden">
+        <aside className="hidden md:flex w-60 flex-col border-r shrink-0 p-3 gap-3">
+          <Skeleton className="h-6 w-24 mt-2" />
+          {Array.from({ length: 7 }).map((_, i) => (
+            <Skeleton key={i} className="h-9 w-full rounded-lg" />
+          ))}
+        </aside>
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <header className="h-14 border-b bg-background flex items-center gap-3 px-4 shrink-0">
+            <Skeleton className="h-8 w-8 rounded-md md:hidden" />
+            <Skeleton className="h-8 w-48 hidden sm:block" />
+            <div className="ml-auto flex items-center gap-2">
+              <Skeleton className="h-8 w-8 rounded-md" />
+            </div>
+          </header>
+          <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-48" />
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-28 rounded-xl" />
+                ))}
+              </div>
+              <Skeleton className="h-64 rounded-xl" />
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-muted/30 overflow-hidden">

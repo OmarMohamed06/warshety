@@ -34,7 +34,6 @@ export default function Footer() {
             </p>
             <ul className="space-y-3 text-sm text-slate-400">
               {[
-                { labelKey: "footer.findSpareParts", href: "/parts" },
                 { labelKey: "footer.bookMechanic", href: "/services" },
               ].map((link) => (
                 <li key={link.labelKey}>

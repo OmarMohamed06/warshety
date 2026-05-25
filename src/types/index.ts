@@ -1,4 +1,4 @@
-// Core vehicle types
+﻿// Core vehicle types
 export interface Vehicle {
   id: string;
   brand: string;
@@ -13,61 +13,6 @@ export interface Vehicle {
   color?: string;
   plate?: string;
   mileage?: number;
-}
-
-// Part / Product types
-export type PartType = "oem" | "aftermarket" | "original";
-
-export interface Part {
-  id: string;
-  slug: string;
-  name: string;
-  brand: string;
-  price: number;
-  originalPrice?: number;
-  condition: "new" | "used" | "refurbished";
-  /** OEM = factory-spec, original = genuine from car brand, aftermarket = third-party */
-  partType?: PartType;
-  oemNumber?: string;
-  partNumber?: string;
-  /** Primary car make this part fits (e.g. "Toyota") */
-  make?: string;
-  /** Primary car model this part fits (e.g. "Corolla") */
-  model?: string;
-  /** Earliest compatible model year */
-  yearFrom?: number;
-  /** Latest compatible model year */
-  yearTo?: number;
-  images: string[];
-  compatibleVehicles: string[];
-  vendorId: string;
-  vendorName: string;
-  vendorRating: number;
-  stock: number;
-  deliveryDays?: number;
-  warrantyMonths?: number;
-  installationAvailable: boolean;
-  rating: number;
-  reviewCount: number;
-  location: string;
-  category: string;
-  subcategory?: string;
-}
-
-export interface PartCategory {
-  slug: string;
-  name: string;
-  nameAr: string;
-  icon: string;
-  subcategories?: PartSubcategory[];
-}
-
-export interface PartSubcategory {
-  slug: string;
-  name: string;
-  nameAr: string;
-  partCount: number;
-  image?: string;
 }
 
 // Service types
@@ -147,29 +92,11 @@ export interface Review {
   rating: number;
   comment: string;
   date: string;
-  verifiedPurchase: boolean;
   photos?: string[];
   helpfulCount: number;
 }
 
 // Filter types
-export interface PartsFilter {
-  carBrand?: string;
-  model?: string;
-  yearFrom?: number;
-  yearTo?: number;
-  engineCode?: string;
-  oemNumber?: string;
-  vendor?: string;
-  priceMin?: number;
-  priceMax?: number;
-  condition?: string;
-  location?: string;
-  inStockOnly?: boolean;
-  maxDeliveryDays?: number;
-  minRating?: number;
-}
-
 export interface ServiceFilter {
   location?: string;
   minRating?: number;

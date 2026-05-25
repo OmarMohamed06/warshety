@@ -88,17 +88,15 @@ export default function PricingPage() {
     for (const s of data ?? []) map[s.key] = s as Setting;
     setSettings(map);
 
-    // Revenue snapshot from completed orders
+    // Revenue snapshot from paid service-center billing records
     const since = new Date(Date.now() - 30 * 86400000).toISOString();
-    const { data: orders } = await supabase
-      .from("orders")
-      .select("total_amount, status")
+    const { data: billing } = await (supabase as any)
+      .from("service_center_billing")
+      .select("total_fees_due, payment_status")
       .gte("created_at", since);
 
-    const paid = (orders ?? []).filter((o) =>
-      ["paid", "shipped", "completed"].includes(o.status),
-    );
-    const total = paid.reduce((s, o) => s + Number(o.total_amount ?? 0), 0);
+    const paid = (billing ?? []).filter((b: any) => b.payment_status === "paid");
+    const total = paid.reduce((s: number, b: any) => s + Number(b.total_fees_due ?? 0), 0);
     setSnap({
       total_revenue: total,
       total_orders: paid.length,

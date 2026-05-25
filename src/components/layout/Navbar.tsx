@@ -3,7 +3,6 @@
 import { LocaleLink as Link } from "@/components/ui/locale-link";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useCart } from "@/context/CartContext";
 import { useGarage, vehicleLabel } from "@/context/GarageContext";
 import { useAuth } from "@/context/AuthContext";
 import { globalSearch, type SearchResult } from "@/services/searchService";
@@ -28,28 +27,21 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
-  ShoppingCart,
   Search,
   ChevronDown,
-  Trash2,
-  Minus,
-  Plus,
-  Lock,
   Car,
   CheckCircle2,
   PlusCircle,
+  Plus,
   LayoutDashboard,
   CalendarDays,
-  ShoppingBag,
   LogOut,
   UserCircle2,
   ShieldCheck,
-  Settings,
   Wrench,
   Menu,
   X,
   ArrowRight,
-  Ticket,
   Store,
   Home,
   MoreHorizontal,
@@ -64,11 +56,6 @@ const LANGUAGES = [
 ] as const;
 
 const NAV_LINKS = [
-  {
-    tKey: "nav.carParts",
-    href: "/parts",
-    icon: <Settings className="w-4 h-4" />,
-  },
   {
     tKey: "nav.serviceCenters",
     href: "/services",
@@ -265,317 +252,11 @@ function SearchBox({ className = "" }: { className?: string }) {
   );
 }
 
-// ── Cart Drawer ────────────────────────────────────────────────────────────────
-function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const {
-    items,
-    cartCount,
-    subtotal,
-    shipping,
-    discount,
-    total,
-    promo,
-    changeQty,
-    removeItem,
-    applyPromo,
-    removePromo,
-  } = useCart();
-  const { t, locale, isRTL } = useLanguage();
 
-  const [promoInput, setPromoInput] = useState("");
-  const [promoError, setPromoError] = useState<string | null>(null);
 
-  const handleApplyPromo = async () => {
-    const err = await applyPromo(promoInput);
-    setPromoError(err);
-    if (!err) setPromoInput("");
-  };
-
-  return (
-    <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
-      <SheetContent
-        side={isRTL ? "left" : "right"}
-        className="w-full max-w-[440px] p-0 flex flex-col"
-      >
-        {/* Header */}
-        <SheetHeader className="px-6 py-5 border-b shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-primary/10 rounded-xl flex items-center justify-center">
-              <ShoppingCart className="w-5 h-5 text-primary" />
-            </div>
-            <div className="text-start">
-              <SheetTitle className="text-base font-black leading-tight">
-                {t("nav.cart")}
-              </SheetTitle>
-              <p className="text-xs text-muted-foreground">
-                {cartCount} {cartCount === 1 ? t("nav.item") : t("nav.items")}
-              </p>
-            </div>
-          </div>
-        </SheetHeader>
-
-        {/* Items */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
-          {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center py-16">
-              <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-4">
-                <ShoppingCart className="w-9 h-9 text-muted-foreground" />
-              </div>
-              <p className="font-bold text-foreground mb-1">
-                {t("nav.cartEmpty")}
-              </p>
-              <p className="text-sm text-muted-foreground mb-6">
-                {t("nav.cartEmptyDesc")}
-              </p>
-              <Button asChild>
-                <Link href="/parts" onClick={onClose}>
-                  {t("nav.browseParts")}
-                </Link>
-              </Button>
-            </div>
-          ) : (
-            items.map((item) => (
-              <div
-                key={item.id}
-                className="flex gap-4 bg-muted/50 rounded-2xl p-4"
-              >
-                {/* Product thumbnail */}
-                <div className="w-14 h-14 rounded-xl bg-muted border shrink-0 shadow-sm overflow-hidden flex items-center justify-center">
-                  {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).style.display =
-                          "none";
-                        (
-                          e.currentTarget
-                            .nextElementSibling as HTMLElement | null
-                        )?.style &&
-                          ((
-                            e.currentTarget.nextElementSibling as HTMLElement
-                          ).style.display = "flex");
-                      }}
-                    />
-                  ) : null}
-                  <span
-                    className="material-symbols-outlined text-primary"
-                    style={{
-                      fontSize: "26px",
-                      display: item.image ? "none" : "block",
-                    }}
-                  >
-                    {item.icon}
-                  </span>
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="text-sm font-bold leading-snug line-clamp-2">
-                      {item.name}
-                    </p>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="shrink-0 w-7 h-7 hover:text-destructive"
-                      onClick={() => removeItem(item.id)}
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-
-                  <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                    {item.vendor}
-                  </p>
-
-                  <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                    {item.badge && (
-                      <Badge
-                        variant={item.badge === "OEM" ? "default" : "outline"}
-                        className="text-[10px] h-4 px-1.5"
-                      >
-                        {item.badge}
-                      </Badge>
-                    )}
-                    <span className="text-[10px] text-green-600 dark:text-green-400 font-semibold flex items-center gap-0.5">
-                      <CheckCircle2 className="w-3 h-3" />
-                      {t("nav.fitsVehicle", { vehicle: item.compatible })}
-                    </span>
-                  </div>
-
-                  {/* Qty + Price */}
-                  <div
-                    className="flex items-center justify-between mt-3"
-                    dir="ltr"
-                  >
-                    <div className="flex items-center gap-1 bg-background rounded-lg border overflow-hidden">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="w-7 h-7 rounded-none"
-                        onClick={() => changeQty(item.id, -1)}
-                      >
-                        <Minus className="w-3 h-3" />
-                      </Button>
-                      <span className="w-7 text-center text-sm font-bold">
-                        {item.qty}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="w-7 h-7 rounded-none"
-                        onClick={() => changeQty(item.id, 1)}
-                      >
-                        <Plus className="w-3 h-3" />
-                      </Button>
-                    </div>
-                    <p className="text-sm font-black whitespace-nowrap">
-                      EGP{" "}
-                      {(item.price * item.qty).toLocaleString(
-                        locale === "ar" ? "ar-EG" : "en-EG",
-                      )}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* Footer */}
-        {items.length > 0 && (
-          <div className="border-t px-6 py-5 space-y-4 shrink-0 bg-background">
-            {/* Promo code */}
-            {promo ? (
-              <div className="flex items-center justify-between px-3 py-2 bg-primary/[0.08] border border-primary/20 rounded-xl">
-                <div className="flex items-center gap-2">
-                  <Ticket className="w-4 h-4 text-primary" />
-                  <div>
-                    <p className="text-xs font-bold text-primary">
-                      {promo.code}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground">
-                      {promo.label}
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="w-6 h-6 hover:text-destructive"
-                  onClick={removePromo}
-                >
-                  <X className="w-3.5 h-3.5" />
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-1">
-                <div className="flex gap-2">
-                  <Input
-                    value={promoInput}
-                    onChange={(e) => {
-                      setPromoInput(e.target.value);
-                      setPromoError(null);
-                    }}
-                    onKeyDown={(e) => e.key === "Enter" && handleApplyPromo()}
-                    placeholder={t("nav.promoCode")}
-                    className="flex-1 h-9"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-primary text-primary hover:bg-primary/5 whitespace-nowrap"
-                    onClick={handleApplyPromo}
-                  >
-                    {t("nav.apply")}
-                  </Button>
-                </div>
-                {promoError && (
-                  <p className="text-[11px] text-destructive">{promoError}</p>
-                )}
-              </div>
-            )}
-
-            {/* Totals */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <span>{t("nav.subtotal")}</span>
-                <span className="font-semibold text-foreground">
-                  EGP{" "}
-                  {subtotal.toLocaleString(locale === "ar" ? "ar-EG" : "en-EG")}
-                </span>
-              </div>
-              {discount > 0 && (
-                <div className="flex justify-between text-sm text-primary">
-                  <span>
-                    {t("nav.discount")} ({promo?.discountPct}%)
-                  </span>
-                  <span className="font-semibold">
-                    − EGP{" "}
-                    {discount.toLocaleString(
-                      locale === "ar" ? "ar-EG" : "en-EG",
-                    )}
-                  </span>
-                </div>
-              )}
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <span>{t("nav.shipping")}</span>
-                <span
-                  className={`font-semibold ${shipping === 0 ? "text-green-600 dark:text-green-400" : "text-foreground"}`}
-                >
-                  {shipping === 0 ? t("nav.free") : `EGP ${shipping}`}
-                </span>
-              </div>
-              {shipping > 0 && (
-                <p className="text-[11px] text-muted-foreground">
-                  {t("nav.freeShippingNote")}
-                </p>
-              )}
-              <Separator />
-              <div className="flex justify-between pt-1">
-                <span className="font-black text-foreground">
-                  {t("nav.total")}
-                </span>
-                <span className="font-black text-lg text-primary">
-                  EGP{" "}
-                  {total.toLocaleString(locale === "ar" ? "ar-EG" : "en-EG")}
-                </span>
-              </div>
-            </div>
-
-            {/* CTA */}
-            <Button
-              asChild
-              size="lg"
-              className="w-full font-black uppercase tracking-wide shadow-lg shadow-primary/25"
-            >
-              <Link href="/checkout" onClick={onClose}>
-                <Lock className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
-                {t("nav.checkout")}
-              </Link>
-            </Button>
-
-            <Button
-              asChild
-              variant="ghost"
-              className="w-full text-muted-foreground hover:text-primary"
-            >
-              <Link href="/parts" onClick={onClose}>
-                {t("nav.continueShopping")}
-              </Link>
-            </Button>
-          </div>
-        )}
-      </SheetContent>
-    </Sheet>
-  );
-}
 
 // ── Main Navbar ────────────────────────────────────────────────────────────────
 export default function Navbar() {
-  const { cartCount } = useCart();
   const { activeVehicle, vehicles, setActiveVehicle } = useGarage();
   const {
     user,
@@ -589,22 +270,18 @@ export default function Navbar() {
 
   const { locale, t, setLocale, localePath } = useLanguage();
   const [moreSheetOpen, setMoreSheetOpen] = useState(false);
-  const [cartOpen, setCartOpen] = useState(false);
 
   const pathname = usePathname();
 
   // Close drawers on route change
   useEffect(() => {
     setMoreSheetOpen(false);
-    setCartOpen(false);
   }, [pathname]);
 
   const current = LANGUAGES.find((l) => l.code === locale)!;
 
   return (
     <>
-      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
-
       <header className="sticky top-0 z-50 w-full bg-background">
         {/* ── Top Bar ── */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
@@ -768,12 +445,6 @@ export default function Navbar() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/orders">
-                        <ShoppingBag className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
-                        {t("nav.myOrders")}
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
                       <Link
                         href="/rewards"
                         className="text-orange-500 font-semibold"
@@ -820,36 +491,6 @@ export default function Navbar() {
             <Separator
               orientation="vertical"
               className="h-7 hidden sm:block mx-1"
-            />
-
-            {/* Cart */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="relative gap-1.5 px-2.5 flex"
-              onClick={() => setCartOpen(true)}
-            >
-              <div className="relative">
-                <ShoppingCart className="w-5 h-5 text-muted-foreground" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 rtl:-right-auto rtl:-left-2 min-w-[17px] h-[17px] bg-primary text-primary-foreground text-[10px] font-black rounded-full flex items-center justify-center px-[3px]">
-                    {cartCount}
-                  </span>
-                )}
-              </div>
-              <div className="text-left rtl:text-right hidden sm:block">
-                <p className="text-xs font-bold leading-tight">
-                  {t("nav.cartLabel")}
-                </p>
-                <p className="text-[10px] text-muted-foreground leading-tight">
-                  {cartCount} {cartCount === 1 ? t("nav.item") : t("nav.items")}
-                </p>
-              </div>
-            </Button>
-
-            <Separator
-              orientation="vertical"
-              className="h-8 hidden sm:block mx-1"
             />
 
             {/* My Garage dropdown */}
@@ -1031,19 +672,6 @@ export default function Navbar() {
           {t("nav.home")}
         </Link>
 
-        {/* Parts */}
-        <Link
-          href="/parts"
-          className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-colors ${
-            pathname.includes("/parts")
-              ? "text-primary"
-              : "text-muted-foreground"
-          }`}
-        >
-          <Settings className="w-5 h-5" />
-          {t("nav.carParts")}
-        </Link>
-
         {/* Rewards — center feature button */}
         <Link
           href="/rewards"
@@ -1165,12 +793,6 @@ export default function Navbar() {
                   icon: <CalendarDays className="w-6 h-6" />,
                   tKey: "nav.myBookings",
                   color: "text-purple-500 bg-purple-50 dark:bg-purple-950/40",
-                },
-                {
-                  href: "/orders",
-                  icon: <ShoppingBag className="w-6 h-6" />,
-                  tKey: "nav.myOrders",
-                  color: "text-green-500 bg-green-50 dark:bg-green-950/40",
                 },
                 {
                   href: "/rewards",

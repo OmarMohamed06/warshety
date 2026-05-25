@@ -36,7 +36,6 @@ export default function ProfilePage() {
 
   // Stats
   const [bookingCount, setBookingCount] = useState<number | null>(null);
-  const [orderCount, setOrderCount] = useState<number | null>(null);
 
   // Always re-fetch profile on mount to pick up role/branch changes
   useEffect(() => {
@@ -62,12 +61,6 @@ export default function ProfilePage() {
       .select("id", { count: "exact", head: true })
       .eq("user_id", user.id)
       .then(({ count }) => setBookingCount(count ?? 0));
-
-    supabase
-      .from("orders")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .then(({ count }) => setOrderCount(count ?? 0));
   }, [user]);
 
   // Redirect guests to login
@@ -154,19 +147,13 @@ export default function ProfilePage() {
         </div>
 
         {/* Stats row */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-2 gap-4 mb-8">
           {[
             {
               icon: "calendar_month",
               label: t("profile.bookings"),
               value: bookingCount ?? "—",
               href: "/bookings",
-            },
-            {
-              icon: "package_2",
-              label: t("profile.orders"),
-              value: orderCount ?? "—",
-              href: "/orders",
             },
             {
               icon: "directions_car",

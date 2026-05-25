@@ -101,60 +101,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // ── Parts seller pending commissions ───────────────────────────────────────
-    // Group by vendor to avoid multiple notifications for multiple orders
-    const { data: partsTx } = await supabase
-      .from("parts_seller_transactions")
-      .select(
-        `vendor_id, platform_share,
-         vendors(user_id, business_name, users(phone, email))`,
-      )
-      .eq("payment_status", "pending")
-      .eq("refunded", false);
-
-    // Aggregate per vendor
-    const vendorTotals = new Map<
-      string,
-      {
-        vendorUserId?: string;
-        phone: string;
-        email: string;
-        totalDue: number;
-      }
-    >();
-
-    for (const tx of partsTx ?? []) {
-      const vendor = tx.vendors as {
-        user_id?: string;
-        users?: { phone?: string; email?: string };
-      } | null;
-      const phone = vendor?.users?.phone;
-      const email = vendor?.users?.email;
-      if (!phone || !email) continue;
-
-      const vid = tx.vendor_id as string;
-      const existing = vendorTotals.get(vid);
-      vendorTotals.set(vid, {
-        vendorUserId: vendor?.user_id,
-        phone,
-        email,
-        totalDue: (existing?.totalDue ?? 0) + (Number(tx.platform_share) || 0),
-      });
-    }
-
-    for (const [, v] of vendorTotals) {
-      if (v.totalDue <= 0) continue;
-      await notifyVendorPaymentDue({
-        vendorUserId: v.vendorUserId,
-        vendorPhone: v.phone,
-        vendorEmail: v.email,
-        amountEGP: v.totalDue,
-        dueDate: todayStr,
-        billingLink: `${APP_URL}/vendor/billing`,
-      });
-      dueCount++;
-    }
-
     return NextResponse.json({
       ok: true,
       overdueNotified: overdueCount,

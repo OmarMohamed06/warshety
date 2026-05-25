@@ -50,10 +50,8 @@ export default function PaymentsPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = supabase as any;
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [orders, setOrders] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"transactions" | "orders">("orders");
   const [statusFilter, setStatusFilter] = useState("all");
   const [methodFilter, setMethodFilter] = useState("all");
   const [page, setPage] = useState(0);
@@ -62,13 +60,13 @@ export default function PaymentsPage() {
     totalRevenue: 0,
     pendingPayout: 0,
     refunded: 0,
-    totalOrders: 0,
+    totalBillingRecords: 0,
   });
 
   const load = useCallback(async () => {
     setLoading(true);
 
-    const [txRes, ordersRes, summaryRes] = await Promise.all([
+    const [txRes, billingRes] = await Promise.all([
       (() => {
         let q = db
           .from("payment_transactions")
@@ -82,59 +80,36 @@ export default function PaymentsPage() {
           .order("created_at", { ascending: false })
           .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
       })(),
-      (() => {
-        let q = supabase
-          .from("orders")
-          .select(
-            "id, status, total_amount, payment_method, created_at, delivery_city, users(full_name, email)",
-            { count: "exact" },
-          );
-        return q
-          .order("created_at", { ascending: false })
-          .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
-      })(),
-      supabase.from("orders").select("status, total_amount"),
+      (supabase as any)
+        .from("service_center_billing")
+        .select("payment_status, total_fees_due"),
     ]);
 
     setTransactions((txRes.data ?? []) as unknown as Transaction[]);
-    setOrders((ordersRes.data ?? []) as Record<string, unknown>[]);
-    setTotal(
-      tab === "transactions" ? (txRes.count ?? 0) : (ordersRes.count ?? 0),
-    );
+    setTotal(txRes.count ?? 0);
 
-    // Compute summary from orders
-    const allOrders = summaryRes.data ?? [];
-    const totalRevenue = allOrders
-      .filter((o) => o.status === "completed")
-      .reduce((s, o) => s + Number(o.total_amount), 0);
-    const pendingPayout = allOrders
-      .filter((o) => o.status === "paid")
-      .reduce((s, o) => s + Number(o.total_amount), 0);
-    const refunded = allOrders
-      .filter((o) => o.status === "cancelled")
-      .reduce((s, o) => s + Number(o.total_amount), 0);
+    const billingRows = billingRes.data ?? [];
+    const totalRevenue = billingRows
+      .filter((b: any) => b.payment_status === "paid")
+      .reduce((s: number, b: any) => s + Number(b.total_fees_due), 0);
+    const pendingPayout = billingRows
+      .filter((b: any) => b.payment_status === "pending")
+      .reduce((s: number, b: any) => s + Number(b.total_fees_due), 0);
+    const refunded = billingRows
+      .filter((b: any) => b.payment_status === "waived")
+      .reduce((s: number, b: any) => s + Number(b.total_fees_due), 0);
     setSummary({
       totalRevenue,
       pendingPayout,
       refunded,
-      totalOrders: allOrders.length,
+      totalBillingRecords: billingRows.length,
     });
     setLoading(false);
-  }, [supabase, statusFilter, methodFilter, page, tab]);
+  }, [supabase, statusFilter, methodFilter, page]);
 
   useEffect(() => {
     load();
   }, [load]);
-
-  async function markComplete(orderId: string) {
-    const { error } = await supabase
-      .from("orders")
-      .update({ status: "completed" })
-      .eq("id", orderId);
-    setMsg(error ? `Error: ${error.message}` : "Order marked as completed.");
-    setTimeout(() => setMsg(null), 3000);
-    load();
-  }
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
@@ -179,7 +154,7 @@ export default function PaymentsPage() {
           },
           {
             label: t("admin.totalOrders"),
-            value: summary.totalOrders.toLocaleString(),
+            value: summary.totalBillingRecords.toLocaleString(),
             icon: "receipt",
             color: "text-blue-600",
             bg: "bg-blue-100 dark:bg-blue-900/30",
@@ -208,179 +183,8 @@ export default function PaymentsPage() {
         ))}
       </div>
 
-      {/* Tabs */}
-      <div className="flex items-center gap-1 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-1 w-fit">
-        {(["orders", "transactions"] as const).map((t_tab) => (
-          <button
-            key={t_tab}
-            onClick={() => {
-              setTab(t_tab);
-              setPage(0);
-            }}
-            className={cn(
-              "px-4 py-1.5 text-xs font-bold rounded-lg capitalize transition-colors",
-              tab === t_tab
-                ? "bg-[#FF4B19] text-white"
-                : "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700",
-            )}
-          >
-            {t_tab === "orders"
-              ? t("admin.ordersTab")
-              : t("admin.transactionsTab")}
-          </button>
-        ))}
-      </div>
-
-      {/* Orders table */}
-      {tab === "orders" && (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700">
-                <tr>
-                  {[
-                    t("admin.orderId"),
-                    t("admin.customer"),
-                    t("admin.total"),
-                    t("admin.method"),
-                    t("admin.city"),
-                    t("admin.status"),
-                    t("admin.date"),
-                    t("admin.actions"),
-                  ].map((h) => (
-                    <th
-                      key={h}
-                      className="text-left px-5 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap"
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                {loading ? (
-                  <tr>
-                    <td colSpan={8} className="px-5 py-16 text-center">
-                      <span
-                        className="material-symbols-outlined animate-spin text-slate-400"
-                        style={{ fontSize: 28 }}
-                      >
-                        progress_activity
-                      </span>
-                    </td>
-                  </tr>
-                ) : orders.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={8}
-                      className="px-5 py-16 text-center text-slate-400 text-sm"
-                    >
-                      {t("admin.noOrders")}
-                    </td>
-                  </tr>
-                ) : (
-                  orders.map((o) => {
-                    const user = o.users as Record<string, unknown> | null;
-                    const status = String(o.status);
-                    return (
-                      <tr
-                        key={String(o.id)}
-                        className="hover:bg-slate-50 dark:hover:bg-slate-700/30"
-                      >
-                        <td className="px-5 py-3 font-mono text-xs text-slate-500">
-                          {String(o.id).slice(0, 8)}…
-                        </td>
-                        <td className="px-5 py-3">
-                          <p className="font-bold text-sm">
-                            {String(user?.full_name ?? "—")}
-                          </p>
-                          <p className="text-xs text-slate-400">
-                            {String(user?.email ?? "")}
-                          </p>
-                        </td>
-                        <td className="px-5 py-3 font-black">
-                          EGP {Number(o.total_amount).toLocaleString()}
-                        </td>
-                        <td className="px-5 py-3">
-                          <span className="inline-flex px-2 py-0.5 text-xs font-bold rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 capitalize">
-                            {String(o.payment_method ?? "cod")}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3 text-sm text-slate-500">
-                          {String(o.delivery_city ?? "—")}
-                        </td>
-                        <td className="px-5 py-3">
-                          <span
-                            className={cn(
-                              "inline-flex px-2 py-0.5 text-xs font-bold rounded-full capitalize",
-                              status === "completed"
-                                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                                : status === "cancelled"
-                                  ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                                  : status === "shipped"
-                                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                                    : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-                            )}
-                          >
-                            {status}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3 text-xs text-slate-400 whitespace-nowrap">
-                          {new Date(String(o.created_at)).toLocaleDateString(
-                            "en-EG",
-                            { month: "short", day: "numeric", year: "numeric" },
-                          )}
-                        </td>
-                        <td className="px-5 py-3">
-                          {status === "paid" && (
-                            <button
-                              onClick={() => markComplete(String(o.id))}
-                              className="px-3 py-1.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-xs font-bold rounded-lg hover:bg-emerald-200 transition-colors"
-                            >
-                              {t("admin.markComplete")}
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between px-5 py-4 border-t border-slate-100 dark:border-slate-700">
-              <p className="text-xs text-slate-500">
-                Showing {page * PAGE_SIZE + 1}–
-                {Math.min((page + 1) * PAGE_SIZE, total)} of {total}
-              </p>
-              <div className="flex items-center gap-2">
-                <button
-                  disabled={page === 0}
-                  onClick={() => setPage((p) => p - 1)}
-                  className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-slate-100 transition-colors"
-                >
-                  ← {t("admin.prev")}
-                </button>
-                <span className="text-xs text-slate-500">
-                  {page + 1} / {totalPages}
-                </span>
-                <button
-                  disabled={page >= totalPages - 1}
-                  onClick={() => setPage((p) => p + 1)}
-                  className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-slate-100 transition-colors"
-                >
-                  {t("admin.next")} →
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
       {/* Transactions table */}
-      {tab === "transactions" && (
-        <div className="space-y-4">
+      <div className="space-y-4">
           <div className="flex flex-wrap gap-3">
             <select
               value={statusFilter}
@@ -554,7 +358,6 @@ export default function PaymentsPage() {
             )}
           </div>
         </div>
-      )}
     </div>
   );
 }

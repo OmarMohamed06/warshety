@@ -16,6 +16,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { completeVendorSetup } from "@/app/actions/adminActions";
 import { cn } from "@/lib/utils";
@@ -37,6 +38,7 @@ export default function VendorSetupPage() {
   const router = useRouter();
   const { t } = useLanguage();
   const supabase = createClient();
+  const { user, session, isLoading: authLoading } = useAuth();
 
   const [state, setState] = useState<PageState>("loading");
   const [vendorType, setVendorType] = useState<string | null>(null);
@@ -48,21 +50,19 @@ export default function VendorSetupPage() {
 
   // ── Bootstrap: verify session + check if already set up ──────────────────
   useEffect(() => {
+    if (authLoading) return; // Wait for AuthProvider to hydrate
+
+    if (!user) {
+      router.replace("/auth/login");
+      return;
+    }
+
     async function init() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        router.replace("/auth/login");
-        return;
-      }
-
       // If vendor record already exists → go straight to dashboard
       const { data: existing } = await supabase
         .from("vendors")
         .select("id, vendor_type, business_name")
-        .eq("user_id", user.id)
+        .eq("user_id", user!.id)
         .maybeSingle();
 
       if (existing) {
@@ -70,13 +70,13 @@ export default function VendorSetupPage() {
         return;
       }
 
-      // Read invite metadata
-      const meta = (user.user_metadata ?? {}) as Record<string, string>;
+      // Read invite metadata from the Supabase auth session user
+      const meta = (session?.user?.user_metadata ?? {}) as Record<string, string>;
       setVendorType(meta.vendor_type ?? null);
       setState("setup");
     }
     init();
-  }, [supabase, router]);
+  }, [authLoading, user, session, supabase, router]);
 
   // ── Form submit ───────────────────────────────────────────────────────────
   async function handleSubmit(e: React.FormEvent) {

@@ -138,69 +138,48 @@ export function GarageProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let cancelled = false;
 
-    async function hydrate() {
-      // 1. Check current auth session
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (cancelled) return;
-
-      if (session?.user) {
-        // Authenticated: load from Supabase
-        setUserId(session.user.id);
-        const { data: rows } = await supabase
-          .from("vehicles")
-          .select("*")
-          .eq("user_id", session.user.id)
-          .order("created_at");
-
-        if (!cancelled && rows) {
-          const dbVehicles = rows.map(dbRowToVehicle);
-          setVehicles(dbVehicles);
-          // Restore active id from localStorage (persists across refreshes)
-          const savedActiveId = readActiveId();
-          const validId = dbVehicles.find((v) => v.id === savedActiveId)?.id;
-          setActiveId(
-            validId ??
-              dbVehicles.find((v) =>
-                rows.find((r) => r.id === v.id && r.is_default),
-              )?.id ??
-              null,
-          );
-        }
-      } else {
-        // Guest: load from localStorage
-        setVehicles(readVehicles());
-        setActiveId(readActiveId());
-      }
-
-      if (!cancelled) setIsHydrated(true);
-    }
-
-    hydrate();
-
-    // Listen for auth state changes (login/logout)
+    // Rely solely on onAuthStateChange — INITIAL_SESSION fires synchronously on
+    // mount for both authenticated and unauthenticated users. This avoids the
+    // race condition of calling getSession() (which reads unverified local
+    // cookies) in parallel with the auth state subscription.
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (cancelled) return;
-      if (event === "SIGNED_IN" && session?.user) {
-        setUserId(session.user.id);
-        const { data: rows } = await supabase
-          .from("vehicles")
-          .select("*")
-          .eq("user_id", session.user.id)
-          .order("created_at");
-        if (!cancelled && rows) {
-          setVehicles(rows.map(dbRowToVehicle));
+
+      if (session?.user) {
+        if (event === "INITIAL_SESSION" || event === "SIGNED_IN") {
+          setUserId(session.user.id);
+          const { data: rows } = await supabase
+            .from("vehicles")
+            .select("*")
+            .eq("user_id", session.user.id)
+            .order("created_at");
+
+          if (!cancelled && rows) {
+            const dbVehicles = rows.map(dbRowToVehicle);
+            setVehicles(dbVehicles);
+            // Restore active id from localStorage (persists across refreshes)
+            const savedActiveId = readActiveId();
+            const validId = dbVehicles.find((v) => v.id === savedActiveId)?.id;
+            setActiveId(
+              validId ??
+                dbVehicles.find((v) =>
+                  rows.find((r) => r.id === v.id && r.is_default),
+                )?.id ??
+                null,
+            );
+          }
+          if (!cancelled) setIsHydrated(true);
         }
-      } else if (event === "SIGNED_OUT") {
-        if (cancelled) return;
-        setUserId(null);
-        // Fall back to localStorage on sign-out
-        setVehicles(readVehicles());
-        setActiveId(readActiveId());
+      } else {
+        if (event === "INITIAL_SESSION" || event === "SIGNED_OUT") {
+          setUserId(null);
+          // Guest: load from localStorage
+          setVehicles(readVehicles());
+          setActiveId(readActiveId());
+          if (!cancelled) setIsHydrated(true);
+        }
       }
     });
 

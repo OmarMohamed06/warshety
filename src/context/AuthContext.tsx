@@ -68,8 +68,24 @@ const NULL_AUTH: AuthContextValue = {
 
 // ── Provider ──────────────────────────────────────────────────────────────────
 
+export interface AuthProviderProps {
+  children: React.ReactNode;
+  /** Pre-fetched user profile from the server (Server Component layout).
+   *  When provided, AuthProvider hydrates immediately with no loading flash. */
+  initialProfile?: DbUser | null;
+  /** Pre-fetched vendor row from the server. Only set for role === 'vendor'. */
+  initialVendor?: DbVendor | null;
+  /** Pre-fetched managed branch ID for role === 'manager'. */
+  initialManagedBranchId?: string | null;
+}
+
 /** Outer wrapper — renders a no-op shell if Supabase env vars are absent. */
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({
+  children,
+  initialProfile = null,
+  initialVendor = null,
+  initialManagedBranchId = null,
+}: AuthProviderProps) {
   const configured =
     !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
     !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -84,10 +100,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return <AuthProviderInner>{children}</AuthProviderInner>;
+  return (
+    <AuthProviderInner
+      initialProfile={initialProfile}
+      initialVendor={initialVendor}
+      initialManagedBranchId={initialManagedBranchId}
+    >
+      {children}
+    </AuthProviderInner>
+  );
 }
 
-function AuthProviderInner({ children }: { children: React.ReactNode }) {
+function AuthProviderInner({
+  children,
+  initialProfile,
+  initialVendor,
+  initialManagedBranchId,
+}: Required<Omit<AuthProviderProps, "children">> & {
+  children: React.ReactNode;
+}) {
   // Stable client — same reference for the lifetime of the provider.
   // createBrowserClient is a singleton per URL+key, but referential stability
   // prevents loadProfile / loadVendors from being recreated on every render.
@@ -95,10 +126,16 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
 
   const [session, setSession] = useState<Session | null>(null);
   const [authUser, setAuthUser] = useState<User | null>(null);
-  const [user, setUser] = useState<DbUser | null>(null);
-  const [vendor, setVendor] = useState<DbVendor | null>(null);
-  const [managedBranchId, setManagedBranchId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // Hydrate immediately from SSR-provided props — eliminates the loading flash
+  // on first page load. Falls back to null when no server data is available.
+  const [user, setUser] = useState<DbUser | null>(initialProfile);
+  const [vendor, setVendor] = useState<DbVendor | null>(initialVendor);
+  const [managedBranchId, setManagedBranchId] = useState<string | null>(
+    initialManagedBranchId,
+  );
+  // Start loading=false when SSR provided a profile (data is already available).
+  // Start loading=true when no SSR data, so the UI waits for INITIAL_SESSION.
+  const [isLoading, setIsLoading] = useState(!initialProfile);
 
   // Guard against state updates after unmount (React 19 concurrent mode)
   const isMountedRef = useRef(true);
@@ -106,7 +143,9 @@ function AuthProviderInner({ children }: { children: React.ReactNode }) {
   // Using a ref (not state) avoids stale-closure bugs inside the
   // onAuthStateChange handler which is set up once and never re-created.
   // Set to true after loadProfile completes; false on sign-out or init.
-  const profileLoadedRef = useRef(false);
+  // Pre-mark as loaded when SSR provided a profile so INITIAL_SESSION
+  // refreshes silently in the background without re-showing a spinner.
+  const profileLoadedRef = useRef(!!initialProfile);
 
   // ── Fetch profile & vendor from DB ────────────────────────────────────────
   const loadProfile = useCallback(

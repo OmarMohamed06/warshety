@@ -24,7 +24,6 @@ import { generateSlugEn, generateSlugAr } from "@/utils/seo";
 import enMessages from "@/../messages/en.json";
 import arMessages from "@/../messages/ar.json";
 import { notifyVendorApprovedEmail } from "@/services/outboundNotificationService";
-import { registerPickupAddress } from "@/services/bostaService";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -391,39 +390,6 @@ export async function approveVendorApplication(
           }));
         if (hoursRows.length) {
           await admin.from("vendor_working_hours").insert(hoursRows);
-        }
-      }
-
-      // ── Auto-register Bosta pickup address for parts_seller vendors ────────
-      if (app.vendor_type === "parts_seller" && app.address && app.city) {
-        const bostaResult = await registerPickupAddress({
-          name: app.business_name,
-          address: {
-            firstLine: app.address,
-            city: app.city,
-            ...(app.governorate ? { districtName: app.governorate } : {}),
-          },
-          contactName: app.business_name,
-          contactPhone: app.phone ?? "",
-        });
-
-        if (bostaResult.locationId) {
-          await admin
-            .from("vendors")
-            .update({
-              pickup_address: app.address,
-              pickup_city: app.city,
-              pickup_governorate: app.governorate ?? null,
-              pickup_phone: app.phone ?? null,
-              bosta_pickup_address_id: bostaResult.locationId,
-            })
-            .eq("id", newVendor.id);
-        } else {
-          // Non-fatal — vendor can register manually from Settings
-          console.warn(
-            `[approveVendor] Bosta pickup registration failed for vendor ${newVendor.id}:`,
-            bostaResult.error,
-          );
         }
       }
 

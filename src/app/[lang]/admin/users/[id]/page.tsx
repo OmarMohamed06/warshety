@@ -30,40 +30,31 @@ export default function UserDetailPage({
   const [user, setUser] = useState<UserProfile | null>(null);
   const [vehicles, setVehicles] = useState<Record<string, unknown>[]>([]);
   const [bookings, setBookings] = useState<Record<string, unknown>[]>([]);
-  const [orders, setOrders] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
       setLoading(true);
-      const [profileRes, vehiclesRes, bookingsRes, ordersRes] =
-        await Promise.all([
-          supabase.from("users").select("*").eq("id", id).single(),
-          supabase
-            .from("vehicles")
-            .select("*")
-            .eq("user_id", id)
-            .order("created_at", { ascending: false }),
-          supabase
-            .from("bookings")
-            .select(
+      const [profileRes, vehiclesRes, bookingsRes] = await Promise.all([
+        supabase.from("users").select("*").eq("id", id).single(),
+        supabase
+          .from("vehicles")
+          .select("*")
+          .eq("user_id", id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("bookings")
+          .select(
               "id, booking_date, status, booking_type, vendors(business_name), services(name), total_price",
             )
             .eq("user_id", id)
             .order("created_at", { ascending: false })
             .limit(10),
-          supabase
-            .from("orders")
-            .select("id, status, total_amount, created_at")
-            .eq("user_id", id)
-            .order("created_at", { ascending: false })
-            .limit(10),
-        ]);
+      ]);
       setUser(profileRes.data as UserProfile);
       setVehicles((vehiclesRes.data ?? []) as Record<string, unknown>[]);
       setBookings((bookingsRes.data ?? []) as Record<string, unknown>[]);
-      setOrders((ordersRes.data ?? []) as Record<string, unknown>[]);
       setLoading(false);
     }
     load();
@@ -260,71 +251,6 @@ export default function UserDetailPage({
             </div>
           )}
         </div>
-      </div>
-
-      {/* Orders */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
-        <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700">
-          <h3 className="font-black flex items-center gap-2">
-            <span
-              className="material-symbols-outlined text-emerald-500"
-              style={{ fontSize: 20 }}
-            >
-              shopping_bag
-            </span>
-            {t("admin.recentOrders")}
-          </h3>
-        </div>
-        {orders.length === 0 ? (
-          <p className="px-5 py-8 text-sm text-slate-400 text-center">
-            {t("admin.noOrdersYet")}
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700">
-                <tr>
-                  {[
-                    t("admin.orderId"),
-                    t("admin.status"),
-                    t("admin.total"),
-                    t("admin.date"),
-                  ].map((h) => (
-                    <th
-                      key={h}
-                      className="text-left px-5 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider"
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                {orders.map((o) => (
-                  <tr key={String(o.id)}>
-                    <td className="px-5 py-3 font-mono text-xs text-slate-500">
-                      {String(o.id).slice(0, 8)}…
-                    </td>
-                    <td className="px-5 py-3">
-                      <span className="inline-flex px-2 py-0.5 text-xs font-bold rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 capitalize">
-                        {String(o.status)}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3 font-bold">
-                      EGP {Number(o.total_amount).toLocaleString()}
-                    </td>
-                    <td className="px-5 py-3 text-xs text-slate-400">
-                      {new Date(String(o.created_at)).toLocaleDateString(
-                        "en-EG",
-                        { month: "short", day: "numeric", year: "numeric" },
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
     </div>
   );

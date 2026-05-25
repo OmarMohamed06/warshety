@@ -4,23 +4,19 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type UserRole = "customer" | "vendor" | "admin" | "manager";
-export type VendorType = "service_center" | "parts_seller";
+export type VendorType = "service_center";
+export type PartType = "oem" | "original" | "aftermarket";
 export type VendorStatus = "pending" | "approved" | "suspended" | "rejected";
 export type SlotOverrideType = "blocked" | "opened";
+export type OrderStatus = "pending" | "paid" | "shipped" | "completed" | "cancelled";
 export type NotificationType =
   | "booking_confirmed"
   | "booking_cancelled"
   | "booking_status_changed"
-  | "order_shipped"
-  | "order_status_changed"
-  | "order_processing"
-  | "order_shipped_bosta"
-  | "order_delivered"
   | "message_received"
   | "review_reply"
   | "vendor_approved"
-  | "vendor_rejected"
-  | "payout_request";
+  | "vendor_rejected";
 export type BookingStatus =
   | "booked"
   | "confirmed"
@@ -32,16 +28,6 @@ export type BookingStatus =
   | "cancelled"
   | "no_show";
 export type BookingType = "routine_maintenance" | "inspection";
-export type PartType = "oem" | "aftermarket" | "original";
-
-export type OrderStatus =
-  | "pending"
-  | "paid"
-  | "processing"
-  | "shipped"
-  | "completed"
-  | "cancelled"
-  | "failed_delivery";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Row types (what Supabase returns)

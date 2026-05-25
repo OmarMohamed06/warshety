@@ -1,25 +1,16 @@
 /**
- * searchService — Unified search across garages, services, and parts.
+ * searchService — Unified search across service centers and services.
  *
  * Logic:
- *  - Keyword matched against name, description, category, brand, city
- *  - Category match for parts
- *  - Brand match for parts
+ *  - Keyword matched against name, description, city
  *  - Results ranked by relevance (exact name match first, then partial)
- *
- * Covers checklist items:
- *  ✓ Search garages
- *  ✓ Search services
- *  ✓ Search parts
- *  ✓ Keyword match, category match, brand match
- *  ✓ Results ranked by relevance
  */
 
 import { createClient } from "@/lib/supabase/client";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type SearchResultType = "vendor" | "service" | "part";
+export type SearchResultType = "vendor" | "service";
 
 export interface SearchResult {
   type: SearchResultType;
@@ -33,11 +24,7 @@ export interface SearchResult {
 
 export interface SearchFilters {
   type?: SearchResultType | "all";
-  category?: string;
-  brand?: string;
   city?: string;
-  minPrice?: number;
-  maxPrice?: number;
   minRating?: number;
 }
 
@@ -59,7 +46,7 @@ function bestScore(fields: string[], keyword: string): number {
 // ── Service functions ─────────────────────────────────────────────────────────
 
 /**
- * Global search across vendors (garages), services, and products (parts).
+ * Global search across service centers and services.
  */
 export async function globalSearch(
   keyword: string,
@@ -72,14 +59,15 @@ export async function globalSearch(
   const results: SearchResult[] = [];
   const type = filters.type ?? "all";
 
-  // ── Search vendors (garages) ──────────────────────────────────────────────
+  // ── Search vendors (service centers) ─────────────────────────────────────
   if (type === "all" || type === "vendor") {
     let query = supabase
       .from("vendors")
       .select(
-        "id, slug, business_name, city, rating, cover_image_url, vendor_type",
+        "id, slug, business_name, city, rating, cover_image_url",
       )
-      .eq("status", "approved");
+      .eq("status", "approved")
+      .eq("vendor_type", "service_center");
 
     if (filters.city) query = query.ilike("city", `%${filters.city}%`);
     if (filters.minRating) query = query.gte("rating", filters.minRating);
@@ -94,11 +82,8 @@ export async function globalSearch(
         type: "vendor",
         id: v.id as string,
         title: v.business_name as string,
-        subtitle: `${v.vendor_type === "service_center" ? "Service Center" : "Parts Seller"} · ${v.city ?? "Egypt"}`,
-        href:
-          v.vendor_type === "service_center"
-            ? `/services/${(v.slug as string | null) ?? v.id}`
-            : `/parts?vendor=${v.id}`,
+        subtitle: `Service Center · ${v.city ?? "Egypt"}`,
+        href: `/services/${(v.slug as string | null) ?? v.id}`,
         image: (v.cover_image_url as string) ?? null,
         relevanceScore: score,
       });
@@ -140,50 +125,12 @@ export async function globalSearch(
     }
   }
 
-  // ── Search parts (products) ───────────────────────────────────────────────
-  if (type === "all" || type === "part") {
-    let query = supabase
-      .from("products")
-      .select(
-        "id, name, brand, category, price, image_url, vendor:vendors(business_name)",
-      )
-      .eq("active", true);
-
-    if (filters.category) query = query.eq("category", filters.category);
-    if (filters.brand) query = query.ilike("brand", `%${filters.brand}%`);
-    if (filters.minPrice) query = query.gte("price", filters.minPrice);
-    if (filters.maxPrice) query = query.lte("price", filters.maxPrice);
-
-    const { data: products } = await query
-      .or(`name.ilike.%${k}%,brand.ilike.%${k}%,category.ilike.%${k}%`)
-      .limit(15);
-
-    for (const p of products ?? []) {
-      const vendor = p.vendor as unknown as { business_name: string } | null;
-      const score = bestScore(
-        [p.name as string, (p.brand as string) ?? "", p.category as string],
-        k,
-      );
-      results.push({
-        type: "part",
-        id: p.id as string,
-        title: p.name as string,
-        subtitle: `${p.brand ?? "Part"} · ${p.category} · EGP ${(p.price as number).toLocaleString()}`,
-        href: `/parts/${p.id}`,
-        image: (p.image_url as string) ?? null,
-        relevanceScore: score,
-      });
-    }
-  }
-
   // Sort by relevance descending
   return results.sort((a, b) => b.relevanceScore - a.relevanceScore);
 }
 
 /**
- * Search garages with full filter + sort options.
- *
- * Sort keys: rating | distance (stub) | price | popularity
+ * Search service centers with full filter + sort options.
  */
 export async function searchGarages(opts: {
   keyword?: string;
@@ -191,7 +138,6 @@ export async function searchGarages(opts: {
   services?: string[];
   minRating?: number;
   availableToday?: boolean;
-  vendorType?: "service_center" | "parts_seller";
   sortBy?: "rating" | "popularity" | "price";
 }) {
   const supabase = createClient();
@@ -199,9 +145,9 @@ export async function searchGarages(opts: {
   let query = supabase
     .from("vendors")
     .select("*, services:services(id,name)")
-    .eq("status", "approved");
+    .eq("status", "approved")
+    .eq("vendor_type", "service_center");
 
-  if (opts.vendorType) query = query.eq("vendor_type", opts.vendorType);
   if (opts.city) query = query.ilike("city", `%${opts.city}%`);
   if (opts.minRating) query = query.gte("rating", opts.minRating);
   if (opts.keyword) query = query.ilike("business_name", `%${opts.keyword}%`);

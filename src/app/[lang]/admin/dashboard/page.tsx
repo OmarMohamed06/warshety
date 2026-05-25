@@ -18,7 +18,6 @@ interface Stats {
   totalUsers: number;
   totalVendors: number;
   pendingApplications: number;
-  totalOrders: number;
   totalBookings: number;
   activeBookings: number;
   completedBookings: number;
@@ -115,7 +114,6 @@ export default function AdminDashboardPage() {
     totalUsers: 0,
     totalVendors: 0,
     pendingApplications: 0,
-    totalOrders: 0,
     totalBookings: 0,
     activeBookings: 0,
     completedBookings: 0,
@@ -140,14 +138,12 @@ export default function AdminDashboardPage() {
       usersRes,
       vendorsRes,
       appsRes,
-      ordersRes,
       bookingsRes,
       activeRes,
       completedRes,
-      revenueRes,
+      billingRes,
       complaintsRes,
       recentBookings,
-      recentOrders,
     ] = await Promise.all([
       supabase.from("users").select("id", { count: "exact", head: true }),
       supabase.from("vendors").select("id", { count: "exact", head: true }),
@@ -158,7 +154,6 @@ export default function AdminDashboardPage() {
         )
         .eq("status", "pending")
         .order("created_at", { ascending: false }),
-      supabase.from("orders").select("id", { count: "exact", head: true }),
       supabase.from("bookings").select("id", { count: "exact", head: true }),
       supabase
         .from("bookings")
@@ -168,7 +163,11 @@ export default function AdminDashboardPage() {
         .from("bookings")
         .select("id", { count: "exact", head: true })
         .eq("status", "completed"),
-      supabase.from("orders").select("total_amount").eq("status", "completed"),
+      // Platform revenue: sum of paid service-center billing records
+      (supabase as any)
+        .from("service_center_billing")
+        .select("total_fees_due")
+        .eq("payment_status", "paid"),
       (supabase as any)
         .from("complaints")
         .select("id", { count: "exact", head: true })
@@ -179,16 +178,12 @@ export default function AdminDashboardPage() {
           "id, created_at, status, users(full_name), vendors(business_name)",
         )
         .order("created_at", { ascending: false })
-        .limit(5),
-      supabase
-        .from("orders")
-        .select("id, created_at, status, total_amount, users(full_name)")
-        .order("created_at", { ascending: false })
-        .limit(3),
+        .limit(8),
     ]);
 
-    const totalRevenue = (revenueRes.data ?? []).reduce(
-      (s, o) => s + (Number(o.total_amount) || 0),
+    const totalRevenue = (billingRes.data ?? []).reduce(
+      (s: number, b: { total_fees_due: number }) =>
+        s + (Number(b.total_fees_due) || 0),
       0,
     );
 
@@ -196,7 +191,6 @@ export default function AdminDashboardPage() {
       totalUsers: usersRes.count ?? 0,
       totalVendors: vendorsRes.count ?? 0,
       pendingApplications: appsRes.data?.length ?? 0,
-      totalOrders: ordersRes.count ?? 0,
       totalBookings: bookingsRes.count ?? 0,
       activeBookings: activeRes.count ?? 0,
       completedBookings: completedRes.count ?? 0,
@@ -224,24 +218,6 @@ export default function AdminDashboardPage() {
         icon: "calendar_month",
         color: "text-blue-600",
         bg: "bg-blue-100 dark:bg-blue-900/30",
-      });
-    });
-    (recentOrders.data ?? []).forEach((o: Record<string, unknown>) => {
-      const user = o.users as Record<string, unknown> | null;
-      feed.push({
-        id: `o-${o.id}`,
-        type: "order",
-        label: `Order EGP ${Number(o.total_amount).toLocaleString()}`,
-        sub: `by ${String(user?.full_name ?? "customer")} · ${String(o.status)}`,
-        time: new Date(String(o.created_at)).toLocaleString("en-EG", {
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        icon: "shopping_bag",
-        color: "text-emerald-600",
-        bg: "bg-emerald-100 dark:bg-emerald-900/30",
       });
     });
     setActivity(feed.slice(0, 8));
@@ -362,13 +338,13 @@ export default function AdminDashboardPage() {
           href="/admin/bookings"
         />
         <StatCard
-          label={t("admin.totalOrders")}
-          value={stats.totalOrders}
-          icon="shopping_bag"
+          label={t("admin.completedBookings")}
+          value={stats.completedBookings}
+          icon="task_alt"
           color="text-emerald-600"
           bg="bg-emerald-100 dark:bg-emerald-900/30"
           loading={loading}
-          href="/admin/payments"
+          href="/admin/bookings"
         />
         <StatCard
           label={t("admin.openComplaints")}

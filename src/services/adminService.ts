@@ -27,7 +27,6 @@ export interface PlatformMetrics {
   pendingVendors: number;
   totalBookings: number;
   completedBookings: number;
-  totalOrders: number;
   totalRevenue: number;
 }
 
@@ -196,7 +195,6 @@ export async function getPlatformMetrics(): Promise<PlatformMetrics> {
     { count: pendingVendors },
     { count: totalBookings },
     { count: completedBookings },
-    { count: totalOrders },
     { data: revenueData },
   ] = await Promise.all([
     supabase.from("users").select("id", { count: "exact", head: true }),
@@ -213,15 +211,16 @@ export async function getPlatformMetrics(): Promise<PlatformMetrics> {
       .from("bookings")
       .select("id", { count: "exact", head: true })
       .eq("status", "completed"),
-    supabase.from("orders").select("id", { count: "exact", head: true }),
+    // Platform revenue from paid service-center billing records
     supabase
-      .from("orders")
-      .select("total_amount")
-      .in("status", ["paid", "shipped", "completed"]),
+      .from("service_center_billing")
+      .select("total_fees_due")
+      .eq("payment_status", "paid"),
   ]);
 
   const totalRevenue = (revenueData ?? []).reduce(
-    (sum: number, o: { total_amount: number }) => sum + (o.total_amount ?? 0),
+    (sum: number, b: { total_fees_due: number }) =>
+      sum + (Number(b.total_fees_due) ?? 0),
     0,
   );
 
@@ -231,7 +230,6 @@ export async function getPlatformMetrics(): Promise<PlatformMetrics> {
     pendingVendors: pendingVendors ?? 0,
     totalBookings: totalBookings ?? 0,
     completedBookings: completedBookings ?? 0,
-    totalOrders: totalOrders ?? 0,
     totalRevenue,
   };
 }

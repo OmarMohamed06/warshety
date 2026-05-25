@@ -26,12 +26,12 @@
  *   const { activeVehicle, isCompatible, filterCompatible } = useVehicle();
  */
 
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import {
   useGarage as useGarageContext,
   vehicleLabel,
 } from "@/context/GarageContext";
-import type { Vehicle, Part } from "@/types";
+import type { Vehicle } from "@/types";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -52,18 +52,6 @@ export interface UseVehicleReturn {
   hasActiveVehicle: boolean;
   /** Human-readable label e.g. "2019 BMW 3 Series 320i" */
   activeVehicleLabel: string | null;
-
-  /**
-   * Returns true when the given Part is compatible with the active vehicle.
-   * Always returns true when no vehicle is selected (show all parts).
-   */
-  isCompatible: (part: Part) => boolean;
-
-  /**
-   * Filters an array of parts to only those compatible with the active vehicle.
-   * Returns the full array unchanged when no vehicle is selected.
-   */
-  filterCompatible: (parts: Part[]) => Part[];
 
   /**
    * Returns a compatibility query object ready for API calls / URL params.
@@ -95,24 +83,6 @@ function includesAll(haystack: string, tokens: string[]): boolean {
   return tokens.every((t) => lower.includes(t.toLowerCase()));
 }
 
-function checkCompatibility(vehicle: Vehicle, part: Part): boolean {
-  if (!part.compatibleVehicles || part.compatibleVehicles.length === 0) {
-    // No compatibility data → assume compatible (don't hide the part)
-    return true;
-  }
-
-  const requiredTokens = [vehicle.brand, vehicle.model, String(vehicle.year)];
-
-  return part.compatibleVehicles.some((entry) => {
-    if (!includesAll(entry, requiredTokens)) return false;
-    // If the vehicle has an engineCode, refine the match when the entry
-    // appears to contain engine info (contains digits suggesting a code)
-    if (vehicle.engineCode && /\d/.test(entry)) {
-      return entry.toLowerCase().includes(vehicle.engineCode.toLowerCase());
-    }
-    return true;
-  });
-}
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
@@ -145,30 +115,12 @@ export function useVehicle(): UseVehicleReturn {
     };
   }, [activeVehicle]);
 
-  const isCompatible = useCallback(
-    (part: Part): boolean => {
-      if (!activeVehicle) return true; // no filter active → show everything
-      return checkCompatibility(activeVehicle, part);
-    },
-    [activeVehicle],
-  );
-
-  const filterCompatible = useCallback(
-    (parts: Part[]): Part[] => {
-      if (!activeVehicle) return parts;
-      return parts.filter((p) => checkCompatibility(activeVehicle, p));
-    },
-    [activeVehicle],
-  );
-
   return {
     activeVehicle,
     hasActiveVehicle,
     activeVehicleLabel,
     compatibilityString,
     compatibilityQuery,
-    isCompatible,
-    filterCompatible,
     vehicles,
     isHydrated,
   };

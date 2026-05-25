@@ -40,9 +40,7 @@ export type OutboundEventType =
   | "booking_cancelled"
   | "booking_reminder"
   | "car_ready"
-  | "order_confirmed"
   | "new_booking_vendor"
-  | "new_order_vendor"
   | "payment_due"
   | "payment_overdue"
   | "vendor_approved";
@@ -696,67 +694,9 @@ export async function notifyCustomerBookingCancelled({
   }
 }
 
-/**
- * 4. Order Confirmed — sent when a parts order is created.
- */
-export async function notifyCustomerOrderConfirmed({
-  userId,
-  phone,
-  email,
-  orderNumber,
-  items,
-  totalAmount,
-  orderLink,
-}: {
-  userId?: string;
-  phone: string;
-  email: string;
-  orderNumber: string;
-  items: Array<{ name: string; qty: number; price: number }>;
-  totalAmount: number;
-  orderLink?: string;
-}): Promise<void> {
-  await sendSMS(phone, `Your order #${orderNumber} has been confirmed`, {
-    userId,
-    eventType: "order_confirmed",
-    idempotencyKey: orderNumber,
-  });
+// (Order notifications removed — platform is service-center only)
 
-  const thStyle =
-    "font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.6px;padding:0 0 10px;border-bottom:2px solid #f1f5f9;font-family:Arial,sans-serif";
-  const tdStyle =
-    "font-size:14px;color:#334155;padding:12px 0;border-bottom:1px solid #f1f5f9;font-family:Arial,sans-serif";
-  const rows = items
-    .map(
-      (i) =>
-        `<tr><td style="${tdStyle}">${i.name}</td><td style="${tdStyle};text-align:center">x${i.qty}</td><td style="${tdStyle};text-align:right">${(i.price * i.qty).toFixed(2)} EGP</td></tr>`,
-    )
-    .join("");
-
-  const html = emailWrapper(
-    `Order #${orderNumber} Confirmed`,
-    `<span style="${S.badge("#dcfce7", "#166534")}">✓ Order Confirmed</span>
-    <p style="${S.title}">Order #${orderNumber}</p>
-    <p style="${S.subtitle}">Thank you! Your order has been received and is being processed.</p>
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:20px 0">
-      <thead><tr>
-        <th style="${thStyle};text-align:left">Item</th>
-        <th style="${thStyle};text-align:center">Qty</th>
-        <th style="${thStyle};text-align:right">Price</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-      <tr><td style="font-size:16px;font-weight:700;color:#0f172a;padding-top:16px;font-family:Arial,sans-serif">Total</td><td></td><td style="font-size:16px;font-weight:700;color:#0f172a;padding-top:16px;text-align:right;font-family:Arial,sans-serif">${totalAmount.toFixed(2)} EGP</td></tr>
-    </table>
-    ${orderLink ? ctaButton(orderLink, "View My Order") : ""}`,
-  );
-
-  await sendEmail(email, `Order #${orderNumber} Confirmed`, html, {
-    userId,
-    eventType: "order_confirmed",
-    idempotencyKey: orderNumber,
-  });
-}
-
+// Kept for future use placeholder
 // ── Vendor event notifications ────────────────────────────────────────────────
 
 /**
@@ -803,70 +743,6 @@ export async function notifyVendorNewBooking({
     userId: vendorUserId,
     eventType: "new_booking_vendor",
     idempotencyKey: bookingId,
-  });
-}
-
-/**
- * 6. New Parts Order — sent to vendor when an order is placed.
- */
-export async function notifyVendorNewOrder({
-  vendorUserId,
-  vendorPhone,
-  vendorEmail,
-  orderNumber,
-  customerName,
-  items,
-  totalAmount,
-  dashboardLink,
-}: {
-  vendorUserId?: string;
-  vendorPhone: string;
-  vendorEmail: string;
-  orderNumber: string;
-  customerName: string;
-  items: Array<{ name: string; qty: number; price: number }>;
-  totalAmount: number;
-  dashboardLink?: string;
-}): Promise<void> {
-  await sendSMS(vendorPhone, `New order #${orderNumber} received`, {
-    userId: vendorUserId,
-    eventType: "new_order_vendor",
-    idempotencyKey: orderNumber,
-  });
-
-  const thStyle2 =
-    "font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.6px;padding:0 0 10px;border-bottom:2px solid #f1f5f9;font-family:Arial,sans-serif";
-  const tdStyle2 =
-    "font-size:14px;color:#334155;padding:12px 0;border-bottom:1px solid #f1f5f9;font-family:Arial,sans-serif";
-  const rows = items
-    .map(
-      (i) =>
-        `<tr><td style="${tdStyle2}">${i.name}</td><td style="${tdStyle2};text-align:center">x${i.qty}</td><td style="${tdStyle2};text-align:right">${(i.price * i.qty).toFixed(2)} EGP</td></tr>`,
-    )
-    .join("");
-
-  const html = emailWrapper(
-    `New Order #${orderNumber}`,
-    `<span style="${S.badge("#dcfce7", "#166534")}">📦 New Order</span>
-    <p style="${S.title}">Order #${orderNumber} received</p>
-    <p style="${S.subtitle}">A customer has placed a new order on your store.</p>
-    ${infoRow("Customer", customerName)}
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:20px 0">
-      <thead><tr>
-        <th style="${thStyle2};text-align:left">Product</th>
-        <th style="${thStyle2};text-align:center">Qty</th>
-        <th style="${thStyle2};text-align:right">Price</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-      <tr><td style="font-size:16px;font-weight:700;color:#0f172a;padding-top:16px;font-family:Arial,sans-serif">Total</td><td></td><td style="font-size:16px;font-weight:700;color:#0f172a;padding-top:16px;text-align:right;font-family:Arial,sans-serif">${totalAmount.toFixed(2)} EGP</td></tr>
-    </table>
-    ${dashboardLink ? ctaButton(dashboardLink, "Manage Order") : ""}`,
-  );
-
-  await sendEmail(vendorEmail, `New Order #${orderNumber}`, html, {
-    userId: vendorUserId,
-    eventType: "new_order_vendor",
-    idempotencyKey: orderNumber,
   });
 }
 
