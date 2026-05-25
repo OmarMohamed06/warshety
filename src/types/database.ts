@@ -78,7 +78,7 @@ export interface DbVendor {
   /** ISO timestamp set when the vendor is first approved. Used for billing period calculation. */
   approved_at?: string | null;
   /** Points automatically awarded per completed booking at this service center. */
-  points_per_booking: number;
+  points_per_booking?: number;
   created_at: string;
   updated_at: string;
 }
