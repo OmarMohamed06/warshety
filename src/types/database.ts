@@ -8,7 +8,12 @@ export type VendorType = "service_center";
 export type PartType = "oem" | "original" | "aftermarket";
 export type VendorStatus = "pending" | "approved" | "suspended" | "rejected";
 export type SlotOverrideType = "blocked" | "opened";
-export type OrderStatus = "pending" | "paid" | "shipped" | "completed" | "cancelled";
+export type OrderStatus =
+  | "pending"
+  | "paid"
+  | "shipped"
+  | "completed"
+  | "cancelled";
 export type NotificationType =
   | "booking_confirmed"
   | "booking_cancelled"

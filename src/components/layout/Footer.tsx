@@ -33,18 +33,18 @@ export default function Footer() {
               {t("footer.shopService")}
             </p>
             <ul className="space-y-3 text-sm text-slate-400">
-              {[
-                { labelKey: "footer.bookMechanic", href: "/services" },
-              ].map((link) => (
-                <li key={link.labelKey}>
-                  <Link
-                    href={link.href}
-                    className="hover:text-[#FF4B19] transition-colors"
-                  >
-                    {t(link.labelKey)}
-                  </Link>
-                </li>
-              ))}
+              {[{ labelKey: "footer.bookMechanic", href: "/services" }].map(
+                (link) => (
+                  <li key={link.labelKey}>
+                    <Link
+                      href={link.href}
+                      className="hover:text-[#FF4B19] transition-colors"
+                    >
+                      {t(link.labelKey)}
+                    </Link>
+                  </li>
+                ),
+              )}
             </ul>
           </div>
 

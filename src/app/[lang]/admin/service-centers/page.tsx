@@ -75,7 +75,8 @@ export default function ServiceCentersPage() {
             "id, display_id, business_name, vendor_type, status, city, rating, total_reviews, completed_bookings, email, phone, created_at",
           );
         if (statusFilter !== "all") q = q.eq("status", statusFilter);
-        if (typeFilter !== "all") q = q.eq("vendor_type", typeFilter as "service_center");
+        if (typeFilter !== "all")
+          q = q.eq("vendor_type", typeFilter as "service_center");
         if (search.trim()) q = q.ilike("business_name", `%${search}%`);
         return q.order("created_at", { ascending: false });
       })(),

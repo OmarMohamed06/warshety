@@ -185,179 +185,179 @@ export default function PaymentsPage() {
 
       {/* Transactions table */}
       <div className="space-y-4">
-          <div className="flex flex-wrap gap-3">
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setPage(0);
-              }}
-              className="px-3 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none"
-            >
-              <option value="all">{t("admin.allStatuses")}</option>
-              {(
-                [
-                  "pending",
-                  "completed",
-                  "failed",
-                  "refunded",
-                  "partially_refunded",
-                ] as PayStatus[]
-              ).map((s) => (
-                <option key={s} value={s}>
-                  {s.replace(/_/g, " ")}
-                </option>
-              ))}
-            </select>
-            <select
-              value={methodFilter}
-              onChange={(e) => {
-                setMethodFilter(e.target.value);
-                setPage(0);
-              }}
-              className="px-3 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none"
-            >
-              <option value="all">{t("admin.allMethods")}</option>
-              {["card", "cod", "wallet", "bank_transfer"].map((m) => (
-                <option key={m} value={m}>
-                  {m.replace(/_/g, " ")}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="flex flex-wrap gap-3">
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(0);
+            }}
+            className="px-3 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none"
+          >
+            <option value="all">{t("admin.allStatuses")}</option>
+            {(
+              [
+                "pending",
+                "completed",
+                "failed",
+                "refunded",
+                "partially_refunded",
+              ] as PayStatus[]
+            ).map((s) => (
+              <option key={s} value={s}>
+                {s.replace(/_/g, " ")}
+              </option>
+            ))}
+          </select>
+          <select
+            value={methodFilter}
+            onChange={(e) => {
+              setMethodFilter(e.target.value);
+              setPage(0);
+            }}
+            className="px-3 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none"
+          >
+            <option value="all">{t("admin.allMethods")}</option>
+            {["card", "cod", "wallet", "bank_transfer"].map((m) => (
+              <option key={m} value={m}>
+                {m.replace(/_/g, " ")}
+              </option>
+            ))}
+          </select>
+        </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700">
+                <tr>
+                  {[
+                    t("admin.customer"),
+                    t("admin.vendor"),
+                    t("admin.amount"),
+                    t("admin.commission"),
+                    t("admin.net"),
+                    t("admin.method"),
+                    t("admin.type"),
+                    t("admin.status"),
+                    t("admin.date"),
+                  ].map((h) => (
+                    <th
+                      key={h}
+                      className="text-left px-5 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                {loading ? (
                   <tr>
-                    {[
-                      t("admin.customer"),
-                      t("admin.vendor"),
-                      t("admin.amount"),
-                      t("admin.commission"),
-                      t("admin.net"),
-                      t("admin.method"),
-                      t("admin.type"),
-                      t("admin.status"),
-                      t("admin.date"),
-                    ].map((h) => (
-                      <th
-                        key={h}
-                        className="text-left px-5 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap"
+                    <td colSpan={9} className="px-5 py-16 text-center">
+                      <span
+                        className="material-symbols-outlined animate-spin text-slate-400"
+                        style={{ fontSize: 28 }}
                       >
-                        {h}
-                      </th>
-                    ))}
+                        progress_activity
+                      </span>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                  {loading ? (
-                    <tr>
-                      <td colSpan={9} className="px-5 py-16 text-center">
-                        <span
-                          className="material-symbols-outlined animate-spin text-slate-400"
-                          style={{ fontSize: 28 }}
-                        >
-                          progress_activity
+                ) : transactions.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={9}
+                      className="px-5 py-16 text-center text-slate-400 text-sm"
+                    >
+                      {t("admin.noTransactions")}
+                    </td>
+                  </tr>
+                ) : (
+                  transactions.map((t) => (
+                    <tr
+                      key={t.id}
+                      className="hover:bg-slate-50 dark:hover:bg-slate-700/30"
+                    >
+                      <td className="px-5 py-3">
+                        <p className="font-bold text-sm">
+                          {t.users?.full_name ?? "—"}
+                        </p>
+                        <p className="text-xs text-slate-400">
+                          {t.users?.email ?? ""}
+                        </p>
+                      </td>
+                      <td className="px-5 py-3 text-sm text-slate-600 dark:text-slate-300">
+                        {t.vendors?.business_name ?? "—"}
+                      </td>
+                      <td className="px-5 py-3 font-black">
+                        EGP {Number(t.amount).toLocaleString()}
+                      </td>
+                      <td className="px-5 py-3 text-sm text-slate-500">
+                        EGP {Number(t.commission).toLocaleString()}
+                      </td>
+                      <td className="px-5 py-3 font-semibold text-emerald-600">
+                        EGP {Number(t.net_to_vendor).toLocaleString()}
+                      </td>
+                      <td className="px-5 py-3">
+                        <span className="inline-flex px-2 py-0.5 text-xs font-bold rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 capitalize">
+                          {t.method}
                         </span>
                       </td>
-                    </tr>
-                  ) : transactions.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan={9}
-                        className="px-5 py-16 text-center text-slate-400 text-sm"
-                      >
-                        {t("admin.noTransactions")}
+                      <td className="px-5 py-3 text-xs text-slate-500 capitalize">
+                        {t.reference_type}
+                      </td>
+                      <td className="px-5 py-3">
+                        <span
+                          className={cn(
+                            "inline-flex px-2 py-0.5 text-xs font-bold rounded-full capitalize",
+                            STATUS_BADGE[t.status],
+                          )}
+                        >
+                          {t.status.replace(/_/g, " ")}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-xs text-slate-400 whitespace-nowrap">
+                        {new Date(t.created_at).toLocaleDateString("en-EG", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
                       </td>
                     </tr>
-                  ) : (
-                    transactions.map((t) => (
-                      <tr
-                        key={t.id}
-                        className="hover:bg-slate-50 dark:hover:bg-slate-700/30"
-                      >
-                        <td className="px-5 py-3">
-                          <p className="font-bold text-sm">
-                            {t.users?.full_name ?? "—"}
-                          </p>
-                          <p className="text-xs text-slate-400">
-                            {t.users?.email ?? ""}
-                          </p>
-                        </td>
-                        <td className="px-5 py-3 text-sm text-slate-600 dark:text-slate-300">
-                          {t.vendors?.business_name ?? "—"}
-                        </td>
-                        <td className="px-5 py-3 font-black">
-                          EGP {Number(t.amount).toLocaleString()}
-                        </td>
-                        <td className="px-5 py-3 text-sm text-slate-500">
-                          EGP {Number(t.commission).toLocaleString()}
-                        </td>
-                        <td className="px-5 py-3 font-semibold text-emerald-600">
-                          EGP {Number(t.net_to_vendor).toLocaleString()}
-                        </td>
-                        <td className="px-5 py-3">
-                          <span className="inline-flex px-2 py-0.5 text-xs font-bold rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 capitalize">
-                            {t.method}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3 text-xs text-slate-500 capitalize">
-                          {t.reference_type}
-                        </td>
-                        <td className="px-5 py-3">
-                          <span
-                            className={cn(
-                              "inline-flex px-2 py-0.5 text-xs font-bold rounded-full capitalize",
-                              STATUS_BADGE[t.status],
-                            )}
-                          >
-                            {t.status.replace(/_/g, " ")}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3 text-xs text-slate-400 whitespace-nowrap">
-                          {new Date(t.created_at).toLocaleDateString("en-EG", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between px-5 py-4 border-t border-slate-100 dark:border-slate-700">
-                <p className="text-xs text-slate-500">
-                  Showing {page * PAGE_SIZE + 1}–
-                  {Math.min((page + 1) * PAGE_SIZE, total)} of {total}
-                </p>
-                <div className="flex items-center gap-2">
-                  <button
-                    disabled={page === 0}
-                    onClick={() => setPage((p) => p - 1)}
-                    className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-slate-100 transition-colors"
-                  >
-                    ← {t("admin.prev")}
-                  </button>
-                  <span className="text-xs text-slate-500">
-                    {page + 1} / {totalPages}
-                  </span>
-                  <button
-                    disabled={page >= totalPages - 1}
-                    onClick={() => setPage((p) => p + 1)}
-                    className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-slate-100 transition-colors"
-                  >
-                    {t("admin.next")} →
-                  </button>
-                </div>
-              </div>
-            )}
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-5 py-4 border-t border-slate-100 dark:border-slate-700">
+              <p className="text-xs text-slate-500">
+                Showing {page * PAGE_SIZE + 1}–
+                {Math.min((page + 1) * PAGE_SIZE, total)} of {total}
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  disabled={page === 0}
+                  onClick={() => setPage((p) => p - 1)}
+                  className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-slate-100 transition-colors"
+                >
+                  ← {t("admin.prev")}
+                </button>
+                <span className="text-xs text-slate-500">
+                  {page + 1} / {totalPages}
+                </span>
+                <button
+                  disabled={page >= totalPages - 1}
+                  onClick={() => setPage((p) => p + 1)}
+                  className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-slate-100 transition-colors"
+                >
+                  {t("admin.next")} →
+                </button>
+              </div>
+            </div>
+          )}
         </div>
+      </div>
     </div>
   );
 }

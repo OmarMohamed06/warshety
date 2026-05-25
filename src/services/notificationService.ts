@@ -140,7 +140,6 @@ export async function notifyBookingCancelled(
   );
 }
 
-
 export async function notifyVendorApproved(userId: string): Promise<void> {
   await createNotification(
     userId,
@@ -163,4 +162,3 @@ export async function notifyVendorRejected(
     "/vendor/apply",
   );
 }
-

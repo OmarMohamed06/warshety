@@ -252,9 +252,6 @@ function SearchBox({ className = "" }: { className?: string }) {
   );
 }
 
-
-
-
 // ── Main Navbar ────────────────────────────────────────────────────────────────
 export default function Navbar() {
   const { activeVehicle, vehicles, setActiveVehicle } = useGarage();

@@ -71,7 +71,10 @@ export default function VendorSetupPage() {
       }
 
       // Read invite metadata from the Supabase auth session user
-      const meta = (session?.user?.user_metadata ?? {}) as Record<string, string>;
+      const meta = (session?.user?.user_metadata ?? {}) as Record<
+        string,
+        string
+      >;
       setVendorType(meta.vendor_type ?? null);
       setState("setup");
     }

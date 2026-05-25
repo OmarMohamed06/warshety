@@ -63,9 +63,7 @@ export async function globalSearch(
   if (type === "all" || type === "vendor") {
     let query = supabase
       .from("vendors")
-      .select(
-        "id, slug, business_name, city, rating, cover_image_url",
-      )
+      .select("id, slug, business_name, city, rating, cover_image_url")
       .eq("status", "approved")
       .eq("vendor_type", "service_center");
 

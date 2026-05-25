@@ -39,9 +39,9 @@ export default function SearchPage() {
 
   const initialQ = searchParams.get("q") ?? "";
   const [query, setQuery] = useState(initialQ);
-  const [activeType, setActiveType] = useState<
-    "all" | "vendor" | "service"
-  >("all");
+  const [activeType, setActiveType] = useState<"all" | "vendor" | "service">(
+    "all",
+  );
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);

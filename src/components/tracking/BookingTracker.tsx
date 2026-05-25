@@ -72,27 +72,38 @@ export default function BookingTracker({ bookingId }: { bookingId: string }) {
 
   if (error || !booking) {
     return (
-      <div className="text-center py-12 text-slate-500">{error ?? "Booking not found."}</div>
+      <div className="text-center py-12 text-slate-500">
+        {error ?? "Booking not found."}
+      </div>
     );
   }
 
   const currentStep = STATUS_STEPS.indexOf(booking.status as BookingStatus);
-  const isCancelled = booking.status === "cancelled" || booking.status === "no_show";
+  const isCancelled =
+    booking.status === "cancelled" || booking.status === "no_show";
 
   return (
     <div className="space-y-6">
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
         <div className="flex items-center justify-between">
           <span className="text-sm text-slate-500">Booking</span>
-          <span className="font-mono font-bold text-sm">{booking.display_id ?? booking.id.slice(0, 8).toUpperCase()}</span>
+          <span className="font-mono font-bold text-sm">
+            {booking.display_id ?? booking.id.slice(0, 8).toUpperCase()}
+          </span>
         </div>
         {booking.vendor && (
           <div>
             <p className="font-semibold">{booking.vendor.business_name}</p>
-            {booking.vendor.city && <p className="text-sm text-slate-500">{booking.vendor.city}</p>}
+            {booking.vendor.city && (
+              <p className="text-sm text-slate-500">{booking.vendor.city}</p>
+            )}
           </div>
         )}
-        {booking.service && <p className="text-sm text-slate-600 dark:text-slate-400">{booking.service.name}</p>}
+        {booking.service && (
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            {booking.service.name}
+          </p>
+        )}
         {booking.service_date && (
           <p className="text-sm text-slate-500">
             {booking.service_date}
@@ -109,7 +120,9 @@ export default function BookingTracker({ bookingId }: { bookingId: string }) {
         </div>
       ) : (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-          <p className="text-sm font-semibold text-slate-500 mb-4">Booking Progress</p>
+          <p className="text-sm font-semibold text-slate-500 mb-4">
+            Booking Progress
+          </p>
           <ol className="space-y-3">
             {STATUS_STEPS.map((step, i) => {
               const done = i < currentStep;
@@ -141,7 +154,9 @@ export default function BookingTracker({ bookingId }: { bookingId: string }) {
 
       {booking.note && (
         <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-2xl p-4">
-          <p className="text-sm text-amber-700 dark:text-amber-400">{booking.note}</p>
+          <p className="text-sm text-amber-700 dark:text-amber-400">
+            {booking.note}
+          </p>
         </div>
       )}
     </div>

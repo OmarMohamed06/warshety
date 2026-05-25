@@ -390,42 +390,41 @@ export default function VendorDashboardPage() {
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="space-y-2">
-                  {([
-                        {
-                          href: "/vendor/bookings",
-                          icon: CalendarDays,
-                          label: t("vendor.viewAllBookings"),
-                        },
-                        {
-                          href: "/vendor/services",
-                          icon: Wrench,
-                          label: t("vendor.manageServices"),
-                        },
-                        {
-                          href: "/vendor/calendar",
-                          icon: CalendarDays,
-                          label: t("vendor.openCalendar"),
-                        },
-                        {
-                          href: "/vendor/customers",
-                          icon: Users,
-                          label: t("vendor.viewCustomers"),
-                        },
-                      ]
-                  ).map(({ href, icon: Icon, label }) => (
-                    <Button
-                      key={href}
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start gap-2"
-                      asChild
-                    >
-                      <Link href={href}>
-                        <Icon className="h-3.5 w-3.5" /> {label}
-                      </Link>
-                    </Button>
-                  ))}
-                </div>
+                {[
+                  {
+                    href: "/vendor/bookings",
+                    icon: CalendarDays,
+                    label: t("vendor.viewAllBookings"),
+                  },
+                  {
+                    href: "/vendor/services",
+                    icon: Wrench,
+                    label: t("vendor.manageServices"),
+                  },
+                  {
+                    href: "/vendor/calendar",
+                    icon: CalendarDays,
+                    label: t("vendor.openCalendar"),
+                  },
+                  {
+                    href: "/vendor/customers",
+                    icon: Users,
+                    label: t("vendor.viewCustomers"),
+                  },
+                ].map(({ href, icon: Icon, label }) => (
+                  <Button
+                    key={href}
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start gap-2"
+                    asChild
+                  >
+                    <Link href={href}>
+                      <Icon className="h-3.5 w-3.5" /> {label}
+                    </Link>
+                  </Button>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -459,9 +458,7 @@ export default function VendorDashboardPage() {
             ) : recent.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <p className="font-semibold">{t("vendor.noActivity")}</p>
-                <p className="text-sm mt-1">
-                  {t("vendor.bookingsWillAppear")}
-                </p>
+                <p className="text-sm mt-1">{t("vendor.bookingsWillAppear")}</p>
               </div>
             ) : (
               <Table>

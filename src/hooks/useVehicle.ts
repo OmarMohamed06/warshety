@@ -83,7 +83,6 @@ function includesAll(haystack: string, tokens: string[]): boolean {
   return tokens.every((t) => lower.includes(t.toLowerCase()));
 }
 
-
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
 export function useVehicle(): UseVehicleReturn {

@@ -193,7 +193,10 @@ export default function BillingPage() {
     // Only persist the field that is relevant to this vendor type.
     // Service centers pay a fixed fee per booking (no commission %).
     // Parts sellers pay a commission % on orders (no fixed booking fee).
-    const payload = { vendor_id: selectedVendor, booking_fee: settingsForm.booking_fee };
+    const payload = {
+      vendor_id: selectedVendor,
+      booking_fee: settingsForm.booking_fee,
+    };
     const { error } = await upsertVendorBillingSettings(payload, user.id);
     flash(error ? `Error: ${error}` : t("admin.billing.settingsSaved"), !error);
     setSettingsLoading(false);
@@ -276,28 +279,26 @@ export default function BillingPage() {
 
       {/* Tabs */}
       <div className="flex items-center gap-1 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-1 w-fit">
-        {(["service_centers", "settings"] as TabType[]).map(
-          (t_tab) => (
-            <button
-              key={t_tab}
-              onClick={() => {
-                setTab(t_tab);
-                setPage(0);
-                setStatusFilter("all");
-              }}
-              className={cn(
-                "px-4 py-1.5 text-xs font-bold rounded-lg capitalize transition-colors",
-                tab === t_tab
-                  ? "bg-[#FF4B19] text-white"
-                  : "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700",
-              )}
-            >
-              {t_tab === "service_centers"
-                ? t("admin.billing.tabSC")
-                : t("admin.billing.tabSettings")}
-            </button>
-          ),
-        )}
+        {(["service_centers", "settings"] as TabType[]).map((t_tab) => (
+          <button
+            key={t_tab}
+            onClick={() => {
+              setTab(t_tab);
+              setPage(0);
+              setStatusFilter("all");
+            }}
+            className={cn(
+              "px-4 py-1.5 text-xs font-bold rounded-lg capitalize transition-colors",
+              tab === t_tab
+                ? "bg-[#FF4B19] text-white"
+                : "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700",
+            )}
+          >
+            {t_tab === "service_centers"
+              ? t("admin.billing.tabSC")
+              : t("admin.billing.tabSettings")}
+          </button>
+        ))}
       </div>
 
       {/* ────────────────────────────────────────────────────────────────────────

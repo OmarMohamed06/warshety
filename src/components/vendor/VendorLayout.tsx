@@ -76,9 +76,9 @@ function SidebarContent({ onNavigate }: SidebarProps) {
 
   const isManager = role === "manager";
 
-  const dynamicItems = SERVICE_CENTER_DEFS
-    .filter((d) => !isManager || !OWNER_ONLY_HREFS.includes(d.href))
-    .map((d) => ({ ...d, label: t(`vendor.${d.key}`) }));
+  const dynamicItems = SERVICE_CENTER_DEFS.filter(
+    (d) => !isManager || !OWNER_ONLY_HREFS.includes(d.href),
+  ).map((d) => ({ ...d, label: t(`vendor.${d.key}`) }));
 
   const dynamicLabel = t("vendor.navGroupService");
 

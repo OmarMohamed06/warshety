@@ -95,8 +95,13 @@ export default function PricingPage() {
       .select("total_fees_due, payment_status")
       .gte("created_at", since);
 
-    const paid = (billing ?? []).filter((b: any) => b.payment_status === "paid");
-    const total = paid.reduce((s: number, b: any) => s + Number(b.total_fees_due ?? 0), 0);
+    const paid = (billing ?? []).filter(
+      (b: any) => b.payment_status === "paid",
+    );
+    const total = paid.reduce(
+      (s: number, b: any) => s + Number(b.total_fees_due ?? 0),
+      0,
+    );
     setSnap({
       total_revenue: total,
       total_orders: paid.length,

@@ -46,11 +46,11 @@ export default function UserDetailPage({
         supabase
           .from("bookings")
           .select(
-              "id, booking_date, status, booking_type, vendors(business_name), services(name), total_price",
-            )
-            .eq("user_id", id)
-            .order("created_at", { ascending: false })
-            .limit(10),
+            "id, booking_date, status, booking_type, vendors(business_name), services(name), total_price",
+          )
+          .eq("user_id", id)
+          .order("created_at", { ascending: false })
+          .limit(10),
       ]);
       setUser(profileRes.data as UserProfile);
       setVehicles((vehiclesRes.data ?? []) as Record<string, unknown>[]);

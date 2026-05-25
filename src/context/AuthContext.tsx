@@ -151,12 +151,15 @@ function AuthProviderInner({
   const loadProfile = useCallback(
     async (uid: string) => {
       try {
-        const { data: profile } = await supabase
+        const { data: profile, error } = await supabase
           .from("users")
           .select("*")
           .eq("id", uid)
           .single();
 
+        if (error) {
+          console.error("[AuthContext] loadProfile error:", error.message, error.code);
+        }
         if (!isMountedRef.current) return;
         if (profile) {
           setUser(profile);
