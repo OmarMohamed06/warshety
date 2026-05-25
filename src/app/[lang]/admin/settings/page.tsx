@@ -24,6 +24,12 @@ const SETTING_GROUPS: Record<string, string[]> = {
   ],
   "Platform Commerce": ["platform_commission_pct", "min_payout_amount"],
   "System Behaviour": ["maintenance_mode", "max_images_per_listing"],
+  "Payment & Banking": [
+    "bank_transfer_bank",
+    "bank_transfer_account_name",
+    "bank_transfer_account_number",
+    "bank_transfer_iban",
+  ],
 };
 
 export default function SettingsPage() {

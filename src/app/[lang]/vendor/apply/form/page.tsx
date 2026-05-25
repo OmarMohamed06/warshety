@@ -31,17 +31,6 @@ export default function VendorApplyFormPage() {
   const router = useRouter();
   const { t, localePath, locale } = useLanguage();
 
-  const VENDOR_TYPE_OPTIONS = [
-    {
-      value: "service_center" as VendorType,
-      label: t("vendor.applyPages.vendorTypeServiceCenter"),
-    },
-    {
-      value: "parts_seller" as VendorType,
-      label: t("vendor.applyPages.vendorTypePartsSeller"),
-    },
-  ];
-
   const [form, setForm] = useState({
     business_name: "",
     owner_name: "",
@@ -179,33 +168,6 @@ export default function VendorApplyFormPage() {
                 value={form.phone}
                 onChange={(e) => set("phone", e.target.value)}
               />
-            </div>
-
-            <div>
-              <label className="text-xs font-bold uppercase text-slate-500 tracking-wider block mb-2">
-                {t("vendor.applyPages.businessType")} *
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {VENDOR_TYPE_OPTIONS.map((opt) => (
-                  <label
-                    key={opt.value}
-                    className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${
-                      form.vendor_type === opt.value
-                        ? "border-primary bg-primary/5"
-                        : "border-slate-200 dark:border-slate-700 hover:border-primary"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="bizType"
-                      className="accent-primary"
-                      checked={form.vendor_type === opt.value}
-                      onChange={() => set("vendor_type", opt.value)}
-                    />
-                    <span className="text-sm font-semibold">{opt.label}</span>
-                  </label>
-                ))}
-              </div>
             </div>
 
             <div>

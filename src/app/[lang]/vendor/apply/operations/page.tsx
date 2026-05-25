@@ -7,7 +7,6 @@ import OnboardingProgress from "@/components/vendor/OnboardingProgress";
 import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/context/LanguageContext";
 import { SERVICE_CATEGORIES } from "@/lib/serviceCategories";
-import { GOVERNORATES, getAreas } from "@/lib/locationData";
 
 // ── localStorage draft helpers ─────────────────────────────────────────────
 function getDraft(): Record<string, unknown> {
@@ -73,17 +72,6 @@ export default function VendorOperationsPage() {
   const supabase = createClient();
   const { t, localePath } = useLanguage();
 
-  const [vendorType, setVendorType] = useState<
-    "service_center" | "parts_seller"
-  >("service_center");
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const t = localStorage.getItem("vendorType");
-      if (t === "parts_seller") setVendorType("parts_seller");
-    }
-  }, []);
-
   useEffect(() => {
     (supabase as any)
       .from("car_makes")
@@ -95,35 +83,7 @@ export default function VendorOperationsPage() {
       });
   }, []);
 
-  const isServiceCenter = vendorType === "service_center";
-
-  const DELIVERY_OPTIONS = [
-    {
-      key: "pickup",
-      icon: "storefront",
-      label: t("vendor.applyPages.deliveryPickupLabel"),
-      desc: t("vendor.applyPages.deliveryPickupDesc"),
-    },
-    {
-      key: "delivery",
-      icon: "local_shipping",
-      label: t("vendor.applyPages.deliveryCityLabel"),
-      desc: t("vendor.applyPages.deliveryCityDesc"),
-    },
-    {
-      key: "shipping",
-      icon: "inventory",
-      label: t("vendor.applyPages.deliveryNationwideLabel"),
-      desc: t("vendor.applyPages.deliveryNationwideDesc"),
-    },
-  ];
-
-  const RETURN_POLICIES = [
-    t("vendor.applyPages.returnNoReturns"),
-    t("vendor.applyPages.returnWithin7"),
-    t("vendor.applyPages.returnWithin14"),
-    t("vendor.applyPages.returnWithin30"),
-  ];
+  const isServiceCenter = true;
 
   const defaultDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
   const [workingDays, setWorkingDays] = useState<string[]>(defaultDays);
@@ -134,11 +94,6 @@ export default function VendorOperationsPage() {
   const [dbMakes, setDbMakes] = useState<string[]>([]);
   const [makesOpen, setMakesOpen] = useState(false);
   const [makesSearch, setMakesSearch] = useState("");
-  const [deliveryOptions, setDeliveryOpts] = useState<string[]>(["pickup"]);
-  const [returnPolicy, setReturnPolicy] = useState("No returns accepted");
-  const [governorate, setGovernorate] = useState("");
-  const [area, setArea] = useState("");
-  const [address, setAddress] = useState("");
   const [termsChecked, setTermsChecked] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -154,12 +109,6 @@ export default function VendorOperationsPage() {
       setSpecs(draft.specializations as string[]);
     if (draft.supported_makes && Array.isArray(draft.supported_makes))
       setSupportedMakes(draft.supported_makes as string[]);
-    if (draft.delivery_options && Array.isArray(draft.delivery_options))
-      setDeliveryOpts(draft.delivery_options as string[]);
-    if (draft.return_policy) setReturnPolicy(draft.return_policy as string);
-    if (draft.governorate) setGovernorate(draft.governorate as string);
-    if (draft.city) setArea(draft.city as string);
-    if (draft.address) setAddress(draft.address as string);
   }, []);
 
   function toggleDay(day: string) {
@@ -181,35 +130,19 @@ export default function VendorOperationsPage() {
       prev.includes(make) ? prev.filter((m) => m !== make) : [...prev, make],
     );
   }
-  function toggleDelivery(key: string) {
-    setDeliveryOpts((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
-    );
-  }
-  // Parts sellers go to account (final step); service centers go to location
-  const nextStep = isServiceCenter
-    ? localePath("/vendor/apply/location")
-    : localePath("/vendor/apply/account");
+  const nextStep = localePath("/vendor/apply/location");
 
   function handleContinue() {
     if (process.env.NEXT_PUBLIC_SKIP_APPLY_VALIDATION === "true") {
       router.push(nextStep);
       return;
     }
-    if (isServiceCenter && workingDays.length === 0) {
+    if (workingDays.length === 0) {
       setError(t("vendor.applyPages.errorSelectWorkingDay"));
       return;
     }
-    if (isServiceCenter && specializations.length === 0) {
+    if (specializations.length === 0) {
       setError(t("vendor.applyPages.errorSelectSpec"));
-      return;
-    }
-    if (!isServiceCenter && !governorate) {
-      setError(t("vendor.applyPages.selectGovernorate"));
-      return;
-    }
-    if (!isServiceCenter && !address.trim()) {
-      setError(t("vendor.applyPages.fullAddress") + " is required.");
       return;
     }
     if (!termsChecked) {
@@ -217,23 +150,13 @@ export default function VendorOperationsPage() {
       return;
     }
 
-    if (isServiceCenter) {
-      saveDraft({
-        working_days: workingDays,
-        open_time: openTime,
-        close_time: closeTime,
-        specializations,
-        supported_makes: supportedMakes,
-      });
-    } else {
-      saveDraft({
-        delivery_options: deliveryOptions,
-        return_policy: returnPolicy,
-        governorate,
-        city: area,
-        address,
-      });
-    }
+    saveDraft({
+      working_days: workingDays,
+      open_time: openTime,
+      close_time: closeTime,
+      specializations,
+      supported_makes: supportedMakes,
+    });
     router.push(nextStep);
   }
 
@@ -245,32 +168,19 @@ export default function VendorOperationsPage() {
             {t("vendor.applyPages.operationsTitle")}
           </h1>
           <p className="text-slate-500">
-            {isServiceCenter
-              ? t("vendor.applyPages.operationsSubtitleSC")
-              : t("vendor.applyPages.operationsSubtitlePS")}
+            {t("vendor.applyPages.operationsSubtitleSC")}
           </p>
         </div>
 
-        <OnboardingProgress
-          currentStep={isServiceCenter ? 3 : 4}
-          stepsType={isServiceCenter ? "sc" : "ps"}
-        />
+        <OnboardingProgress currentStep={3} stepsType="sc" />
 
         <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 border border-slate-100 dark:border-slate-700 shadow-sm space-y-8">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-black">
               {t("vendor.applyPages.step3Operations")}
             </h2>
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-bold ${
-                isServiceCenter
-                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                  : "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
-              }`}
-            >
-              {isServiceCenter
-                ? t("vendor.login.serviceCenterCard")
-                : t("vendor.login.partsSellerCard")}
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+              {t("vendor.login.serviceCenterCard")}
             </span>
           </div>
 
@@ -553,127 +463,6 @@ export default function VendorOperationsPage() {
             </div>
           )}
 
-          {/* ── Parts Seller: Location ── */}
-          {!isServiceCenter && (
-            <div className="space-y-4">
-              <label className="text-xs font-bold uppercase text-slate-500 tracking-wider block">
-                {t("vendor.applyPages.locationTitle").replace(" & Photos", "")}{" "}
-                *
-              </label>
-
-              {/* Governorate */}
-              <div>
-                <label className="text-xs font-medium text-slate-500 block mb-1">
-                  {t("vendor.applyPages.governorate")} *
-                </label>
-                <select
-                  className={inputCls}
-                  value={governorate}
-                  onChange={(e) => {
-                    setGovernorate(e.target.value);
-                    setArea("");
-                  }}
-                >
-                  <option value="">
-                    {t("vendor.applyPages.selectGovernorate")}
-                  </option>
-                  {GOVERNORATES.map((g) => (
-                    <option key={g} value={g}>
-                      {g}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Area / District */}
-              {governorate && (
-                <div>
-                  <label className="text-xs font-medium text-slate-500 block mb-1">
-                    {t("vendor.applyPages.cityDistrict")}
-                  </label>
-                  <select
-                    className={inputCls}
-                    value={area}
-                    onChange={(e) => setArea(e.target.value)}
-                  >
-                    <option value="">
-                      {t("vendor.applyPages.cityDistrictPlaceholder")}
-                    </option>
-                    {getAreas(governorate).map((a) => (
-                      <option key={a} value={a}>
-                        {a}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {/* Full Address */}
-              <div>
-                <label className="text-xs font-medium text-slate-500 block mb-1">
-                  {t("vendor.applyPages.fullAddress")} *
-                </label>
-                <textarea
-                  className={inputCls + " resize-none"}
-                  rows={2}
-                  placeholder={t("vendor.applyPages.addressPlaceholder")}
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* ── Parts Seller: Delivery Options ── */}
-          {!isServiceCenter && (
-            <div>
-              <label className="text-xs font-bold uppercase text-slate-500 tracking-wider block mb-3">
-                {t("vendor.applyPages.deliveryOptionsLabel")}
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {DELIVERY_OPTIONS.map((opt) => {
-                  const active = deliveryOptions.includes(opt.key);
-                  return (
-                    <button
-                      key={opt.key}
-                      type="button"
-                      onClick={() => toggleDelivery(opt.key)}
-                      className={`flex flex-col gap-1 p-4 border rounded-xl text-left text-sm transition-all ${
-                        active
-                          ? "border-[#FF4B19] bg-[#FF4B19]/5"
-                          : "border-slate-200 dark:border-slate-700 hover:border-[#FF4B19]"
-                      }`}
-                    >
-                      <span className="material-symbols-outlined text-[#FF4B19]">
-                        {opt.icon}
-                      </span>
-                      <span className="font-bold text-sm">{opt.label}</span>
-                      <span className="text-xs text-slate-500">{opt.desc}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* ── Parts Seller: Return Policy ── */}
-          {!isServiceCenter && (
-            <div>
-              <label className="text-xs font-bold uppercase text-slate-500 tracking-wider block mb-2">
-                {t("vendor.applyPages.returnPolicyLabel")} *
-              </label>
-              <select
-                className={inputCls}
-                value={returnPolicy}
-                onChange={(e) => setReturnPolicy(e.target.value)}
-              >
-                {RETURN_POLICIES.map((p) => (
-                  <option key={p}>{p}</option>
-                ))}
-              </select>
-            </div>
-          )}
-
           {/* ── Terms ── */}
           <div className="pt-4 border-t border-slate-100 dark:border-slate-700">
             <label className="flex items-start gap-3 cursor-pointer">
@@ -706,11 +495,9 @@ export default function VendorOperationsPage() {
             >
               {saving
                 ? t("vendor.applyPages.saving")
-                : isServiceCenter
-                  ? t("vendor.applyPages.continueBtn")
-                  : t("vendor.applyPages.submitBtn")}
+                : t("vendor.applyPages.continueBtn")}
               <span className="material-symbols-outlined text-sm">
-                {isServiceCenter ? "arrow_forward" : "check_circle"}
+                arrow_forward
               </span>
             </button>
           </div>

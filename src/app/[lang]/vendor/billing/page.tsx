@@ -61,11 +61,18 @@ function PaymentModal({
   open,
   onClose,
   onSubmitted,
+  bankDetails,
 }: {
   bill: ServiceCenterBillingRecord | null;
   open: boolean;
   onClose: () => void;
   onSubmitted: (billingId: string) => void;
+  bankDetails: {
+    bank: string;
+    accountName: string;
+    accountNumber: string;
+    iban: string;
+  };
 }) {
   const { t } = useLanguage();
   const [submitting, setSubmitting] = useState(false);
@@ -142,9 +149,10 @@ function PaymentModal({
               <Banknote className="h-4 w-4 shrink-0 mt-0.5 text-blue-600" />
               <div>
                 <p className="font-bold">Bank Transfer</p>
-                <p>Bank: CIB Egypt</p>
-                <p>Account name: Garage Egypt Platform</p>
-                <p>Account number: 1234 5678 9012 3456</p>
+                <p>Bank: {bankDetails.bank}</p>
+                <p>Account name: {bankDetails.accountName}</p>
+                <p>Account number: {bankDetails.accountNumber}</p>
+                {bankDetails.iban && <p>IBAN: {bankDetails.iban}</p>}
                 <p className="mt-1 text-xs text-blue-700 dark:text-blue-300">
                   Use your business name as the transfer reference.
                 </p>
@@ -197,6 +205,38 @@ export default function VendorBillingPage() {
   const [payBill, setPayBill] = useState<ServiceCenterBillingRecord | null>(
     null,
   );
+
+  // Bank details from system_settings
+  const [bankDetails, setBankDetails] = useState({
+    bank: "CIB Egypt",
+    accountName: "Garage Egypt Platform",
+    accountNumber: "1234 5678 9012 3456",
+    iban: "",
+  });
+
+  useEffect(() => {
+    (supabase as any)
+      .from("system_settings")
+      .select("key, value")
+      .in("key", [
+        "bank_transfer_bank",
+        "bank_transfer_account_name",
+        "bank_transfer_account_number",
+        "bank_transfer_iban",
+      ])
+      .then(({ data }: { data: { key: string; value: string }[] | null }) => {
+        if (!data) return;
+        const kv = Object.fromEntries(data.map((r: any) => [r.key, r.value]));
+        setBankDetails({
+          bank: kv["bank_transfer_bank"] ?? "CIB Egypt",
+          accountName:
+            kv["bank_transfer_account_name"] ?? "Garage Egypt Platform",
+          accountNumber:
+            kv["bank_transfer_account_number"] ?? "1234 5678 9012 3456",
+          iban: kv["bank_transfer_iban"] ?? "",
+        });
+      });
+  }, [supabase]);
 
   // Current in-progress period (SC only)
   const currentPeriod = useMemo(() => {
@@ -611,6 +651,7 @@ export default function VendorBillingPage() {
           bill={payBill}
           open={!!payBill}
           onClose={() => setPayBill(null)}
+          bankDetails={bankDetails}
           onSubmitted={(billingId) => {
             // Optimistically update local state so badge changes immediately
             setBills((prev) =>

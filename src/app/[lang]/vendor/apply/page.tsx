@@ -9,12 +9,12 @@ const BENEFITS = [
   {
     icon: "groups",
     title: "Reach More Customers",
-    desc: "Tap into thousands of car owners across Egypt actively searching for parts and services every day.",
+    desc: "Tap into thousands of car owners across Egypt actively searching for automotive services every day.",
   },
   {
     icon: "payments",
     title: "Earn More Revenue",
-    desc: "List your inventory or services and start receiving orders with secure, on-time payouts.",
+    desc: "List your services and start receiving bookings with secure, on-time payouts.",
   },
   {
     icon: "trending_up",
@@ -49,7 +49,7 @@ const STEPS = [
 const FAQS = [
   {
     q: "Who can become a vendor on Warshety?",
-    a: "Any registered spare parts shop or automotive service center operating in Egypt. We accept both individual shop owners and multi-branch businesses.",
+    a: "Any registered automotive service center operating in Egypt. We accept both individual shop owners and multi-branch businesses.",
   },
   {
     q: "How long does the approval process take?",
@@ -62,10 +62,6 @@ const FAQS = [
   {
     q: "What documents do I need?",
     a: "A valid commercial registration (سجل تجاري), national ID of the owner, and your business contact details.",
-  },
-  {
-    q: "Can I list both parts and services?",
-    a: "Currently vendors register as either a Spare Parts Shop or a Service Center. Multi-category support is coming soon.",
   },
   {
     q: "How will I receive payments?",
