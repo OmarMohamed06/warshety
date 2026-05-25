@@ -41,7 +41,7 @@ export default function HeroSection() {
       <div className="relative z-10 md:hidden">
         <div className="flex items-end pt-10 gap-0">
           {/* Text — 60% width, padding on the inline-start side */}
-          <div className="w-[60%] shrink-0 pb-6 ps-5 min-w-0">
+          <div className="w-[60%] shrink-0 pb-6 rtl:pb-14 ps-5 min-w-0">
             <h1 className="font-black uppercase leading-tight tracking-tight text-foreground text-[clamp(1.7rem,8.5vw,2.8rem)] text-start break-words">
               {t("home.heroTitle1")}
               <br />

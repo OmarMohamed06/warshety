@@ -9,11 +9,6 @@ const badges = [
     descKey: "home.trust.vettedDesc",
   },
   {
-    icon: "build_circle",
-    titleKey: "home.trust.diagTitle",
-    descKey: "home.trust.diagDesc",
-  },
-  {
     icon: "workspace_premium",
     titleKey: "home.trust.warrantyTitle",
     descKey: "home.trust.warrantyDesc",

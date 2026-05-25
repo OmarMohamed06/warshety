@@ -48,6 +48,7 @@ import {
   Globe,
   ChevronRight,
   Gift,
+  ClipboardList,
 } from "lucide-react";
 
 const LANGUAGES = [
@@ -669,27 +670,6 @@ export default function Navbar() {
           {t("nav.home")}
         </Link>
 
-        {/* Rewards — center feature button */}
-        <Link
-          href="/rewards"
-          className="flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold text-muted-foreground relative"
-        >
-          <div
-            className={`relative -mt-5 w-12 h-12 rounded-full flex items-center justify-center shadow-lg shadow-primary/30 ${
-              pathname.includes("/rewards") ? "bg-primary" : "bg-primary"
-            }`}
-          >
-            <Gift className="w-5 h-5 text-primary-foreground" />
-          </div>
-          <span
-            className={`mt-0.5 ${
-              pathname.includes("/rewards") ? "text-primary font-bold" : ""
-            }`}
-          >
-            {t("nav.rewards")}
-          </span>
-        </Link>
-
         {/* Services */}
         <Link
           href="/services"
@@ -701,6 +681,32 @@ export default function Navbar() {
         >
           <Wrench className="w-5 h-5" />
           {t("nav.services")}
+        </Link>
+
+        {/* Rewards */}
+        <Link
+          href="/rewards"
+          className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-colors ${
+            pathname.includes("/rewards")
+              ? "text-primary"
+              : "text-muted-foreground"
+          }`}
+        >
+          <Gift className="w-5 h-5" />
+          {t("nav.rewards")}
+        </Link>
+
+        {/* My Bookings */}
+        <Link
+          href="/bookings"
+          className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-colors ${
+            pathname.includes("/bookings")
+              ? "text-primary"
+              : "text-muted-foreground"
+          }`}
+        >
+          <ClipboardList className="w-5 h-5" />
+          {t("nav.myBookings")}
         </Link>
 
         {/* More */}
