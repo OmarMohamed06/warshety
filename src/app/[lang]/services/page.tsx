@@ -52,7 +52,7 @@ export default async function AllServiceCentersPage({
       (supabase as any)
         .from("vendors")
         .select(
-          "id, slug, business_name, city, governorate, district, latitude, longitude, featured, featured_priority, rating, total_reviews, cover_image_url, status, specializations",
+          "id, slug, business_name, city, governorate, district, latitude, longitude, featured, featured_priority, rating, total_reviews, cover_image_url, status, specializations, supported_makes",
         )
         .eq("vendor_type", "service_center")
         .in("status", ["approved", "pending"])
@@ -105,7 +105,9 @@ export default async function AllServiceCentersPage({
       rating: v.rating ?? 0,
       reviewCount: v.total_reviews ?? 0,
       completedBookings: bookingCountByVendor.get(v.id) ?? 0,
-      specializations: ["All Makes"],
+      specializations: (v.supported_makes as string[] | null)?.length
+        ? (v.supported_makes as string[])
+        : ["All Makes"],
       services: ((v.specializations ?? []) as string[]).flatMap((entry) => {
         // Support both category keys (legacy) and individual service slugs
         const cat = SERVICE_CATEGORIES.find((c) => c.key === entry);
