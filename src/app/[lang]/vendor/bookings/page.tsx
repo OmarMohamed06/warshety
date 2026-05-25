@@ -118,6 +118,24 @@ export default function VendorBookingsPage() {
   const [cancelConfirmId, setCancelConfirmId] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState("");
   const [viewBooking, setViewBooking] = useState<any | null>(null);
+  // ── Service picker (for completion) ─────────────────────────────────────
+  const [serviceTypes, setServiceTypes] = useState<
+    { id: string; name: string; name_ar: string | null; points: number }[]
+  >([]);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerBookingId, setPickerBookingId] = useState<string | null>(null);
+  const [pickerChecked, setPickerChecked] = useState<Set<string>>(new Set());
+  const [completing, setCompleting] = useState(false);
+
+  // Load active service types once
+  useEffect(() => {
+    (supabase as any)
+      .from("service_type_points")
+      .select("id, name, name_ar, points")
+      .eq("is_active", true)
+      .order("name")
+      .then(({ data }: { data: any[] | null }) => setServiceTypes(data ?? []));
+  }, [supabase]);
 
   const loadBookings = useCallback(async () => {
     if (!vendor) return;
@@ -202,17 +220,61 @@ export default function VendorBookingsPage() {
         /* non-fatal */
       });
     }
+  };
 
-    // Fire-and-forget: notify customer booking completed + points earned
-    if (status === "completed") {
-      fetch("/api/bookings/notify-completed", {
+  // Called when manager picks services and confirms completion
+  const handleCompleteWithServices = async (
+    bookingId: string,
+    serviceTypeIds: string[],
+  ) => {
+    setCompleting(true);
+    // 1. Update booking status
+    const { error } = await supabase
+      .from("bookings")
+      .update({ status: "completed" })
+      .eq("id", bookingId);
+    if (error) {
+      toast.error(`Failed to complete booking: ${error.message}`);
+      setCompleting(false);
+      return;
+    }
+    if (note) {
+      await supabase.from("booking_status_history").insert({
+        booking_id: bookingId,
+        status: "completed",
+        note,
+        changed_at: new Date().toISOString(),
+      });
+      setNote("");
+    }
+    // 2. Award points for selected services
+    if (serviceTypeIds.length > 0) {
+      fetch("/api/bookings/award-points", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookingId }),
+        body: JSON.stringify({ bookingId, serviceTypeIds }),
       }).catch(() => {
         /* non-fatal */
       });
     }
+    // 3. Notify customer
+    fetch("/api/bookings/notify-completed", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bookingId }),
+    }).catch(() => {
+      /* non-fatal */
+    });
+
+    toast.success(t("vendor.statusUpdated") || "Booking completed");
+    setSelected((prev: any) =>
+      prev ? { ...prev, status: "completed" } : null,
+    );
+    setCompleting(false);
+    setPickerOpen(false);
+    setPickerBookingId(null);
+    setPickerChecked(new Set());
+    loadBookings();
   };
 
   const vendorCancelBooking = async (bookingId: string) => {
@@ -683,7 +745,15 @@ export default function VendorBookingsPage() {
                         ? "border-primary text-primary bg-primary/5"
                         : ""
                     }
-                    onClick={() => updateStatus(selected.id, s.value)}
+                    onClick={() => {
+                      if (s.value === "completed") {
+                        setPickerBookingId(selected.id);
+                        setPickerChecked(new Set());
+                        setPickerOpen(true);
+                      } else {
+                        updateStatus(selected.id, s.value);
+                      }
+                    }}
                   >
                     {t(`vendor.statusLabels.${s.value}`) || s.label}
                   </Button>
@@ -831,6 +901,102 @@ export default function VendorBookingsPage() {
                 onClick={() => vendorCancelBooking(cancelConfirmId)}
               >
                 {t("vendor.cancelBookingBtn")}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Service Picker — shown when marking a booking as Completed */}
+      {pickerOpen && pickerBookingId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4 max-h-[90dvh] overflow-y-auto">
+            <div>
+              <p className="font-black text-base">Services Performed</p>
+              <p className="text-sm text-slate-500 mt-0.5">
+                Select all services that were completed for this booking. Points
+                will be awarded accordingly.
+              </p>
+            </div>
+            <div className="space-y-2">
+              {serviceTypes.length === 0 ? (
+                <p className="text-sm text-slate-400 italic">
+                  No service types configured yet.
+                </p>
+              ) : (
+                serviceTypes.map((stp) => {
+                  const checked = pickerChecked.has(stp.id);
+                  return (
+                    <label
+                      key={stp.id}
+                      className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${
+                        checked
+                          ? "border-[#FF4B19] bg-orange-50 dark:bg-orange-950/20"
+                          : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 accent-[#FF4B19]"
+                        checked={checked}
+                        onChange={() => {
+                          setPickerChecked((prev) => {
+                            const next = new Set(prev);
+                            if (next.has(stp.id)) next.delete(stp.id);
+                            else next.add(stp.id);
+                            return next;
+                          });
+                        }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm">{stp.name}</p>
+                        {stp.name_ar && (
+                          <p className="text-xs text-slate-400" dir="rtl">
+                            {stp.name_ar}
+                          </p>
+                        )}
+                      </div>
+                      <span className="text-sm font-black text-orange-500 shrink-0">
+                        {stp.points} pts
+                      </span>
+                    </label>
+                  );
+                })
+              )}
+            </div>
+            {pickerChecked.size > 0 && (
+              <div className="rounded-xl bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 px-4 py-2 text-sm font-bold text-orange-700 dark:text-orange-400">
+                Total points to award:{" "}
+                {serviceTypes
+                  .filter((s) => pickerChecked.has(s.id))
+                  .reduce((sum, s) => sum + s.points, 0)}{" "}
+                pts
+              </div>
+            )}
+            <div className="flex gap-3 pt-1">
+              <Button
+                variant="outline"
+                className="flex-1"
+                disabled={completing}
+                onClick={() => {
+                  setPickerOpen(false);
+                  setPickerBookingId(null);
+                  setPickerChecked(new Set());
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold"
+                disabled={completing}
+                onClick={() =>
+                  handleCompleteWithServices(
+                    pickerBookingId,
+                    Array.from(pickerChecked),
+                  )
+                }
+              >
+                {completing ? "Completing…" : "Mark as Completed"}
               </Button>
             </div>
           </div>

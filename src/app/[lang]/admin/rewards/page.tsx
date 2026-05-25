@@ -28,6 +28,8 @@ import {
   Layers,
   ImageIcon,
   AlertTriangle,
+  Coins,
+  Settings,
   ToggleLeft,
   ToggleRight,
   Upload,
@@ -100,6 +102,19 @@ const CATEGORY_META: Record<
   },
 };
 
+// ── Service Type Points types ─────────────────────────────────────────────────
+
+interface ServiceTypePoint {
+  id: string;
+  name: string;
+  name_ar: string | null;
+  points: number;
+  is_active: boolean;
+  created_at: string;
+}
+
+const EMPTY_STP_FORM = { name: "", name_ar: "", points: "" };
+
 const EMPTY_FORM = {
   title: "",
   title_ar: "",
@@ -118,6 +133,16 @@ const EMPTY_FORM = {
 export default function AdminRewardsPage() {
   const { isRTL } = useLanguage();
   const supabase = createClient();
+
+  // ── Service type points state ─────────────────────────────────────────────
+  const [serviceTypes, setServiceTypes] = useState<ServiceTypePoint[]>([]);
+  const [stpLoading, setStpLoading] = useState(true);
+  const [stpDialogOpen, setStpDialogOpen] = useState(false);
+  const [stpEditingId, setStpEditingId] = useState<string | null>(null);
+  const [stpForm, setStpForm] = useState(EMPTY_STP_FORM);
+  const [stpSaving, setStpSaving] = useState(false);
+  const [stpDeletingId, setStpDeletingId] = useState<string | null>(null);
+  const [stpError, setStpError] = useState<string | null>(null);
 
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [loading, setLoading] = useState(true);
@@ -158,9 +183,112 @@ export default function AdminRewardsPage() {
     setLoading(false);
   }, [supabase]);
 
+  const fetchServiceTypes = useCallback(async () => {
+    setStpLoading(true);
+    const { data } = await (supabase as any)
+      .from("service_type_points")
+      .select("*")
+      .order("name", { ascending: true });
+    setServiceTypes((data as ServiceTypePoint[]) ?? []);
+    setStpLoading(false);
+  }, [supabase]);
+
   useEffect(() => {
     fetchRewards();
-  }, [fetchRewards]);
+    fetchServiceTypes();
+  }, [fetchRewards, fetchServiceTypes]);
+
+  // ── Service type points CRUD ──────────────────────────────────────────────
+
+  function openStpCreate() {
+    setStpEditingId(null);
+    setStpForm(EMPTY_STP_FORM);
+    setStpError(null);
+    setStpDialogOpen(true);
+  }
+
+  function openStpEdit(stp: ServiceTypePoint) {
+    setStpEditingId(stp.id);
+    setStpForm({
+      name: stp.name,
+      name_ar: stp.name_ar ?? "",
+      points: String(stp.points),
+    });
+    setStpError(null);
+    setStpDialogOpen(true);
+  }
+
+  async function handleStpSave() {
+    if (!stpForm.name.trim()) {
+      setStpError("Name (English) is required.");
+      return;
+    }
+    const pts = Number(stpForm.points);
+    if (isNaN(pts) || pts < 0) {
+      setStpError("Points must be a non-negative number.");
+      return;
+    }
+    setStpSaving(true);
+    setStpError(null);
+    const payload = {
+      name: stpForm.name.trim(),
+      name_ar: stpForm.name_ar.trim() || null,
+      points: pts,
+      updated_at: new Date().toISOString(),
+    };
+    let err: { message: string } | null = null;
+    if (stpEditingId) {
+      const res = await (supabase as any)
+        .from("service_type_points")
+        .update(payload)
+        .eq("id", stpEditingId);
+      err = res.error;
+    } else {
+      const res = await (supabase as any)
+        .from("service_type_points")
+        .insert({ ...payload, is_active: true });
+      err = res.error;
+    }
+    setStpSaving(false);
+    if (err) {
+      setStpError(err.message);
+      return;
+    }
+    setStpDialogOpen(false);
+    showToast(stpEditingId ? "Service type updated." : "Service type created.");
+    fetchServiceTypes();
+  }
+
+  async function handleStpDelete(id: string, name: string) {
+    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+    setStpDeletingId(id);
+    const { error } = await (supabase as any)
+      .from("service_type_points")
+      .delete()
+      .eq("id", id);
+    setStpDeletingId(null);
+    if (error) {
+      showToast(`Error: ${error.message}`, false);
+    } else {
+      showToast("Service type deleted.");
+      setServiceTypes((prev) => prev.filter((s) => s.id !== id));
+    }
+  }
+
+  async function handleStpToggleActive(stp: ServiceTypePoint) {
+    await (supabase as any)
+      .from("service_type_points")
+      .update({
+        is_active: !stp.is_active,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", stp.id);
+    setServiceTypes((prev) =>
+      prev.map((s) =>
+        s.id === stp.id ? { ...s, is_active: !stp.is_active } : s,
+      ),
+    );
+  }
 
   // ── Dialog open/close ────────────────────────────────────────────────────────
 
@@ -596,7 +724,184 @@ export default function AdminRewardsPage() {
         )}
       </div>
 
-      {/* ── Create / Edit Dialog ─────────────────────────────────────────────── */}
+      {/* ── Service Type Points Section ──────────────────────────────────── */}
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 overflow-hidden mt-2">
+        <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+          <div>
+            <h2 className="font-black flex items-center gap-2">
+              <Settings size={17} className="text-orange-500" />
+              Service Type Points
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Points earned per service type — shown to vendors/managers when
+              marking a booking as completed.
+            </p>
+          </div>
+          <Button
+            size="sm"
+            onClick={openStpCreate}
+            className="gap-1.5 font-bold shrink-0"
+          >
+            <PlusCircle size={14} /> Add Service Type
+          </Button>
+        </div>
+
+        {stpLoading ? (
+          <div className="divide-y divide-slate-100 dark:divide-slate-700">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="px-5 py-3 flex items-center gap-4 animate-pulse"
+              >
+                <div className="flex-1 h-4 bg-slate-200 dark:bg-slate-700 rounded" />
+                <div className="w-16 h-4 bg-slate-100 dark:bg-slate-600 rounded" />
+              </div>
+            ))}
+          </div>
+        ) : serviceTypes.length === 0 ? (
+          <div className="py-10 text-center text-slate-400 text-sm">
+            No service types yet. Add your first one.
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100 dark:divide-slate-700">
+            {serviceTypes.map((stp) => (
+              <div
+                key={stp.id}
+                className={cn(
+                  "px-5 py-3 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors",
+                  !stp.is_active && "opacity-50",
+                )}
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm">{stp.name}</p>
+                  {stp.name_ar && (
+                    <p className="text-xs text-slate-400" dir="rtl">
+                      {stp.name_ar}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-1 text-sm font-black text-orange-500">
+                  <Coins size={14} />
+                  {stp.points} pts
+                </div>
+                <button
+                  onClick={() => handleStpToggleActive(stp)}
+                  className={cn(
+                    "text-xs font-bold px-2 py-0.5 rounded-full border transition-colors",
+                    stp.is_active
+                      ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+                      : "bg-slate-100 text-slate-400 border-slate-200",
+                  )}
+                >
+                  {stp.is_active ? "Active" : "Inactive"}
+                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => openStpEdit(stp)}
+                    className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 transition-colors"
+                  >
+                    <Pencil size={14} />
+                  </button>
+                  <button
+                    onClick={() => handleStpDelete(stp.id, stp.name)}
+                    disabled={stpDeletingId === stp.id}
+                    className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-slate-400 hover:text-red-600 transition-colors disabled:opacity-40"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── Service Type Points Dialog ───────────────────────────────────── */}
+      <Dialog
+        open={stpDialogOpen}
+        onOpenChange={(v) => !v && setStpDialogOpen(false)}
+      >
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-black flex items-center gap-2">
+              <Settings size={16} className="text-orange-500" />
+              {stpEditingId ? "Edit Service Type" : "Add Service Type"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            {stpError && (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+                <AlertTriangle size={14} /> {stpError}
+              </div>
+            )}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold">
+                Name (English) <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                placeholder="e.g. Oil Change"
+                value={stpForm.name}
+                onChange={(e) =>
+                  setStpForm((f) => ({ ...f, name: e.target.value }))
+                }
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold">Name (Arabic)</Label>
+              <Input
+                placeholder="مثال: تغيير زيت"
+                value={stpForm.name_ar}
+                onChange={(e) =>
+                  setStpForm((f) => ({ ...f, name_ar: e.target.value }))
+                }
+                dir="rtl"
+                className="text-right"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold">
+                Points Earned <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                type="number"
+                min={0}
+                placeholder="e.g. 150"
+                value={stpForm.points}
+                onChange={(e) =>
+                  setStpForm((f) => ({ ...f, points: e.target.value }))
+                }
+              />
+            </div>
+            <div className="flex justify-end gap-3 pt-1">
+              <Button
+                variant="outline"
+                onClick={() => setStpDialogOpen(false)}
+                disabled={stpSaving}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleStpSave}
+                disabled={stpSaving}
+                className="gap-2 font-bold min-w-[110px]"
+              >
+                {stpSaving ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />{" "}
+                    Saving…
+                  </>
+                ) : stpEditingId ? (
+                  "Save Changes"
+                ) : (
+                  "Create"
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Create / Edit Reward Dialog ──────────────────────────────────── */}
       <Dialog
         open={dialogOpen}
         onOpenChange={(v) => {
