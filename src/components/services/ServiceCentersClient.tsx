@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import NextImage from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import { tGov, tArea } from "@/lib/locationData";
 import { LocaleLink as Link } from "@/components/ui/locale-link";
@@ -548,11 +549,13 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                   {/* Image */}
                   <div className="w-full h-40 relative">
                     {sc.image ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
+                      <NextImage
                         src={sc.image}
                         alt={sc.name}
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover"
+                        quality={85}
                       />
                     ) : (
                       <div className="w-full h-full bg-muted flex items-center justify-center">

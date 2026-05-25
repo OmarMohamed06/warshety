@@ -1,5 +1,6 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
+import NextImage from "next/image";
 import { notFound } from "next/navigation";
 import { servicePageSeo, pick } from "@/utils/seo";
 import { createClient } from "@/lib/supabase/server";
@@ -254,15 +255,18 @@ export default async function ServiceCenterPage({ params }: Props) {
   return (
     <div className="min-h-screen bg-muted/40">
       {/* Hero */}
-      <div
-        className="h-72 bg-cover bg-center relative"
-        style={
-          center.image
-            ? { backgroundImage: `url('${center.image}')` }
-            : undefined
-        }
-      >
-        {!center.image && (
+      <div className="h-72 relative">
+        {center.image ? (
+          <NextImage
+            src={center.image}
+            alt={center.name}
+            fill
+            sizes="100vw"
+            className="object-cover object-center"
+            quality={90}
+            priority
+          />
+        ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-slate-700 to-slate-900" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
