@@ -686,14 +686,14 @@ export default function Navbar() {
         {/* Rewards */}
         <Link
           href="/rewards"
-          className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-colors ${
-            pathname.includes("/rewards")
-              ? "text-primary"
-              : "text-muted-foreground"
-          }`}
+          className="flex-1 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold text-muted-foreground relative"
         >
-          <Gift className="w-5 h-5" />
-          {t("nav.rewards")}
+          <div className="relative -mt-5 w-12 h-12 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
+            <Gift className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <span className={`mt-0.5 ${pathname.includes("/rewards") ? "text-primary font-bold" : ""}`}>
+            {t("nav.rewards")}
+          </span>
         </Link>
 
         {/* My Bookings */}

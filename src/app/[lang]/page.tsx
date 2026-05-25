@@ -45,9 +45,9 @@ export default async function HomePage() {
     <div className="w-full overflow-x-hidden">
       <HeroSection />
       <TrustBadges />
-      <HowItWorks />
       <BrowseServices />
       <FeaturedServiceCenters initialData={centersResult.data ?? undefined} />
+      <HowItWorks />
     </div>
   );
 }
