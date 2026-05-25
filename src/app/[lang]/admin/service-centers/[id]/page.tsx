@@ -43,28 +43,24 @@ export default function ServiceCenterDetailPage({
   const [isApplication, setIsApplication] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
-  // points_reward inline edit: map of serviceId → draft value
-  const [pointsDraft, setPointsDraft] = useState<Record<string, string>>({});
-  const [savingPoints, setSavingPoints] = useState<string | null>(null);
+  // points_per_booking inline edit at vendor level
+  const [vendorPtsDraft, setVendorPtsDraft] = useState<string>("0");
+  const [savingVendorPts, setSavingVendorPts] = useState(false);
   const pointsToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  async function savePoints(serviceId: string) {
-    const pts = Number(pointsDraft[serviceId]);
+  async function saveVendorPoints() {
+    const pts = Number(vendorPtsDraft);
     if (isNaN(pts) || pts < 0) return;
-    setSavingPoints(serviceId);
+    setSavingVendorPts(true);
     const { error } = await (supabase as any)
-      .from("services")
-      .update({ points_reward: pts })
-      .eq("id", serviceId);
-    setSavingPoints(null);
+      .from("vendors")
+      .update({ points_per_booking: pts })
+      .eq("id", id);
+    setSavingVendorPts(false);
     if (!error) {
-      setServices((prev) =>
-        prev.map((s) =>
-          String(s.id) === serviceId ? { ...s, points_reward: pts } : s,
-        ),
-      );
+      setData((prev) => (prev ? { ...prev, points_per_booking: pts } : prev));
       if (pointsToastTimer.current) clearTimeout(pointsToastTimer.current);
-      setMsg(`Points updated to ${pts} pts ✓`);
+      setMsg(`Points per booking updated to ${pts} pts ✓`);
       pointsToastTimer.current = setTimeout(() => setMsg(null), 3000);
     } else {
       setMsg(`Error: ${error.message}`);
@@ -82,6 +78,9 @@ export default function ServiceCenterDetailPage({
         .maybeSingle();
       if (vendor) {
         setData(vendor);
+        setVendorPtsDraft(
+          String((vendor as Record<string, unknown>).points_per_booking ?? 0),
+        );
         setIsApplication(false);
         const [svcRes, revRes, bkRes] = await Promise.all([
           supabase
@@ -590,6 +589,45 @@ export default function ServiceCenterDetailPage({
           </div>
         )}
 
+      {/* Points per booking — vendor-level */}
+      {!isApplication && (
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-6">
+          <h2 className="font-black mb-1">Loyalty Points per Booking</h2>
+          <p className="text-xs text-slate-400 mb-4">
+            Automatically awarded to the customer when any booking at this
+            service center is marked completed.
+          </p>
+          <div className="flex items-center gap-3">
+            <input
+              type="number"
+              min={0}
+              value={vendorPtsDraft}
+              onChange={(e) => setVendorPtsDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (
+                  e.key === "Enter" &&
+                  Number(vendorPtsDraft) !==
+                    Number(data?.points_per_booking ?? 0)
+                )
+                  saveVendorPoints();
+              }}
+              className="w-28 px-3 py-2 text-sm font-bold rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-[#FF4B19]/30"
+            />
+            <span className="text-sm text-slate-400">pts</span>
+            {Number(vendorPtsDraft) !==
+              Number(data?.points_per_booking ?? 0) && (
+              <button
+                onClick={saveVendorPoints}
+                disabled={savingVendorPts}
+                className="px-4 py-2 text-sm font-bold rounded-xl bg-[#FF4B19] text-white hover:bg-[#e04316] disabled:opacity-50 transition-colors"
+              >
+                {savingVendorPts ? "Saving…" : "Save"}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Services */}
       {!isApplication && services.length > 0 && (
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
@@ -601,9 +639,6 @@ export default function ServiceCenterDetailPage({
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
             {services.map((s) => {
               const sid = String(s.id);
-              const currentPts = Number(s.points_reward ?? 0);
-              const draft = pointsDraft[sid] ?? String(currentPts);
-              const isDirty = Number(draft) !== currentPts;
               return (
                 <div
                   key={sid}
@@ -618,39 +653,6 @@ export default function ServiceCenterDetailPage({
                       {Number(s.duration_minutes as number)} min
                     </p>
                   )}
-                  {/* Points reward inline edit */}
-                  <div className="pt-1 border-t border-slate-200 dark:border-slate-700">
-                    <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">
-                      Points on completion
-                    </p>
-                    <div className="flex items-center gap-1.5">
-                      <input
-                        type="number"
-                        min={0}
-                        value={draft}
-                        onChange={(e) =>
-                          setPointsDraft((prev) => ({
-                            ...prev,
-                            [sid]: e.target.value,
-                          }))
-                        }
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && isDirty) savePoints(sid);
-                        }}
-                        className="w-20 px-2 py-1 text-sm font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-[#FF4B19]/30"
-                      />
-                      <span className="text-xs text-slate-400">pts</span>
-                      {isDirty && (
-                        <button
-                          onClick={() => savePoints(sid)}
-                          disabled={savingPoints === sid}
-                          className="px-2 py-1 text-xs font-bold rounded-lg bg-[#FF4B19] text-white hover:bg-[#e04316] disabled:opacity-50 transition-colors"
-                        >
-                          {savingPoints === sid ? "…" : "Save"}
-                        </button>
-                      )}
-                    </div>
-                  </div>
                 </div>
               );
             })}
