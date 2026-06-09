@@ -76,7 +76,9 @@ export default async function LocaleLayout({
       const { data: profile } = await withTimeout(
         supabase.from("users").select("*").eq("id", authUser.id).single(),
         3000,
-        { data: null } as { data: DbUser | null },
+        { data: null } as unknown as Awaited<
+          ReturnType<ReturnType<typeof supabase.from>["select"]>
+        >,
       );
 
       if (profile) {
@@ -90,7 +92,9 @@ export default async function LocaleLayout({
               .eq("user_id", authUser.id)
               .single(),
             3000,
-            { data: null } as { data: DbVendor | null },
+            { data: null } as unknown as Awaited<
+              ReturnType<ReturnType<typeof supabase.from>["select"]>
+            >,
           );
           initialVendor = (vendorRow as DbVendor) ?? null;
         } else if (profile.role === "manager") {
@@ -103,7 +107,9 @@ export default async function LocaleLayout({
               .limit(1)
               .maybeSingle(),
             3000,
-            { data: null } as { data: { branch_id?: string } | null },
+            { data: null } as unknown as Awaited<
+              ReturnType<ReturnType<typeof supabase.from>["select"]>
+            >,
           );
           initialManagedBranchId = assignment?.branch_id ?? null;
         }
