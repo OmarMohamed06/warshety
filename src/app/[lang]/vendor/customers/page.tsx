@@ -129,7 +129,9 @@ export default function VendorCustomersPage() {
   );
 
   const isService = vendorType === "service_center";
-  const activityLabel = isService ? "Bookings" : "Orders";
+  const activityLabel = isService
+    ? t("vendor.bookingsTitle")
+    : t("vendor.ordersTitle");
 
   return (
     <VendorLayout>

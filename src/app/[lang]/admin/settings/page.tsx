@@ -100,7 +100,9 @@ export default function SettingsPage() {
   function renderValue(s: Setting) {
     const val = edited[s.key] ?? s.value;
     const isBool = s.value === "true" || s.value === "false";
-    const isNumber = !isBool && !isNaN(Number(s.value));
+    const forceText = s.key.startsWith("bank_transfer_");
+    const isNumber =
+      !isBool && !forceText && s.value.trim() !== "" && !isNaN(Number(s.value));
 
     if (isBool) {
       const checked = val === "true";
@@ -135,7 +137,7 @@ export default function SettingsPage() {
           onChange={(e) =>
             setEdited((prev) => ({ ...prev, [s.key]: e.target.value }))
           }
-          className="w-36 px-3 py-1.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-[#FF4B19]/30 text-right font-mono"
+          className={`px-3 py-1.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-[#FF4B19]/30 font-mono ${forceText ? "w-64" : "w-36 text-right"}`}
         />
       </div>
     );

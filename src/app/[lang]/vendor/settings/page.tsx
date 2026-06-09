@@ -171,7 +171,7 @@ export default function VendorSettingsPage() {
               <Input
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
-                placeholder="Your Business Name"
+                placeholder={t("vendor.businessNamePlaceholder")}
               />
             </div>
             <div className="space-y-1">
@@ -195,7 +195,7 @@ export default function VendorSettingsPage() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
-                placeholder="Tell customers about your business…"
+                placeholder={t("vendor.descriptionPlaceholder")}
               />
             </div>
           </CardContent>
@@ -213,7 +213,7 @@ export default function VendorSettingsPage() {
                 <Input
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+20 1X XXXX XXXX"
+                  placeholder={t("vendor.phonePlaceholder")}
                   type="tel"
                 />
               </div>
@@ -229,7 +229,7 @@ export default function VendorSettingsPage() {
             </div>
             <p className="text-xs text-muted-foreground">
               {/* Auth login email is shown read-only in Account Info below */}
-              This is your public business contact — not your login email.
+              {t("vendor.publicContactNote")}
             </p>
           </CardContent>
         </Card>
@@ -283,12 +283,11 @@ export default function VendorSettingsPage() {
               <Input
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                placeholder="Street, building, district…"
+                placeholder={t("vendor.addressPlaceholder")}
               />
             </div>
           </CardContent>
         </Card>
-
 
         {/* Save button */}
         <Button

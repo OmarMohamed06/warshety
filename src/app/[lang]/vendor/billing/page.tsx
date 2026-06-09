@@ -114,24 +114,30 @@ function PaymentModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CreditCard className="h-5 w-5 text-primary" />
-            Pay Invoice
+            {t("vendor.billing.payInvoiceTitle")}
           </DialogTitle>
         </DialogHeader>
 
         {/* Invoice summary */}
         <div className="bg-muted rounded-xl p-4 space-y-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Period</span>
+            <span className="text-muted-foreground">
+              {t("vendor.billing.colPeriod")}
+            </span>
             <span className="font-semibold">
               {fmt(bill.period_start)} – {fmt(bill.period_end)}
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Bookings</span>
+            <span className="text-muted-foreground">
+              {t("vendor.billing.colBookings")}
+            </span>
             <span className="font-semibold">{bill.bookings_count}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Fee / Booking</span>
+            <span className="text-muted-foreground">
+              {t("vendor.billing.colFee")}
+            </span>
             <span className="font-semibold">{egp(bill.booking_fee)}</span>
           </div>
           <Separator />
@@ -143,25 +149,38 @@ function PaymentModal({
 
         {/* Payment instructions */}
         <div className="space-y-3">
-          <p className="text-sm font-semibold">How to pay:</p>
+          <p className="text-sm font-semibold">
+            {t("vendor.billing.howToPay")}
+          </p>
           <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-xl p-4 space-y-2 text-sm text-blue-900 dark:text-blue-200">
             <div className="flex items-start gap-2">
               <Banknote className="h-4 w-4 shrink-0 mt-0.5 text-blue-600" />
               <div>
-                <p className="font-bold">Bank Transfer</p>
-                <p>Bank: {bankDetails.bank}</p>
-                <p>Account name: {bankDetails.accountName}</p>
-                <p>Account number: {bankDetails.accountNumber}</p>
-                {bankDetails.iban && <p>IBAN: {bankDetails.iban}</p>}
+                <p className="font-bold">{t("vendor.billing.bankTransfer")}</p>
+                <p>
+                  {t("vendor.billing.bankLabel")} {bankDetails.bank}
+                </p>
+                <p>
+                  {t("vendor.billing.accountNameLabel")}{" "}
+                  {bankDetails.accountName}
+                </p>
+                <p>
+                  {t("vendor.billing.accountNumberLabel")}{" "}
+                  {bankDetails.accountNumber}
+                </p>
+                {bankDetails.iban && (
+                  <p>
+                    {t("vendor.billing.ibanLabel")} {bankDetails.iban}
+                  </p>
+                )}
                 <p className="mt-1 text-xs text-blue-700 dark:text-blue-300">
-                  Use your business name as the transfer reference.
+                  {t("vendor.billing.transferReferenceNote")}
                 </p>
               </div>
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            After transferring, click the button below. Our team will verify and
-            mark your invoice as paid within 1–2 business days.
+            {t("vendor.billing.afterTransferNote")}
           </p>
         </div>
 
@@ -171,10 +190,10 @@ function PaymentModal({
           className="w-full"
         >
           {submitting
-            ? "Submitting…"
+            ? t("vendor.billing.submitting")
             : submitted
-              ? "Payment Submitted ✓"
-              : "I've Transferred — Notify Team"}
+              ? t("vendor.billing.paymentSubmitted")
+              : t("vendor.billing.notifyTeam")}
         </Button>
       </DialogContent>
     </Dialog>

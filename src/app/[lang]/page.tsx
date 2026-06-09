@@ -8,6 +8,7 @@ import BrowseServices from "@/components/home/BrowseServices";
 import FeaturedServiceCenters from "@/components/home/FeaturedServiceCenters";
 import { generateSeoMeta } from "@/utils/seo";
 import { createClient } from "@/lib/supabase/server";
+import { withTimeout } from "@/lib/utils";
 
 interface Props {
   params: Promise<{ lang: string }>;
@@ -31,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function HomePage() {
   const supabase = await createClient();
 
-  const centersResult = await supabase
+  const centersQuery = supabase
     .from("vendors")
     .select(
       "id, business_name, business_name_ar, city, rating, total_reviews, cover_image_url, supported_makes, completed_bookings",
@@ -40,6 +41,14 @@ export default async function HomePage() {
     .eq("vendor_type", "service_center")
     .order("completed_bookings", { ascending: false })
     .limit(8);
+
+  // Wrap in a timeout: if the DB is slow/cold, render the page shell instantly
+  // with `data: null`. FeaturedServiceCenters then falls back to a client-side
+  // fetch (it only skips client fetch when `initialData` is a defined array),
+  // so the homepage never hangs waiting on this query.
+  const centersResult = await withTimeout(centersQuery, 2500, {
+    data: null,
+  } as Awaited<typeof centersQuery>);
 
   return (
     <div className="w-full overflow-x-hidden">

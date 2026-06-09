@@ -50,7 +50,7 @@ export default function ServiceCenterLoginPage() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      setError("Sign-in failed. Please try again.");
+      setError(t("vendor.login.errSignInFailed"));
       setLoading(false);
       return;
     }
@@ -64,7 +64,7 @@ export default function ServiceCenterLoginPage() {
 
     if (profile?.role !== "vendor" && profile?.role !== "admin") {
       await supabase.auth.signOut();
-      setError("This portal is for vendor accounts only.");
+      setError(t("vendor.login.errVendorOnly"));
       setLoading(false);
       return;
     }
@@ -78,20 +78,14 @@ export default function ServiceCenterLoginPage() {
 
     if (vendor?.vendor_type !== "service_center" && profile?.role !== "admin") {
       await supabase.auth.signOut();
-      setError(
-        "This login is for Service Centers only. " +
-          "If you're a Parts Seller, use the Parts Seller sign in instead.",
-      );
+      setError(t("vendor.login.errServiceCenterOnly"));
       setLoading(false);
       return;
     }
 
     if (vendor?.status === "pending") {
       await supabase.auth.signOut();
-      setError(
-        "Your application is still under review. " +
-          "You'll receive an email once it's approved.",
-      );
+      setError(t("vendor.login.errUnderReview"));
       setLoading(false);
       return;
     }
@@ -147,7 +141,7 @@ export default function ServiceCenterLoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@servicecenter.com"
+                placeholder={t("vendor.login.emailPlaceholder")}
                 required
                 autoFocus
                 autoComplete="email"
@@ -172,7 +166,7 @@ export default function ServiceCenterLoginPage() {
                   type={showPw ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Your password"
+                  placeholder={t("vendor.login.passwordPlaceholder")}
                   required
                   autoComplete="current-password"
                   className="pr-10"

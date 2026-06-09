@@ -1,20 +1,63 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 const STEPS_SC = [
-  { id: 1, label: "Application", path: "/vendor/apply/form" },
-  { id: 2, label: "Legal & ID", path: "/vendor/apply/legal" },
-  { id: 3, label: "Operations", path: "/vendor/apply/operations" },
-  { id: 4, label: "Location", path: "/vendor/apply/location" },
-  { id: 5, label: "Account", path: "/vendor/apply/account" },
+  {
+    id: 1,
+    labelKey: "vendor.onboarding.stepApplication",
+    path: "/vendor/apply/form",
+  },
+  {
+    id: 2,
+    labelKey: "vendor.onboarding.stepLegalId",
+    path: "/vendor/apply/legal",
+  },
+  {
+    id: 3,
+    labelKey: "vendor.onboarding.stepOperations",
+    path: "/vendor/apply/operations",
+  },
+  {
+    id: 4,
+    labelKey: "vendor.onboarding.stepLocation",
+    path: "/vendor/apply/location",
+  },
+  {
+    id: 5,
+    labelKey: "vendor.onboarding.stepAccount",
+    path: "/vendor/apply/account",
+  },
 ];
 
 const STEPS_PS = [
-  { id: 1, label: "Application", path: "/vendor/apply/form" },
-  { id: 2, label: "Legal & ID", path: "/vendor/apply/legal" },
-  { id: 3, label: "Bank Details", path: "/vendor/apply/bank" },
-  { id: 4, label: "Operations", path: "/vendor/apply/operations" },
-  { id: 5, label: "Account", path: "/vendor/apply/account" },
+  {
+    id: 1,
+    labelKey: "vendor.onboarding.stepApplication",
+    path: "/vendor/apply/form",
+  },
+  {
+    id: 2,
+    labelKey: "vendor.onboarding.stepLegalId",
+    path: "/vendor/apply/legal",
+  },
+  {
+    id: 3,
+    labelKey: "vendor.onboarding.stepBankDetails",
+    path: "/vendor/apply/bank",
+  },
+  {
+    id: 4,
+    labelKey: "vendor.onboarding.stepOperations",
+    path: "/vendor/apply/operations",
+  },
+  {
+    id: 5,
+    labelKey: "vendor.onboarding.stepAccount",
+    path: "/vendor/apply/account",
+  },
 ];
 
 export default function OnboardingProgress({
@@ -27,6 +70,7 @@ export default function OnboardingProgress({
   stepsType?: "sc" | "ps";
   totalSteps?: number;
 }) {
+  const { t } = useLanguage();
   const STEPS = stepsType === "ps" ? STEPS_PS : STEPS_SC;
   return (
     <div className="flex items-center w-full mb-10">
@@ -53,7 +97,7 @@ export default function OnboardingProgress({
                 currentStep === step.id ? "text-[#FF4B19]" : "text-slate-400"
               }`}
             >
-              {step.label}
+              {t(step.labelKey)}
             </span>
           </div>
           {i < STEPS.length - 1 && (

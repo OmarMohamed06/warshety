@@ -88,30 +88,7 @@ const STATUS_CLS: Record<string, string> = {
   cancelled: "bg-slate-100 text-slate-500 border-slate-200",
 };
 
-const DAY_NAMES_FULL = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-];
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const MONTH_NAMES = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -337,14 +314,14 @@ export default function VendorCalendarPage() {
             selectedBranch,
             selectedDate,
             [slot.time],
-            "Blocked by vendor",
+            t("vendor.blockedByVendor"),
             newBlocked,
           )
         : await blockSlots(
             vendor.id,
             selectedDate,
             [slot.time],
-            "Blocked by vendor",
+            t("vendor.blockedByVendor"),
             newBlocked,
           );
     }
@@ -454,7 +431,8 @@ export default function VendorCalendarPage() {
               {t("vendor.calendarTitle")}
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              {MONTH_NAMES[month]} {year} &mdash; {t("vendor.calendarSubtitle")}
+              {t(`vendor.calMonths.${month}`)} {year} &mdash;{" "}
+              {t("vendor.calendarSubtitle")}
               <span className="ml-2 text-primary font-medium">
                 &middot;{" "}
                 {selectedBranch
@@ -515,12 +493,12 @@ export default function VendorCalendarPage() {
           <Card className="lg:col-span-2">
             <CardContent className="p-4">
               <div className="grid grid-cols-7 gap-px mb-2">
-                {DAYS.map((d) => (
+                {DAYS.map((d, i) => (
                   <div
                     key={d}
                     className="text-center text-xs font-bold text-muted-foreground py-1"
                   >
-                    {d}
+                    {t(`vendor.calDaysShort.${i}`)}
                   </div>
                 ))}
               </div>
@@ -1092,7 +1070,7 @@ export default function VendorCalendarPage() {
                       !h.isOpen && "text-muted-foreground",
                     )}
                   >
-                    {DAY_NAMES_FULL[h.dayOfWeek].slice(0, 3)}
+                    {t(`vendor.calDaysShort.${h.dayOfWeek}`)}
                   </Label>
                 </div>
                 {h.isOpen ? (

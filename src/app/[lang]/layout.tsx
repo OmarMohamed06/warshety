@@ -1,5 +1,6 @@
 import { Providers } from "@/app/providers";
 import { createClient } from "@/lib/supabase/server";
+import { withTimeout } from "@/lib/utils";
 import type { Metadata } from "next";
 import type { Locale } from "@/context/LanguageContext";
 import type { DbUser, DbVendor } from "@/types/database";
@@ -66,33 +67,44 @@ export default async function LocaleLayout({
     const supabase = await createClient();
     const {
       data: { user: authUser },
-    } = await supabase.auth.getUser();
+    } = await withTimeout(supabase.auth.getUser(), 3000, {
+      data: { user: null },
+      error: null,
+    } as Awaited<ReturnType<typeof supabase.auth.getUser>>);
 
     if (authUser) {
-      const { data: profile } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", authUser.id)
-        .single();
+      const { data: profile } = await withTimeout(
+        supabase.from("users").select("*").eq("id", authUser.id).single(),
+        3000,
+        { data: null } as { data: DbUser | null },
+      );
 
       if (profile) {
         initialProfile = profile as DbUser;
 
         if (profile.role === "vendor") {
-          const { data: vendorRow } = await supabase
-            .from("vendors")
-            .select("*")
-            .eq("user_id", authUser.id)
-            .single();
+          const { data: vendorRow } = await withTimeout(
+            supabase
+              .from("vendors")
+              .select("*")
+              .eq("user_id", authUser.id)
+              .single(),
+            3000,
+            { data: null } as { data: DbVendor | null },
+          );
           initialVendor = (vendorRow as DbVendor) ?? null;
         } else if (profile.role === "manager") {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data: assignment } = await (supabase as any)
-            .from("branch_users")
-            .select("branch_id")
-            .eq("user_id", authUser.id)
-            .limit(1)
-            .maybeSingle();
+          const { data: assignment } = await withTimeout(
+            (supabase as any)
+              .from("branch_users")
+              .select("branch_id")
+              .eq("user_id", authUser.id)
+              .limit(1)
+              .maybeSingle(),
+            3000,
+            { data: null } as { data: { branch_id?: string } | null },
+          );
           initialManagedBranchId = assignment?.branch_id ?? null;
         }
       }

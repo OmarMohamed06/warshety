@@ -192,7 +192,7 @@ export default function VendorBookingsPage() {
       .update({ status })
       .eq("id", bookingId);
     if (error) {
-      toast.error(`Failed to update status: ${error.message}`);
+      toast.error(`${t("vendor.errUpdateStatus")}: ${error.message}`);
       setUpdating(false);
       return;
     }
@@ -234,7 +234,7 @@ export default function VendorBookingsPage() {
       .update({ status: "completed" })
       .eq("id", bookingId);
     if (error) {
-      toast.error(`Failed to complete booking: ${error.message}`);
+      toast.error(`${t("vendor.errCompleteBooking")}: ${error.message}`);
       setCompleting(false);
       return;
     }
@@ -287,7 +287,7 @@ export default function VendorBookingsPage() {
     await supabase.from("booking_status_history").insert({
       booking_id: bookingId,
       status: "cancelled",
-      note: reason ?? "Cancelled by vendor",
+      note: reason ?? t("vendor.cancelledByVendor"),
       changed_at: new Date().toISOString(),
     });
     // In-app notification to customer

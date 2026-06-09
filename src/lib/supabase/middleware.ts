@@ -1,6 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/types/database";
+import { withTimeout } from "@/lib/utils";
+
+type GetUserResult = Awaited<
+  ReturnType<ReturnType<typeof createServerClient<Database>>["auth"]["getUser"]>
+>;
 
 /**
  * Supabase middleware helper.
@@ -33,9 +38,16 @@ export async function updateSession(request: NextRequest) {
   );
 
   // Refresh session — IMPORTANT: do not remove this.
+  // Wrapped in a timeout: if Supabase Auth is slow/cold/unreachable, we must
+  // NOT block every request indefinitely. On timeout we treat the user as
+  // unauthenticated and pass through — the page render degrades gracefully
+  // instead of the whole site hanging ("buffering forever").
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await withTimeout<GetUserResult>(supabase.auth.getUser(), 3000, {
+    data: { user: null },
+    error: null,
+  } as unknown as GetUserResult);
 
   return { supabaseResponse, user, supabase };
 }

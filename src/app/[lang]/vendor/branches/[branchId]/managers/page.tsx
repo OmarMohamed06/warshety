@@ -121,7 +121,7 @@ export default function BranchManagersPage({
     ]);
 
     if (!branchData) {
-      setError("Branch not found");
+      setError(t("vendor.errBranchNotFound"));
       setLoading(false);
       return;
     }
@@ -149,7 +149,7 @@ export default function BranchManagersPage({
 
   async function handleAssign() {
     if (!assignEmail.trim()) {
-      setAssignError("Email is required");
+      setAssignError(t("vendor.applyPages.errorEmailRequired"));
       return;
     }
     setAssigning(true);
@@ -168,7 +168,10 @@ export default function BranchManagersPage({
     }
 
     setAssignSuccess(
-      `${data?.user?.email ?? assignEmail} has been assigned as manager.`,
+      t("vendor.bmAssignSuccess").replace(
+        "{email}",
+        data?.user?.email ?? assignEmail,
+      ),
     );
     setAssignEmail("");
     setAssigning(false);
@@ -247,13 +250,12 @@ export default function BranchManagersPage({
               </h1>
               {branch?.is_main && (
                 <Badge className="text-xs bg-primary/10 text-primary border-primary/20">
-                  Main
+                  {t("vendor.mainBadge")}
                 </Badge>
               )}
             </div>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Branch managers &mdash; assign existing users to manage this
-              branch
+              {t("vendor.bmPageSubtitle")}
             </p>
           </div>
           <Button
@@ -267,7 +269,7 @@ export default function BranchManagersPage({
             }}
           >
             <UserPlus className="h-4 w-4 mr-2" />
-            Assign Manager
+            {t("vendor.bmAssignManager")}
           </Button>
         </div>
 
@@ -284,27 +286,31 @@ export default function BranchManagersPage({
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold flex items-center gap-2 text-muted-foreground">
               <ShieldCheck className="h-4 w-4 text-primary" />
-              Manager permissions
+              {t("vendor.bmPermissionsTitle")}
             </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-xs text-muted-foreground">
             <div className="space-y-1">
-              <p className="font-semibold text-foreground">Managers CAN:</p>
+              <p className="font-semibold text-foreground">
+                {t("vendor.bmCanHeading")}
+              </p>
               <ul className="space-y-0.5 list-disc list-inside">
-                <li>View bookings (this branch only)</li>
-                <li>Update booking status</li>
-                <li>Manage customers (this branch)</li>
-                <li>Edit services for this branch</li>
-                <li>Manage calendar &amp; availability</li>
+                <li>{t("vendor.bmCanItem1")}</li>
+                <li>{t("vendor.bmCanItem2")}</li>
+                <li>{t("vendor.bmCanItem3")}</li>
+                <li>{t("vendor.bmCanItem4")}</li>
+                <li>{t("vendor.bmCanItem5")}</li>
               </ul>
             </div>
             <div className="space-y-1 mt-3 sm:mt-0">
-              <p className="font-semibold text-foreground">Managers CANNOT:</p>
+              <p className="font-semibold text-foreground">
+                {t("vendor.bmCannotHeading")}
+              </p>
               <ul className="space-y-0.5 list-disc list-inside">
-                <li>Access other branches</li>
-                <li>Assign or remove users</li>
-                <li>Access billing or payments</li>
-                <li>Access business-level settings</li>
+                <li>{t("vendor.bmCannotItem1")}</li>
+                <li>{t("vendor.bmCannotItem2")}</li>
+                <li>{t("vendor.bmCannotItem3")}</li>
+                <li>{t("vendor.bmCannotItem4")}</li>
               </ul>
             </div>
           </CardContent>
@@ -315,7 +321,7 @@ export default function BranchManagersPage({
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <Users className="h-4 w-4" />
-              Assigned Managers
+              {t("vendor.bmAssignedManagers")}
               {managers.length > 0 && (
                 <Badge variant="secondary" className="ml-auto text-xs">
                   {managers.length}
@@ -327,10 +333,8 @@ export default function BranchManagersPage({
             {managers.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-center gap-2 text-muted-foreground">
                 <Users className="h-8 w-8 opacity-30" />
-                <p className="text-sm">No managers assigned yet.</p>
-                <p className="text-xs">
-                  Use &ldquo;Assign Manager&rdquo; to add an existing user.
-                </p>
+                <p className="text-sm">{t("vendor.bmNoManagers")}</p>
+                <p className="text-xs">{t("vendor.bmNoManagersHint")}</p>
               </div>
             ) : (
               <div className="space-y-0">
@@ -353,7 +357,7 @@ export default function BranchManagersPage({
                           </p>
                         )}
                         <p className="text-xs text-muted-foreground">
-                          Assigned{" "}
+                          {t("vendor.bmAssignedOn")}{" "}
                           {new Date(m.created_at).toLocaleDateString(
                             undefined,
                             {
@@ -399,12 +403,13 @@ export default function BranchManagersPage({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <UserPlus className="h-5 w-5 text-primary" />
-              Assign Manager
+              {t("vendor.bmAssignDialogTitle")}
             </DialogTitle>
             <DialogDescription>
-              Enter the email of an existing user to assign them as a manager
-              for <strong>{branch?.name}</strong>. The user must already have an
-              account.
+              {t("vendor.bmAssignDialogDesc").replace(
+                "{branch}",
+                branch?.name ?? "",
+              )}
             </DialogDescription>
           </DialogHeader>
 
@@ -441,7 +446,7 @@ export default function BranchManagersPage({
                     onClick={() => setShowAssignDialog(false)}
                     disabled={assigning}
                   >
-                    Cancel
+                    {t("vendor.cancel")}
                   </Button>
                   <Button onClick={handleAssign} disabled={assigning}>
                     {assigning ? (
@@ -449,7 +454,7 @@ export default function BranchManagersPage({
                     ) : (
                       <UserPlus className="h-4 w-4 mr-2" />
                     )}
-                    Assign
+                    {t("vendor.bmAssignBtn")}
                   </Button>
                 </div>
               </>
@@ -469,15 +474,17 @@ export default function BranchManagersPage({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Trash2 className="h-5 w-5 text-destructive" />
-              Remove manager?
+              {t("vendor.bmRemoveTitle")}
             </DialogTitle>
             <DialogDescription>
-              This will remove{" "}
-              <strong>
-                {removeTarget?.user?.full_name ?? removeTarget?.user?.email}
-              </strong>{" "}
-              from <strong>{branch?.name}</strong>. They will immediately lose
-              access to this branch. This action cannot be undone.
+              {t("vendor.bmRemoveDesc")
+                .replace(
+                  "{name}",
+                  removeTarget?.user?.full_name ??
+                    removeTarget?.user?.email ??
+                    "",
+                )
+                .replace("{branch}", branch?.name ?? "")}
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-2 pt-2">
@@ -486,7 +493,7 @@ export default function BranchManagersPage({
               onClick={() => setRemoveTarget(null)}
               disabled={removing}
             >
-              Cancel
+              {t("vendor.cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -498,7 +505,7 @@ export default function BranchManagersPage({
               ) : (
                 <Trash2 className="h-4 w-4 mr-2" />
               )}
-              Remove
+              {t("vendor.bmRemoveBtn")}
             </Button>
           </div>
         </DialogContent>

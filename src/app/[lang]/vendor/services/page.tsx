@@ -110,7 +110,7 @@ export default function VendorServicesPage() {
       const mainSynthetic: DbBranch = {
         id: vendor.id, // use vendor.id as the branch id sentinel
         vendor_id: vendor.id,
-        name: vendor.business_name ?? "Main Branch",
+        name: vendor.business_name ?? t("vendor.mainBranchLabel"),
         name_ar: vendor.business_name_ar ?? null,
         address: vendor.address ?? null,
         city: vendor.city ?? null,
@@ -186,7 +186,7 @@ export default function VendorServicesPage() {
 
   async function save() {
     if (!form.serviceKey) {
-      setError("Please select a service.");
+      setError(t("vendor.errSelectService"));
       return;
     }
     setSaving(true);
@@ -244,7 +244,7 @@ export default function VendorServicesPage() {
   }
 
   async function remove(id: string) {
-    if (!confirm("Delete this service?")) return;
+    if (!confirm(t("vendor.deleteServiceConfirm"))) return;
     await supabase.from("services").delete().eq("id", id);
     load();
   }
@@ -525,7 +525,7 @@ export default function VendorServicesPage() {
                 value={form.description}
                 onChange={(e) => set("description", e.target.value)}
                 rows={3}
-                placeholder="What's included…"
+                placeholder={t("vendor.serviceDescPlaceholder")}
                 className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50"
               />
             </div>

@@ -3,6 +3,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { withTimeout } from "@/lib/utils";
 import ServiceCentersClient from "@/components/services/ServiceCentersClient";
 import type { ServiceCenterDisplay } from "@/components/services/ServiceCentersClient";
 import { SERVICE_CATEGORIES } from "@/lib/serviceCategories";
@@ -44,11 +45,7 @@ export default async function AllServiceCentersPage({
 
     // Two separate queries avoids the embedded-join that was causing a 500
     // due to an RLS recursion on order_items → orders → order_items.
-    const [
-      { data: vendors },
-      { data: completedBookingsRaw },
-      { data: allBranches },
-    ] = await Promise.all([
+    const centersQueries = Promise.all([
       (supabase as any)
         .from("vendors")
         .select(
@@ -66,6 +63,16 @@ export default async function AllServiceCentersPage({
         .select("vendor_id, city, governorate")
         .eq("status", "active"),
     ]);
+
+    const [
+      { data: vendors },
+      { data: completedBookingsRaw },
+      { data: allBranches },
+    ] = await withTimeout(centersQueries, 3500, [
+      { data: null },
+      { data: null },
+      { data: null },
+    ] as unknown as Awaited<typeof centersQueries>);
 
     // Count completed bookings per vendor from real booking data
     const bookingCountByVendor = new Map<string, number>();

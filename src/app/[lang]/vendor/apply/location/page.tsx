@@ -137,7 +137,7 @@ export default function VendorLocationPage() {
       return;
     }
     if (!form.governorate || !form.city || !form.address || !form.maps_link) {
-      setError("Please fill in all required fields.");
+      setError(t("vendor.applyPages.errorRequiredFields"));
       return;
     }
     if (!photos[0]) {
@@ -151,7 +151,7 @@ export default function VendorLocationPage() {
     const draft = getDraft();
     const tempId = draft.tempId as string | undefined;
     if (!tempId) {
-      setError("Application draft not found. Please start from step 1.");
+      setError(t("vendor.applyPages.errorDraftNotFound"));
       return;
     }
 
@@ -172,7 +172,9 @@ export default function VendorLocationPage() {
         .from("vendor-documents")
         .upload(path, file, { upsert: true });
       if (upErr) {
-        setError(`Photo upload failed: ${upErr.message}`);
+        setError(
+          `${t("vendor.applyPages.errorPhotoUpload")}: ${upErr.message}`,
+        );
         setSaving(false);
         return;
       }

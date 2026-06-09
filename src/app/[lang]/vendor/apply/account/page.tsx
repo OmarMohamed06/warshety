@@ -71,7 +71,7 @@ export default function VendorAccountPage() {
 
     const draft = getDraft();
     if (!draft.tempId) {
-      setError("Application draft not found. Please start from step 1.");
+      setError(t("vendor.applyPages.errorDraftNotFound"));
       return;
     }
 

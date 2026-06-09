@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
+import { withTimeout } from "@/lib/utils";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Locale configuration
@@ -138,11 +139,11 @@ async function middlewareInner(request: NextRequest) {
 
     if (!role) {
       // Reuse the supabase client already created by updateSession
-      const { data: profile } = await supabase
-        .from("users")
-        .select("role")
-        .eq("id", user.id)
-        .single();
+      const { data: profile } = await withTimeout(
+        supabase.from("users").select("role").eq("id", user.id).single(),
+        3000,
+        { data: null } as { data: { role?: string } | null },
+      );
       role = profile?.role ?? undefined;
       fetchedRole = role; // capture for cookie-caching below
     }

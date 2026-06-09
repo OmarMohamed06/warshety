@@ -87,7 +87,7 @@ export default function VendorLegalPage() {
     const hasBack = backFile || backUrl;
 
     if (!hasFront || !hasBack) {
-      setError("Please upload both the front and back of your national ID.");
+      setError(t("vendor.applyPages.legalErrorBothId"));
       return;
     }
 
@@ -193,8 +193,8 @@ export default function VendorLegalPage() {
               {file
                 ? file.name
                 : existingUrl
-                  ? "Uploaded — click to replace"
-                  : "Click to upload"}
+                  ? t("vendor.applyPages.legalUploadedReplace")
+                  : t("vendor.applyPages.legalClickUpload")}
             </p>
             {file && (
               <p className="text-xs text-slate-400 mt-0.5">
@@ -202,7 +202,9 @@ export default function VendorLegalPage() {
               </p>
             )}
             {!file && !existingUrl && (
-              <p className="text-xs text-slate-400 mt-0.5">JPG, PNG or PDF</p>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {t("vendor.applyPages.legalFileTypes")}
+              </p>
             )}
           </div>
         </button>
