@@ -70,7 +70,7 @@ export default async function LocaleLayout({
     } = await withTimeout(supabase.auth.getUser(), 3000, {
       data: { user: null },
       error: null,
-    } as Awaited<ReturnType<typeof supabase.auth.getUser>>);
+    } as unknown as Awaited<ReturnType<typeof supabase.auth.getUser>>);
 
     if (authUser) {
       const { data: profile } = await withTimeout(
