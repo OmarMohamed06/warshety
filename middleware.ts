@@ -218,7 +218,7 @@ async function middlewareInner(request: NextRequest) {
   ) {
     supabaseResponse.cookies.set("_role", fetchedRole, {
       path: "/",
-      maxAge: 60,
+      maxAge: 60 * 5,
       sameSite: "lax",
       httpOnly: true,
     });

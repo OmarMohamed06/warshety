@@ -148,11 +148,6 @@ export default function VendorDashboardPage() {
   // For service centers: fee per booking (from vendor_billing_settings)
   const [bookingFee, setBookingFee] = useState(75);
 
-  // When auth finishes loading but no vendor exists, stop the skeleton
-  useEffect(() => {
-    if (!authLoading && !vendor) setLoading(false);
-  }, [authLoading, vendor]);
-
   const load = useCallback(async () => {
     if (!vendor) return;
     setLoading(true);
@@ -255,9 +250,17 @@ export default function VendorDashboardPage() {
     }
   }, [vendor, vendorType]);
 
+  // Single gated effect: wait for auth to settle, stop the skeleton when there
+  // is no vendor, and (re)run load() once vendor becomes available. Because
+  // load is memoized on [vendor, vendorType], this re-fires when vendor loads.
   useEffect(() => {
+    if (authLoading) return;
+    if (!vendor) {
+      setLoading(false);
+      return;
+    }
     load();
-  }, [load]);
+  }, [authLoading, vendor, load]);
 
   // isService is always true for this service-center-only platform
   const isService = true;

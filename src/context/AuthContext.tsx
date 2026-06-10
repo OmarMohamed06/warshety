@@ -340,6 +340,12 @@ function AuthProviderInner({
     setUser(null);
     setVendor(null);
     setManagedBranchId(null);
+    // Hard redirect to the site root. This guarantees every piece of in-memory
+    // state is discarded and the user lands on a public page, instead of
+    // lingering on a now-unauthorized protected route until the next nav.
+    if (typeof window !== "undefined") {
+      window.location.href = "/";
+    }
   }, []);
 
   // ── Value ─────────────────────────────────────────────────────────────────

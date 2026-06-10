@@ -44,7 +44,7 @@ export async function updateSession(request: NextRequest) {
   // instead of the whole site hanging ("buffering forever").
   const {
     data: { user },
-  } = await withTimeout<GetUserResult>(supabase.auth.getUser(), 3000, {
+  } = await withTimeout<GetUserResult>(supabase.auth.getUser(), 5000, {
     data: { user: null },
     error: null,
   } as unknown as GetUserResult);
