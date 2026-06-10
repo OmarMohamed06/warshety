@@ -238,9 +238,18 @@ function AuthProviderInner({
               setIsLoading(false);
             }
           });
-        } else {
-          // TOKEN_REFRESHED — profile already loaded; silently refresh in background.
-          loadProfile(s.user.id);
+        } else if (!profileLoadedRef.current) {
+          // TOKEN_REFRESHED (the only remaining event with a user). The token
+          // rotated but profile/vendor data is unchanged, so re-running the
+          // queries is redundant — and if the vendors query transiently fails it
+          // would null out `vendor` mid-session and break the vendor UI. Only
+          // load when we somehow don't have a profile yet (defensive).
+          loadProfile(s.user.id).finally(() => {
+            if (isMountedRef.current) {
+              profileLoadedRef.current = true;
+              setIsLoading(false);
+            }
+          });
         }
       } else {
         // SIGNED_OUT / no session on INITIAL_SESSION.
