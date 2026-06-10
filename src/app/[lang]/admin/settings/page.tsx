@@ -58,10 +58,12 @@ export default function SettingsPage() {
     const newVal = edited[key];
     if (newVal === undefined) return;
     setSaving(key);
+    // Upsert (not update) so a setting still saves even if its row was never
+    // seeded — otherwise an `update ... where key = ?` silently affects 0 rows
+    // and the value never persists (e.g. the bank_transfer_* keys).
     const { error } = await db
       .from("system_settings")
-      .update({ value: newVal })
-      .eq("key", key);
+      .upsert({ key, value: newVal }, { onConflict: "key" });
     if (error) {
       setMsg({ text: `Error saving ${key}: ${error.message}`, ok: false });
     } else {

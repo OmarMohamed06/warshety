@@ -67,6 +67,14 @@ create policy "Admin full access on settings"
   on public.system_settings for all
   using (public.get_my_role() = 'admin');
 
+-- Vendors need to read the bank-transfer payment instructions shown on the
+-- Billing "Pay" panel. Expose ONLY the bank_transfer_* keys to authenticated
+-- users — every other setting stays admin-only.
+create policy "Authenticated can read bank transfer settings"
+  on public.system_settings for select
+  to authenticated
+  using (key like 'bank_transfer_%');
+
 -- Seed default settings
 insert into public.system_settings (key, value, description) values
   ('platform_commission_pct',    '10',     'Platform commission percentage on each booking'),
@@ -77,7 +85,11 @@ insert into public.system_settings (key, value, description) values
   ('new_user_bonus',             '0',      'Credit given to new users on signup (EGP)'),
   ('delivery_base_fee',          '50',     'Default shipping/delivery base fee (EGP)'),
   ('free_delivery_threshold',    '1000',   'Order amount above which delivery is free (EGP)'),
-  ('review_flagging_threshold',  '3',      'Number of reports before a review is auto-hidden')
+  ('review_flagging_threshold',  '3',      'Number of reports before a review is auto-hidden'),
+  ('bank_transfer_bank',           'CIB Egypt',             'Bank name shown to vendors for bank-transfer payments'),
+  ('bank_transfer_account_name',   'Garage Egypt Platform', 'Account holder name shown to vendors for bank-transfer payments'),
+  ('bank_transfer_account_number', '1234 5678 9012 3456',   'Account number shown to vendors for bank-transfer payments'),
+  ('bank_transfer_iban',           '',                      'IBAN shown to vendors for bank-transfer payments (optional)')
 on conflict (key) do nothing;
 
 -- ─────────────────────────────────────────────────────────────────────────────
