@@ -38,13 +38,14 @@ export async function updateSession(request: NextRequest) {
   );
 
   // Refresh session — IMPORTANT: do not remove this.
-  // Wrapped in a timeout: if Supabase Auth is slow/cold/unreachable, we must
-  // NOT block every request indefinitely. On timeout we treat the user as
-  // unauthenticated and pass through — the page render degrades gracefully
-  // instead of the whole site hanging ("buffering forever").
+  // Wrapped in a short timeout: if Supabase Auth is slow/cold/unreachable we
+  // must NOT block every request waiting for it. On timeout `user` is null, but
+  // the middleware treats a null user WITH a session cookie present as
+  // "optimistically authenticated" and passes through (see middleware.ts), so a
+  // short timeout here no longer risks a false logout — it just avoids hanging.
   const {
     data: { user },
-  } = await withTimeout<GetUserResult>(supabase.auth.getUser(), 5000, {
+  } = await withTimeout<GetUserResult>(supabase.auth.getUser(), 2500, {
     data: { user: null },
     error: null,
   } as unknown as GetUserResult);

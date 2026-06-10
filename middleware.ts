@@ -113,6 +113,21 @@ async function middlewareInner(request: NextRequest) {
   }
 
   // ── Step 4: auth guards (based on internalPath) ───────────────────────────
+  // `user` comes from getUser() wrapped in a timeout. On a cold serverless
+  // start (or a slow/cross-region Auth call) that verification can exceed the
+  // timeout and return null even though the visitor IS logged in. If we redirect
+  // on that false-null, the logged-in user gets bounced to /vendor/login and has
+  // to refresh — the classic "needs to load twice" bug. To avoid it we detect
+  // the presence of a Supabase auth cookie: when getUser returned null but the
+  // session cookie exists, we optimistically let the request through and rely on
+  // the client (and RLS, which protects all data server-side) to verify.
+  const hasAuthCookie = request.cookies
+    .getAll()
+    .some((c) => /^sb-.*-auth-token/.test(c.name));
+  // True only when we are confident the visitor is signed out (no user AND no
+  // session cookie at all). Safe to redirect to a login page in this case.
+  const definitelySignedOut = !user && !hasAuthCookie;
+
   const isVendorAuthRoute = VENDOR_AUTH_ROUTES.some((r) =>
     internalPath.startsWith(r),
   );
@@ -126,11 +141,14 @@ async function middlewareInner(request: NextRequest) {
     return localeRedirect("/vendor/dashboard");
   }
 
-  if (internalPath.startsWith("/auth/vendor-setup") && !user) {
+  if (internalPath.startsWith("/auth/vendor-setup") && definitelySignedOut) {
     return localeRedirect("/auth/login", "?error=session_required");
   }
 
-  if (PROTECTED_ROUTES.some((r) => internalPath.startsWith(r)) && !user) {
+  if (
+    PROTECTED_ROUTES.some((r) => internalPath.startsWith(r)) &&
+    definitelySignedOut
+  ) {
     return localeRedirect("/auth/login", `?next=/${locale}${internalPath}`);
   }
 
@@ -143,53 +161,59 @@ async function middlewareInner(request: NextRequest) {
   let fetchedRole: string | undefined;
 
   if (needsVendorOrAdmin) {
-    if (!user) {
+    if (definitelySignedOut) {
       return localeRedirect("/vendor/login", `?next=/${locale}${internalPath}`);
     }
 
-    // Check role cache cookie first to avoid a DB round-trip on every request
-    const cachedRole = request.cookies.get("_role")?.value;
-    let role: string | undefined = cachedRole;
+    // Only run role-based guards when getUser() actually resolved a user. If it
+    // timed out (user null but auth cookie present) we skip the role checks and
+    // pass through optimistically — the page renders, the client verifies, and
+    // RLS prevents any unauthorized data access.
+    if (user) {
+      // Check role cache cookie first to avoid a DB round-trip on every request
+      const cachedRole = request.cookies.get("_role")?.value;
+      let role: string | undefined = cachedRole;
 
-    if (!role) {
-      // Reuse the supabase client already created by updateSession
-      const { data: profile } = await withTimeout(
-        supabase.from("users").select("role").eq("id", user.id).single(),
-        3000,
-        { data: null } as { data: { role?: string } | null },
-      );
-      role = profile?.role ?? undefined;
-      fetchedRole = role; // capture for cookie-caching below
-    }
-
-    if (
-      ADMIN_ROUTES.some((r) => internalPath.startsWith(r)) &&
-      role !== "admin"
-    ) {
-      return localeRedirect("/");
-    }
-
-    if (
-      VENDOR_ROUTES.some((r) => internalPath.startsWith(r)) &&
-      role !== "vendor" &&
-      role !== "admin" &&
-      role !== "manager"
-    ) {
-      return localeRedirect("/vendor/apply");
-    }
-
-    // Branch managers (role='manager') cannot access owner-only routes
-    if (role === "manager") {
-      const isBranchListExact =
-        internalPath === "/vendor/branches" ||
-        internalPath === "/vendor/branches/";
-      const isOwnerOnly =
-        isBranchListExact ||
-        ["/vendor/billing", "/vendor/settings"].some((r) =>
-          internalPath.startsWith(r),
+      if (!role) {
+        // Reuse the supabase client already created by updateSession
+        const { data: profile } = await withTimeout(
+          supabase.from("users").select("role").eq("id", user.id).single(),
+          3000,
+          { data: null } as { data: { role?: string } | null },
         );
-      if (isOwnerOnly) {
-        return localeRedirect("/vendor/dashboard");
+        role = profile?.role ?? undefined;
+        fetchedRole = role; // capture for cookie-caching below
+      }
+
+      if (
+        ADMIN_ROUTES.some((r) => internalPath.startsWith(r)) &&
+        role !== "admin"
+      ) {
+        return localeRedirect("/");
+      }
+
+      if (
+        VENDOR_ROUTES.some((r) => internalPath.startsWith(r)) &&
+        role !== "vendor" &&
+        role !== "admin" &&
+        role !== "manager"
+      ) {
+        return localeRedirect("/vendor/apply");
+      }
+
+      // Branch managers (role='manager') cannot access owner-only routes
+      if (role === "manager") {
+        const isBranchListExact =
+          internalPath === "/vendor/branches" ||
+          internalPath === "/vendor/branches/";
+        const isOwnerOnly =
+          isBranchListExact ||
+          ["/vendor/billing", "/vendor/settings"].some((r) =>
+            internalPath.startsWith(r),
+          );
+        if (isOwnerOnly) {
+          return localeRedirect("/vendor/dashboard");
+        }
       }
     }
   }
