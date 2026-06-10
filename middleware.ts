@@ -88,6 +88,20 @@ async function middlewareInner(request: NextRequest) {
   // ── Step 3: refresh Supabase session ──────────────────────────────────────
   const { supabaseResponse, user, supabase } = await updateSession(request);
 
+  // ── Server Actions: never redirect them ───────────────────────────────────
+  // Server Actions are dispatched as POST requests to the *current page URL*
+  // (not /api), carrying a `next-action` header. If middleware returns a
+  // redirect (e.g. because getUser() timed out or a role guard failed), the
+  // Server Action POST receives a 307 instead of the expected action result —
+  // which surfaces as a Next.js E394 "invalid/unexpected response" error and
+  // the action silently fails. Each Server Action performs its own auth checks,
+  // so here we just refresh the session cookie and pass through untouched.
+  if (request.method === "POST" && request.headers.has("next-action")) {
+    supabaseResponse.headers.set("x-locale", locale);
+    supabaseResponse.headers.set("x-pathname", pathname);
+    return supabaseResponse;
+  }
+
   // Helper: create a locale-prefixed redirect carrying Supabase cookies
   function localeRedirect(path: string, search = ""): NextResponse {
     const url = new URL(`/${locale}${path}${search}`, request.url);
