@@ -15,6 +15,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { LocaleLink as Link } from "@/components/ui/locale-link";
 import { createClient } from "@/lib/supabase/client";
+import { ProfileAppBanner } from "@/components/app-download/ProfileAppBanner";
 
 export default function ProfilePage() {
   const {
@@ -36,6 +37,11 @@ export default function ProfilePage() {
 
   // Stats
   const [bookingCount, setBookingCount] = useState<number | null>(null);
+
+  // Referral
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [referralCount, setReferralCount] = useState<number>(0);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   // Always re-fetch profile on mount to pick up role/branch changes
   useEffect(() => {
@@ -61,6 +67,24 @@ export default function ProfilePage() {
       .select("id", { count: "exact", head: true })
       .eq("user_id", user.id)
       .then(({ count }) => setBookingCount(count ?? 0));
+
+    // Load referral code + how many friends have been referred
+    (supabase as any)
+      .from("users")
+      .select("referral_code")
+      .eq("id", user.id)
+      .single()
+      .then(({ data }: { data: { referral_code?: string } | null }) =>
+        setReferralCode(data?.referral_code ?? null),
+      );
+
+    (supabase as any)
+      .from("referrals")
+      .select("id", { count: "exact", head: true })
+      .eq("referrer_id", user.id)
+      .then(({ count }: { count: number | null }) =>
+        setReferralCount(count ?? 0),
+      );
   }, [user]);
 
   // Redirect guests to login
@@ -259,6 +283,133 @@ export default function ProfilePage() {
             </button>
           </div>
         </div>
+
+        {/* App download banner */}
+        <ProfileAppBanner
+          locale={
+            user.role === "customer"
+              ? t("nav.language") === "العربية"
+                ? "ar"
+                : "en"
+              : "en"
+          }
+        />
+
+        {/* Referral — App download */}
+        {referralCode &&
+          (() => {
+            const appUrl =
+              typeof window !== "undefined"
+                ? `${window.location.origin}/download?ref=${referralCode}`
+                : `https://warshety.com/download?ref=${referralCode}`;
+            return (
+              <div className="mt-6 bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-100 dark:border-slate-700">
+                {/* Header */}
+                <div className="flex items-start gap-3 mb-5">
+                  <div className="w-10 h-10 bg-amber-50 dark:bg-amber-950/30 rounded-xl flex items-center justify-center shrink-0">
+                    <span className="material-symbols-outlined text-amber-500">
+                      smartphone
+                    </span>
+                  </div>
+                  <div>
+                    <h2 className="font-black text-base">
+                      {t("profile.referralTitle")}
+                    </h2>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      {t("profile.referralDesc")}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Rewards grid */}
+                <div className="grid grid-cols-3 gap-3 text-center mb-5">
+                  <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-3">
+                    <p className="text-xl font-black">{referralCount}</p>
+                    <p className="text-xs text-slate-400">
+                      {t("profile.referralFriends")}
+                    </p>
+                  </div>
+                  <div className="bg-amber-50 dark:bg-amber-950/30 rounded-xl p-3">
+                    <p className="text-xl font-black text-amber-600">+500</p>
+                    <p className="text-xs text-slate-400">
+                      {t("profile.referralYourBonus")}
+                    </p>
+                  </div>
+                  <div className="bg-green-50 dark:bg-green-950/30 rounded-xl p-3">
+                    <p className="text-xl font-black text-green-600">+250</p>
+                    <p className="text-xs text-slate-400">
+                      {t("profile.referralFriendBonus")}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Share link */}
+                <div className="space-y-2">
+                  <p className="text-xs font-bold uppercase text-slate-400 tracking-wider">
+                    {t("profile.referralShareLink")}
+                  </p>
+                  <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 rounded-xl p-3 border border-slate-200 dark:border-slate-700">
+                    <span className="flex-1 text-xs text-slate-500 truncate font-mono select-all">
+                      {appUrl}
+                    </span>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard
+                          .writeText(appUrl)
+                          .then(() => {
+                            setLinkCopied(true);
+                            setTimeout(() => setLinkCopied(false), 2000);
+                          })
+                          .catch(() => {});
+                      }}
+                      className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg bg-[#FF4B19] text-white hover:opacity-90 transition shrink-0"
+                    >
+                      <span className="material-symbols-outlined text-sm">
+                        {linkCopied ? "check" : "content_copy"}
+                      </span>
+                      {linkCopied
+                        ? t("profile.referralCopied")
+                        : t("profile.referralCopy")}
+                    </button>
+                  </div>
+
+                  {/* App store buttons */}
+                  <div className="flex gap-2 pt-1">
+                    <a
+                      href={`https://apps.apple.com/app/warshety`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-2 bg-black text-white text-xs font-bold rounded-xl py-3 hover:opacity-80 transition"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        className="w-4 h-4 fill-current"
+                        aria-hidden="true"
+                      >
+                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+                      </svg>
+                      {t("profile.referralAppStore")}
+                    </a>
+                    <a
+                      href={`https://play.google.com/store/apps/details?id=com.warshety.app`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-2 bg-slate-800 dark:bg-slate-700 text-white text-xs font-bold rounded-xl py-3 hover:opacity-80 transition"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        className="w-4 h-4 fill-current"
+                        aria-hidden="true"
+                      >
+                        <path d="M3.18 23.76A1 1 0 0 1 3 23.1V.9A1 1 0 0 1 3.18.24l11.27 11.76zm1.87-.9 10.14-5.76-2.27-2.37zm10.14-14.76L5.05 2.14l7.87 8.21zM16.82 7.1 13.6 12l3.22 4.9 4.1-2.34a1 1 0 0 0 0-1.72z" />
+                      </svg>
+                      {t("profile.referralPlayStore")}
+                    </a>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
         {/* Quick links */}
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">

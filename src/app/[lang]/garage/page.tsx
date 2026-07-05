@@ -35,6 +35,7 @@ import {
   History,
   Bell,
 } from "lucide-react";
+import { GarageAppPromo } from "@/components/app-download/GarageAppPromo";
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
@@ -304,6 +305,9 @@ export default function GaragePage() {
             </Card>
           ))}
         </div>
+
+        {/* App promo */}
+        <GarageAppPromo />
       </div>
 
       {/* Add/Edit Vehicle Dialog */}

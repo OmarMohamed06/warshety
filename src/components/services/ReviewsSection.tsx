@@ -6,6 +6,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import {
   getReviewEligibility,
   submitReview,
+  REVIEW_MIN_CHARS,
   type DbReview,
 } from "@/services/reviewService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +21,7 @@ import {
   Loader2,
   PenLine,
   ChevronDown,
+  Gift,
 } from "lucide-react";
 
 // ── Star display ──────────────────────────────────────────────────────────────
@@ -181,6 +183,7 @@ function WriteReviewForm({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
+  const [pointsEarned, setPointsEarned] = useState(0);
 
   async function handleOpen() {
     if (!user) return;
@@ -208,6 +211,11 @@ function WriteReviewForm({
     if (err || !review) {
       setError(err ?? "Failed to submit review.");
     } else {
+      // Try to get the points awarded (non-blocking; already fired in reviewService)
+      const commentLen = comment.trim().length;
+      if (commentLen >= REVIEW_MIN_CHARS) {
+        setPointsEarned(50);
+      }
       setDone(true);
       onSubmitted({
         ...review,
@@ -215,6 +223,9 @@ function WriteReviewForm({
       });
     }
   }
+
+  const commentLen = comment.trim().length;
+  const willEarnPoints = commentLen >= REVIEW_MIN_CHARS;
 
   if (!user) return null;
 
@@ -245,9 +256,16 @@ function WriteReviewForm({
           {t("servicePage.reviewNotEligible")}
         </p>
       ) : done ? (
-        <div className="flex items-center gap-2 text-sm text-green-600 font-medium">
-          <CheckCircle2 className="h-4 w-4" />
-          {t("servicePage.reviewSubmitted")}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-sm text-green-600 font-medium">
+            <CheckCircle2 className="h-4 w-4" />
+            {t("servicePage.reviewSubmitted")}
+          </div>
+          {pointsEarned > 0 && (
+            <div className="flex items-center gap-2 text-sm text-amber-600 font-semibold">
+              <Gift className="h-4 w-4" />+{pointsEarned} points earned!
+            </div>
+          )}
         </div>
       ) : (
         <div className="bg-muted/40 rounded-xl p-4 space-y-3">
@@ -255,13 +273,32 @@ function WriteReviewForm({
             {t("servicePage.reviewYourRating")}
           </p>
           <StarPicker value={rating} onChange={setRating} />
-          <textarea
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            placeholder={t("servicePage.reviewCommentPlaceholder")}
-            rows={3}
-            className="w-full resize-none rounded-xl border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          />
+          <div className="space-y-1">
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder={t("servicePage.reviewCommentPlaceholder")}
+              rows={3}
+              className="w-full resize-none rounded-xl border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+            <div className="flex items-center justify-between px-0.5">
+              <p
+                className={`text-xs ${willEarnPoints ? "text-green-600 font-medium" : "text-muted-foreground"}`}
+              >
+                {willEarnPoints ? (
+                  <span className="flex items-center gap-1">
+                    <Gift className="h-3 w-3" />
+                    Write {REVIEW_MIN_CHARS}+ chars to earn 50 pts
+                  </span>
+                ) : (
+                  `${commentLen}/${REVIEW_MIN_CHARS} chars for +50 points`
+                )}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {commentLen} chars
+              </p>
+            </div>
+          </div>
           {error && <p className="text-xs text-destructive">{error}</p>}
           <div className="flex gap-2">
             <Button

@@ -6,6 +6,8 @@ import TrustBadges from "@/components/home/TrustBadges";
 import HowItWorks from "@/components/home/HowItWorks";
 import BrowseServices from "@/components/home/BrowseServices";
 import FeaturedServiceCenters from "@/components/home/FeaturedServiceCenters";
+import { AppDownloadHero } from "@/components/app-download/AppDownloadHero";
+import { AppFeatureComparison } from "@/components/app-download/AppFeatureComparison";
 import { generateSeoMeta } from "@/utils/seo";
 import { createClient } from "@/lib/supabase/server";
 import { withTimeout } from "@/lib/utils";
@@ -29,7 +31,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-export default async function HomePage() {
+export default async function HomePage({ params }: Props) {
+  const { lang } = await params;
   const supabase = await createClient();
 
   const centersQuery = supabase
@@ -57,6 +60,8 @@ export default async function HomePage() {
       <BrowseServices />
       <FeaturedServiceCenters initialData={centersResult.data ?? undefined} />
       <HowItWorks />
+      <AppDownloadHero locale={lang as "en" | "ar"} />
+      <AppFeatureComparison locale={lang as "en" | "ar"} />
     </div>
   );
 }

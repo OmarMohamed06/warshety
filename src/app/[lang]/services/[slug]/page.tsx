@@ -6,6 +6,7 @@ import { servicePageSeo, pick } from "@/utils/seo";
 import { createClient } from "@/lib/supabase/server";
 import BookingSidebar from "@/components/services/BookingSidebar";
 import ReviewsSection from "@/components/services/ReviewsSection";
+import { ServiceCenterAppCTA } from "@/components/app-download/ServiceCenterAppCTA";
 import { SERVICE_CATEGORIES } from "@/lib/serviceCategories";
 import type { DbService } from "@/types/database";
 import type { DbReview } from "@/services/reviewService";
@@ -533,6 +534,7 @@ export default async function ServiceCenterPage({ params }: Props) {
               services={services}
               branches={branches}
             />
+            <ServiceCenterAppCTA locale={locale} />
           </div>
         </div>
 

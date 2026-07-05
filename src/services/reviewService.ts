@@ -37,6 +37,9 @@ export interface SubmitReviewInput {
   comment?: string;
 }
 
+/** Minimum comment length required to earn review points. */
+export const REVIEW_MIN_CHARS = 30;
+
 // ── Service functions ─────────────────────────────────────────────────────────
 
 /**
@@ -163,6 +166,18 @@ export async function submitReview(
         total_reviews: allRatings.length,
       })
       .eq("id", input.vendorId);
+  }
+
+  // Award 50 review points (fire-and-forget — non-fatal)
+  const commentLen = (input.comment ?? "").trim().length;
+  if (commentLen >= REVIEW_MIN_CHARS && review) {
+    fetch("/api/reviews/award-points", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reviewId: review.id, userId: input.userId }),
+    }).catch(() => {
+      /* non-fatal */
+    });
   }
 
   return { review: review as DbReview, error: null };

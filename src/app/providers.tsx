@@ -18,6 +18,7 @@ import { LanguageProvider, type Locale } from "@/context/LanguageContext";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Toaster } from "@/components/ui/sonner";
+import { FloatingAppBanner } from "@/components/app-download/FloatingAppBanner";
 
 export interface ProvidersProps extends Pick<
   AuthProviderProps,
@@ -46,6 +47,7 @@ export function Providers({
           {/* pb-[62px] on mobile to clear the fixed bottom navbar */}
           <div className="pb-[62px] sm:pb-0">{children}</div>
           <Footer />
+          <FloatingAppBanner />
           <Toaster richColors position="top-center" />
         </GarageProvider>
       </AuthProvider>

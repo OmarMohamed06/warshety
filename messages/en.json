@@ -42,7 +42,9 @@
     "emailPlaceholder": "Email address",
     "copyright": "© 2026 Warshety Egypt. All rights reserved.",
     "privacy": "Privacy Policy",
-    "terms": "Terms of Service"
+    "terms": "Terms of Service",
+    "downloadApp": "Download the Warshety App",
+    "downloadAppDesc": "Live tracking, rewards & faster booking"
   },
   "home": {
     "heroTitle1": "Book a",
@@ -276,7 +278,17 @@
     "myOrders": "My Orders",
     "manageVehicles": "Manage your vehicles",
     "trackService": "Track service status",
-    "partsHistory": "Parts order history"
+    "partsHistory": "Parts order history",
+    "referralTitle": "Invite Friends, Earn Points",
+    "referralDesc": "Share your app download link. You earn 500 pts when your friend completes their first booking.",
+    "referralShareLink": "Your download link",
+    "referralCopy": "Copy",
+    "referralCopied": "Copied!",
+    "referralFriends": "Friends Invited",
+    "referralYourBonus": "Your Bonus",
+    "referralFriendBonus": "Friend Gets",
+    "referralAppStore": "App Store",
+    "referralPlayStore": "Google Play"
   },
   "garage": {
     "title": "My Garage",
@@ -344,6 +356,9 @@
     "applyLink": "Apply to sell on Warshety",
     "createAccount": "Create your account",
     "createSubtitle": "Join Egypt's #1 automotive platform",
+    "referralCode": "Referral Code",
+    "referralCodePlaceholder": "Friend's code (e.g. AB12CD34)",
+    "optional": "Optional",
     "fullName": "Full Name",
     "emailNote": "We'll use this to contact you. We will not share your email with anyone else.",
     "passwordNote": "Must be at least 8 characters long.",

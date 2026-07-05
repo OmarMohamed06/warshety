@@ -247,16 +247,14 @@ export default function VendorBookingsPage() {
       });
       setNote("");
     }
-    // 2. Award points for selected services
-    if (serviceTypeIds.length > 0) {
-      fetch("/api/bookings/award-points", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookingId, serviceTypeIds }),
-      }).catch(() => {
-        /* non-fatal */
-      });
-    }
+    // 2. Award points for selected services + first-booking bonus + referral
+    fetch("/api/bookings/award-points", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bookingId, serviceTypeIds }),
+    }).catch(() => {
+      /* non-fatal */
+    });
     // 3. Notify customer
     fetch("/api/bookings/notify-completed", {
       method: "POST",

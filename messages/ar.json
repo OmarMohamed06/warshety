@@ -42,7 +42,9 @@
     "emailPlaceholder": "البريد الإلكتروني",
     "copyright": "© 2026 ورشتي مصر. جميع الحقوق محفوظة.",
     "privacy": "سياسة الخصوصية",
-    "terms": "شروط الخدمة"
+    "terms": "شروط الخدمة",
+    "downloadApp": "حمّل تطبيق ورشتي",
+    "downloadAppDesc": "تتبع مباشر، مكافآت، وحجز أسرع"
   },
   "home": {
     "heroTitle1": "احجز مركز",
@@ -276,7 +278,17 @@
     "myOrders": "طلباتي",
     "manageVehicles": "إدارة سياراتك",
     "trackService": "تتبع حالة الخدمة",
-    "partsHistory": "سجل طلبات القطع"
+    "partsHistory": "سجل طلبات القطع",
+    "referralTitle": "ادعُ أصدقاءك واكسب نقاطاً",
+    "referralDesc": "شارك رابط تنزيل التطبيق — أنت تكسب 500 نقطة عندما يكمل صديقك أول حجز له.",
+    "referralShareLink": "رابط التنزيل الخاص بك",
+    "referralCopy": "نسخ",
+    "referralCopied": "تم النسخ!",
+    "referralFriends": "أصدقاء مدعوون",
+    "referralYourBonus": "مكافأتك",
+    "referralFriendBonus": "يحصل الصديق",
+    "referralAppStore": "App Store",
+    "referralPlayStore": "Google Play"
   },
   "garage": {
     "title": "كراجي",
@@ -344,6 +356,9 @@
     "applyLink": "تقدم للبيع على ورشتي",
     "createAccount": "إنشاء حساب",
     "createSubtitle": "انضم إلى المنصة الأولى للسيارات في مصر",
+    "referralCode": "كود الإحالة",
+    "referralCodePlaceholder": "كود صديقك (مثل AB12CD34)",
+    "optional": "اختياري",
     "fullName": "الاسم الكامل",
     "emailNote": "سنستخدم هذا للتواصل معك. لن نشارك بريدك الإلكتروني مع أي طرف آخر.",
     "passwordNote": "يجب أن تكون 8 أحرف على الأقل.",

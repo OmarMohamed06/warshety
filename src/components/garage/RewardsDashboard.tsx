@@ -16,6 +16,7 @@ import { RewardCard } from "@/components/garage/RewardCard";
 import { VoucherModal } from "@/components/garage/VoucherModal";
 import { PointsHistoryModal } from "@/components/garage/PointsHistoryModal";
 import { GiftBoxHero } from "@/components/garage/GiftBoxHero";
+import { RewardsAppPromo } from "@/components/app-download/RewardsAppPromo";
 import {
   getRewards,
   getUserPoints,
@@ -358,6 +359,11 @@ export default function RewardsDashboard({ locale }: RewardsDashboardProps) {
           )}
         </div>
       )}
+
+      {/* ── App Promo ─────────────────────────────────────────────────────── */}
+      <div className="mx-auto max-w-lg px-5 pb-4">
+        <RewardsAppPromo locale={locale} />
+      </div>
 
       {/* ── Modals ────────────────────────────────────────────────────────── */}
       <VoucherModal

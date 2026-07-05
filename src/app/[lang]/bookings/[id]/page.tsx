@@ -6,6 +6,8 @@ import BookingTracker from "@/components/tracking/BookingTracker";
 import en from "@/../messages/en.json";
 import ar from "@/../messages/ar.json";
 
+import { BookingTrackingCTA } from "@/components/app-download/BookingTrackingCTA";
+
 export async function generateMetadata({
   params,
 }: {
@@ -53,6 +55,7 @@ export default async function TrackBookingPage({
         >
           <BookingTracker bookingId={id} />
         </Suspense>
+        <BookingTrackingCTA locale={lang as "en" | "ar"} />
       </div>
     </div>
   );

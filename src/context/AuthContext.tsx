@@ -242,7 +242,7 @@ function AuthProviderInner({
           // TOKEN_REFRESHED (the only remaining event with a user). The token
           // rotated but profile/vendor data is unchanged, so re-running the
           // queries is redundant — and if the vendors query transiently fails it
-          // would null out `vendor` mid-session and break the vendor UI. Only
+          // would null out `vendor` mid-s ession and break the vendor UI. Only
           // load when we somehow don't have a profile yet (defensive).
           loadProfile(s.user.id).finally(() => {
             if (isMountedRef.current) {
