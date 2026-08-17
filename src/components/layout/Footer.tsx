@@ -131,8 +131,6 @@ export default function Footer() {
 
         <Separator className="mb-6 bg-slate-800" />
 
-        <Separator className="mb-6 bg-slate-800" />
-
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <p>{t("footer.copyright")}</p>
           <div className="flex gap-6">

@@ -45,7 +45,7 @@ export function PhoneMockup({ className }: { className?: string }) {
           {/* App header */}
           <div className="px-4 py-2 flex items-center gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/warshety-nav.svg" alt="Warshety" className="h-6 w-auto object-contain" />
+            <img src="/warshety-footer.svg" alt="Warshety" className="h-5 w-auto object-contain" />
           </div>
 
           {/* Booking card */}
