@@ -302,55 +302,28 @@ export default function Navbar() {
 
           {/* Right Actions */}
           <div className="ms-auto flex items-center gap-1">
-            {/* Language Toggle — globe only on mobile, flag+label on desktop */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="flex sm:hidden w-9 h-9"
-                  aria-label={t("nav.language")}
-                >
-                  <Globe className="w-5 h-5 text-muted-foreground" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-36 sm:hidden">
-                {LANGUAGES.map((l) => (
-                  <DropdownMenuItem
-                    key={l.code}
-                    onClick={() => setLocale(l.code)}
-                    className={
-                      locale === l.code ? "text-primary font-bold" : ""
-                    }
-                  >
-                    {l.code === "en" ? "English" : "العربية"}
-                    {locale === l.code && (
-                      <CheckCircle2 className="w-3.5 h-3.5 ml-auto text-primary" />
-                    )}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Language Toggle */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="gap-1.5 px-2.5 hidden sm:flex"
+                  className="gap-1.5 px-2.5"
+                  aria-label={t("nav.language")}
                 >
-                  <span className="text-xs font-bold">{current.label}</span>
-                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                  <Globe className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-xs font-bold hidden sm:inline">{current.label}</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground hidden sm:inline" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-36">
+              <DropdownMenuContent align="end" className="w-40">
                 {LANGUAGES.map((l) => (
                   <DropdownMenuItem
                     key={l.code}
                     onClick={() => setLocale(l.code)}
-                    className={
-                      locale === l.code ? "text-primary font-bold" : ""
-                    }
+                    className={locale === l.code ? "text-primary font-bold" : ""}
                   >
+                    <span className="text-xs font-black text-muted-foreground w-7">{l.label}</span>
                     {l.code === "en" ? "English" : "العربية"}
                     {locale === l.code && (
                       <CheckCircle2 className="w-3.5 h-3.5 ml-auto text-primary" />
