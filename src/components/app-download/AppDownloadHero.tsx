@@ -42,16 +42,6 @@ export function AppDownloadHero({ locale = "en" }: Props) {
         <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-20">
           {/* Text side */}
           <div className="flex-1 text-center lg:text-start">
-            {/* Eyebrow */}
-            <div className="inline-flex items-center gap-2 bg-[#FF4B19]/10 border border-[#FF4B19]/20 rounded-full px-4 py-1.5 mb-6">
-              <span className="w-2 h-2 rounded-full bg-[#FF4B19]" />
-              <span className="text-[#FF4B19] text-xs font-bold tracking-wider uppercase">
-                {isAr
-                  ? "تطبيق ورشتي متاح الآن"
-                  : "Warshety App — Available Now"}
-              </span>
-            </div>
-
             <h2 className="text-4xl sm:text-5xl font-black text-white leading-tight mb-5">
               {isAr ? (
                 <>

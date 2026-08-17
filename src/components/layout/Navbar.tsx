@@ -323,7 +323,6 @@ export default function Navbar() {
                       locale === l.code ? "text-primary font-bold" : ""
                     }
                   >
-                    <span className="text-base mr-2">{l.flag}</span>
                     {l.code === "en" ? "English" : "العربية"}
                     {locale === l.code && (
                       <CheckCircle2 className="w-3.5 h-3.5 ml-auto text-primary" />
@@ -339,7 +338,6 @@ export default function Navbar() {
                   size="sm"
                   className="gap-1.5 px-2.5 hidden sm:flex"
                 >
-                  <span className="text-base leading-none">{current.flag}</span>
                   <span className="text-xs font-bold">{current.label}</span>
                   <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
                 </Button>
@@ -353,7 +351,6 @@ export default function Navbar() {
                       locale === l.code ? "text-primary font-bold" : ""
                     }
                   >
-                    <span className="text-base mr-2">{l.flag}</span>
                     {l.code === "en" ? "English" : "العربية"}
                     {locale === l.code && (
                       <CheckCircle2 className="w-3.5 h-3.5 ml-auto text-primary" />
@@ -889,7 +886,6 @@ export default function Navbar() {
                         : "border-border text-muted-foreground hover:bg-muted"
                     }`}
                   >
-                    <span className="text-base">{l.flag}</span>
                     {l.code === "en" ? "English" : "العربية"}
                   </button>
                 ))}
