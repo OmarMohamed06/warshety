@@ -113,14 +113,14 @@ export function AppFeatureComparison({ locale = "en" }: Props) {
           </div>
 
           {/* App column */}
-          <div className="bg-gradient-to-br from-slate-900 to-[#1a0800] rounded-3xl p-6 border border-[#FF4B19]/20 relative overflow-hidden shadow-2xl">
+          <div className="bg-slate-900 rounded-3xl p-6 border border-slate-700 relative overflow-hidden">
             {/* Popular badge */}
             <div className="absolute top-4 end-4 bg-[#FF4B19] text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
               {isAr ? "الأفضل" : "Best"}
             </div>
 
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-10 h-10 rounded-2xl bg-[#FF4B19] flex items-center justify-center shadow-lg shadow-[#FF4B19]/30">
+              <div className="w-10 h-10 rounded-2xl bg-[#FF4B19] flex items-center justify-center">
                 <span
                   className="material-symbols-outlined text-white"
                   style={{ fontSize: 20 }}
@@ -133,7 +133,7 @@ export function AppFeatureComparison({ locale = "en" }: Props) {
               </h3>
             </div>
             <ul className="space-y-3">
-              {appFeats.map((f, i) => (
+              {appFeats.map((f) => (
                 <li
                   key={f}
                   className="flex items-center gap-2.5 text-sm text-white/90"
@@ -143,12 +143,12 @@ export function AppFeatureComparison({ locale = "en" }: Props) {
                     style={{
                       fontSize: 16,
                       fontVariationSettings: "'FILL' 1",
-                      color: i < 4 ? "#4ade80" : "#FF4B19",
+                      color: "#4ade80",
                     }}
                   >
-                    {i < 4 ? "check_circle" : "stars"}
+                    check_circle
                   </span>
-                  <span className={i >= 4 ? "font-semibold text-white" : ""}>
+                  <span>
                     {f}
                   </span>
                 </li>
