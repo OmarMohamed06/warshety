@@ -19,6 +19,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Toaster } from "@/components/ui/sonner";
 import { FloatingAppBanner } from "@/components/app-download/FloatingAppBanner";
+import { DebugOverlay } from "@/components/debug/DebugOverlay";
 
 export interface ProvidersProps extends Pick<
   AuthProviderProps,
@@ -49,6 +50,8 @@ export function Providers({
           <Footer />
           <FloatingAppBanner />
           <Toaster richColors position="top-center" />
+          {/* Renders only with ?debug=1 — see components/debug/DebugOverlay */}
+          <DebugOverlay />
         </GarageProvider>
       </AuthProvider>
     </LanguageProvider>

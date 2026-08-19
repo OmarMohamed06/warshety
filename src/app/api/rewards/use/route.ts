@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -38,8 +38,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "code is required" }, { status: 400 });
   }
 
-  // Use the DB function for atomic validation + update
-  const { data, error } = await supabase.rpc("use_reward_code", {
+  // Use admin client so the RPC can update any user's reward row past RLS
+  const admin = createAdminClient();
+  const { data, error } = await admin.rpc("use_reward_code", {
     p_code: code.toUpperCase().trim(),
   });
 

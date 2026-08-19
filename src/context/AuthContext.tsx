@@ -20,6 +20,7 @@ import {
 } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import { logDebug } from "@/lib/debug-log";
 import type { DbUser, DbVendor, UserRole, VendorType } from "@/types/database";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -228,8 +229,11 @@ function AuthProviderInner({
     // token refresh on a dead connection, or a cross-tab auth lock that is
     // never released). Release the gate after AUTH_INIT_TIMEOUT_MS so pages
     // render with whatever we already have instead of hanging.
+    logDebug("note", "AuthProvider mounted — waiting for first auth event");
+
     const initFailsafe = setTimeout(() => {
       if (!isMountedRef.current) return;
+      logDebug("note", "auth failsafe fired — no event arrived");
       console.warn(
         "[AuthContext] no auth event within",
         AUTH_INIT_TIMEOUT_MS,
@@ -241,6 +245,7 @@ function AuthProviderInner({
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, s) => {
+      logDebug("auth", `${event} session=${!!s}`);
       // An event arrived — the normal paths below own `isLoading` from here.
       clearTimeout(initFailsafe);
       if (!isMountedRef.current) return;

@@ -1087,7 +1087,7 @@ export default function VendorCalendarPage() {
                   </Label>
                 </div>
                 {h.isOpen ? (
-                  <div className="flex items-center gap-2 flex-1">
+                  <div className="flex items-center gap-2 flex-1" dir="ltr">
                     <Input
                       type="time"
                       value={h.open}

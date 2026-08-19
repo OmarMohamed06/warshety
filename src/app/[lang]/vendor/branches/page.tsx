@@ -261,7 +261,7 @@ function WorkingHoursDialog({
                     checked={h.isOpen}
                     onCheckedChange={(v) => setDay(i, "isOpen", v)}
                   />
-                  <div className="flex items-center gap-2 flex-1">
+                  <div className="flex items-center gap-2 flex-1" dir="ltr">
                     <Input
                       type="time"
                       value={h.open}
@@ -389,7 +389,7 @@ function MainWorkingHoursDialog({
                     checked={h.isOpen}
                     onCheckedChange={(v) => setDay(i, "isOpen", v)}
                   />
-                  <div className="flex items-center gap-2 flex-1">
+                  <div className="flex items-center gap-2 flex-1" dir="ltr">
                     <Input
                       type="time"
                       value={h.open}

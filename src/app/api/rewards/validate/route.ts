@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");
@@ -16,8 +16,10 @@ export async function GET(req: NextRequest) {
   }
 
   const supabase = await createClient();
+  // Use admin client so vendors can look up any user's reward code
+  const admin = createAdminClient();
 
-  const { data: userReward, error } = await supabase
+  const { data: userReward, error } = await admin
     .from("user_rewards")
     .select(
       "id, code, is_used, used_at, created_at, reward:rewards(title, title_ar, description, value, value_type, category, type)",
