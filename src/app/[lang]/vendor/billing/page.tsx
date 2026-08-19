@@ -219,6 +219,8 @@ export default function VendorBillingPage() {
   const [currentPeriodCount, setCurrentPeriodCount] = useState<number | null>(
     null,
   );
+  // Current booking fee from system_settings (updated when admin changes it)
+  const [currentBookingFee, setCurrentBookingFee] = useState<number>(75);
 
   // SC payment modal
   const [payBill, setPayBill] = useState<ServiceCenterBillingRecord | null>(
@@ -242,6 +244,7 @@ export default function VendorBillingPage() {
         "bank_transfer_account_name",
         "bank_transfer_account_number",
         "bank_transfer_iban",
+        "service_center_booking_fee",
       ])
       .then(({ data }: { data: { key: string; value: string }[] | null }) => {
         if (!data) return;
@@ -254,6 +257,9 @@ export default function VendorBillingPage() {
             kv["bank_transfer_account_number"] ?? "1234 5678 9012 3456",
           iban: kv["bank_transfer_iban"] ?? "",
         });
+        if (kv["service_center_booking_fee"]) {
+          setCurrentBookingFee(parseFloat(kv["service_center_booking_fee"]) || 75);
+        }
       });
   }, [supabase]);
 
@@ -543,8 +549,8 @@ export default function VendorBillingPage() {
                             b.period_end === currentPeriod.end,
                         ) &&
                         (() => {
-                          // find the booking_fee from the most recent bill, or fall back to 75
-                          const fee = bills[0]?.booking_fee ?? 75;
+                          // Use the current fee from system_settings, not the last bill's locked fee
+                          const fee = currentBookingFee;
                           const estimate = currentPeriodCount * fee;
                           return (
                             <tr

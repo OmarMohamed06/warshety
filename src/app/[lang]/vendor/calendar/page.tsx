@@ -635,7 +635,7 @@ export default function VendorCalendarPage() {
               )}
             </CardHeader>
 
-            <CardContent className="flex-1 space-y-4">
+            <CardContent className="flex-1 min-h-0 space-y-4 overflow-y-auto">
               {!selectedDate ? (
                 <p className="text-sm text-muted-foreground">
                   {t("vendor.clickDateHint")}
