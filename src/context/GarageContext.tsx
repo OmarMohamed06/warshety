@@ -138,39 +138,55 @@ export function GarageProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let cancelled = false;
 
+    /** Runs OUTSIDE the auth callback — safe to query Supabase here. */
+    async function loadVehicles(uid: string) {
+      const { data: rows } = await supabase
+        .from("vehicles")
+        .select("*")
+        .eq("user_id", uid)
+        .order("created_at");
+
+      if (!cancelled && rows) {
+        const dbVehicles = rows.map(dbRowToVehicle);
+        setVehicles(dbVehicles);
+        // Restore active id from localStorage (persists across refreshes)
+        const savedActiveId = readActiveId();
+        const validId = dbVehicles.find((v) => v.id === savedActiveId)?.id;
+        setActiveId(
+          validId ??
+            dbVehicles.find((v) =>
+              rows.find((r) => r.id === v.id && r.is_default),
+            )?.id ??
+            null,
+        );
+      }
+      if (!cancelled) setIsHydrated(true);
+    }
+
     // Rely solely on onAuthStateChange — INITIAL_SESSION fires synchronously on
     // mount for both authenticated and unauthenticated users. This avoids the
     // race condition of calling getSession() (which reads unverified local
     // cookies) in parallel with the auth state subscription.
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (cancelled) return;
 
       if (session?.user) {
         if (event === "INITIAL_SESSION" || event === "SIGNED_IN") {
           setUserId(session.user.id);
-          const { data: rows } = await supabase
-            .from("vehicles")
-            .select("*")
-            .eq("user_id", session.user.id)
-            .order("created_at");
-
-          if (!cancelled && rows) {
-            const dbVehicles = rows.map(dbRowToVehicle);
-            setVehicles(dbVehicles);
-            // Restore active id from localStorage (persists across refreshes)
-            const savedActiveId = readActiveId();
-            const validId = dbVehicles.find((v) => v.id === savedActiveId)?.id;
-            setActiveId(
-              validId ??
-                dbVehicles.find((v) =>
-                  rows.find((r) => r.id === v.id && r.is_default),
-                )?.id ??
-                null,
-            );
-          }
-          if (!cancelled) setIsHydrated(true);
+          // ⚠️ DO NOT await Supabase calls inside this callback, and never make
+          // it `async`. supabase-js awaits every subscriber while it holds its
+          // internal auth lock, and any query issued here waits on that same
+          // lock for its access token — a circular wait that deadlocks the
+          // whole client. Once deadlocked, every query on every page hangs
+          // forever with no error until the page is reloaded.
+          // Deferring to a macrotask lets the notification (and the lock)
+          // finish first. See loadVehicles below.
+          const uid = session.user.id;
+          setTimeout(() => {
+            void loadVehicles(uid);
+          }, 0);
         }
       } else {
         if (event === "INITIAL_SESSION" || event === "SIGNED_OUT") {

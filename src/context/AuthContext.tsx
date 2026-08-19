@@ -242,6 +242,27 @@ function AuthProviderInner({
       setIsLoading(false);
     }, AUTH_INIT_TIMEOUT_MS);
 
+    /**
+     * Starts the profile load on a fresh macrotask.
+     *
+     * ⚠️ Supabase queries must never be issued directly inside an
+     * onAuthStateChange callback. supabase-js awaits every subscriber while
+     * holding its internal auth lock, and a query issued from here waits on
+     * that same lock to obtain its access token — a circular wait that
+     * deadlocks the client. Once deadlocked, every query on every page hangs
+     * forever with no error until the page is reloaded.
+     */
+    const runProfileLoad = (uid: string) => {
+      setTimeout(() => {
+        loadProfile(uid).finally(() => {
+          if (isMountedRef.current) {
+            profileLoadedRef.current = true;
+            setIsLoading(false);
+          }
+        });
+      }, 0);
+    };
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, s) => {
@@ -264,24 +285,14 @@ function AuthProviderInner({
           if (!profileLoadedRef.current) {
             setIsLoading(true);
           }
-          loadProfile(s.user.id).finally(() => {
-            if (isMountedRef.current) {
-              profileLoadedRef.current = true;
-              setIsLoading(false);
-            }
-          });
+          runProfileLoad(s.user.id);
         } else if (!profileLoadedRef.current) {
           // TOKEN_REFRESHED (the only remaining event with a user). The token
           // rotated but profile/vendor data is unchanged, so re-running the
           // queries is redundant — and if the vendors query transiently fails it
           // would null out `vendor` mid-s ession and break the vendor UI. Only
           // load when we somehow don't have a profile yet (defensive).
-          loadProfile(s.user.id).finally(() => {
-            if (isMountedRef.current) {
-              profileLoadedRef.current = true;
-              setIsLoading(false);
-            }
-          });
+          runProfileLoad(s.user.id);
         }
       } else {
         // SIGNED_OUT / no session on INITIAL_SESSION.

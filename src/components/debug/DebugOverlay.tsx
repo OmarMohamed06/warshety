@@ -94,6 +94,17 @@ export function DebugOverlay() {
             )}
             {entries.map((e) => {
               const age = ((Date.now() - e.at) / 1000).toFixed(1);
+
+              // Auth events and notes are instants, not requests — they never
+              // "complete", so never render them as pending.
+              if (e.kind !== "request") {
+                return (
+                  <div key={e.id} className="text-sky-300">
+                    {age}s ago · {e.label}
+                  </div>
+                );
+              }
+
               const done = e.status !== undefined;
               const bad =
                 done &&
