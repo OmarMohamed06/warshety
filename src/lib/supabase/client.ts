@@ -1,7 +1,6 @@
 import { createBrowserClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
-import { completeDebug, logDebug } from "@/lib/debug-log";
 
 /**
  * Browser-side Supabase client.
@@ -51,16 +50,7 @@ async function fetchWithTimeout(
 
   let lastError: unknown;
 
-  // Short, readable label for the diagnostic overlay: "GET bookings", etc.
-  const url = typeof input === "string" ? input : String(input);
-  const label = `${method} ${url.replace(/^.*\/(rest|auth)\/v1\//, "").split("?")[0]}`;
-
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    const startedAt = Date.now();
-    const logId = logDebug(
-      "request",
-      attempt > 1 ? `${label} (retry)` : label,
-    );
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
@@ -71,16 +61,9 @@ async function fetchWithTimeout(
     callerSignal?.addEventListener("abort", onCallerAbort, { once: true });
 
     try {
-      const res = await fetch(input, { ...init, signal: controller.signal });
-      completeDebug(logId, res.status, Date.now() - startedAt);
-      return res;
+      return await fetch(input, { ...init, signal: controller.signal });
     } catch (err) {
       lastError = err;
-      completeDebug(
-        logId,
-        controller.signal.aborted ? "TIMEOUT" : "NETWORK-ERR",
-        Date.now() - startedAt,
-      );
       // The caller aborted on purpose (component unmounted, etc.) — respect it.
       if (callerSignal?.aborted) throw err;
 
@@ -208,10 +191,6 @@ async function resilientLock<R>(
 
   gaveUp = true;
   clearTimeout(abortTimer);
-  logDebug(
-    "note",
-    `auth lock unavailable after ${timeout}ms — proceeding without it`,
-  );
   console.warn(
     `[supabase] auth lock '${name}' could not be acquired in ${timeout}ms — ` +
       "continuing without it to avoid freezing every query",
