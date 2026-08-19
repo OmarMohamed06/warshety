@@ -72,7 +72,7 @@ const empty = {
 };
 
 export default function VendorServicesPage() {
-  const { vendor } = useAuth();
+  const { vendor, isLoading: authLoading } = useAuth();
   const { t, locale } = useLanguage();
   const supabase = useMemo(() => createClient(), []);
 
@@ -92,13 +92,18 @@ export default function VendorServicesPage() {
   const load = useCallback(async () => {
     if (!vendor) return;
     setLoading(true);
-    const { data } = await supabase
-      .from("services")
-      .select("*")
-      .eq("vendor_id", vendor.id)
-      .order("created_at", { ascending: false });
-    setServices((data ?? []) as unknown as DbService[]);
-    setLoading(false);
+    try {
+      const { data } = await supabase
+        .from("services")
+        .select("*")
+        .eq("vendor_id", vendor.id)
+        .order("created_at", { ascending: false });
+      setServices((data ?? []) as unknown as DbService[]);
+    } finally {
+      // Always clear the gate — otherwise a failed request leaves the page
+      // showing skeletons until the user reloads.
+      setLoading(false);
+    }
   }, [vendor]);
 
   // Load branches once — prepend a synthetic "Main" entry from the vendor record
@@ -135,6 +140,11 @@ export default function VendorServicesPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Auth settled but this user has no vendor — nothing to load, stop waiting.
+  useEffect(() => {
+    if (!authLoading && !vendor) setLoading(false);
+  }, [authLoading, vendor]);
 
   const set = (k: keyof typeof empty, v: string | boolean) =>
     setForm((f) => ({ ...f, [k]: v }));

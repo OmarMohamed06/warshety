@@ -437,7 +437,7 @@ function MainWorkingHoursDialog({
 // ── Main Page ──────────────────────────────────────────────────────────────────
 
 export default function VendorBranchesPage() {
-  const { vendor, vendorType } = useAuth();
+  const { vendor, vendorType, isLoading: authLoading } = useAuth();
   const { t, locale } = useLanguage();
 
   const [branches, setBranches] = useState<DbBranch[]>([]);
@@ -464,18 +464,28 @@ export default function VendorBranchesPage() {
   const load = useCallback(async () => {
     if (!vendor) return;
     setLoading(true);
-    const [data, { id }] = await Promise.all([
-      getBranches(vendor.id),
-      getOrCreateMainBranch(vendor.id, vendor.business_name),
-    ]);
-    setBranches(data);
-    setMainBranchId(id);
-    setLoading(false);
+    try {
+      const [data, { id }] = await Promise.all([
+        getBranches(vendor.id),
+        getOrCreateMainBranch(vendor.id, vendor.business_name),
+      ]);
+      setBranches(data);
+      setMainBranchId(id);
+    } finally {
+      // Always clear the gate — otherwise a failed request leaves the page
+      // showing skeletons until the user reloads.
+      setLoading(false);
+    }
   }, [vendor]);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  // Auth settled but this user has no vendor — nothing to load, stop waiting.
+  useEffect(() => {
+    if (!authLoading && !vendor) setLoading(false);
+  }, [authLoading, vendor]);
 
   function openNew() {
     setForm(EMPTY_FORM);

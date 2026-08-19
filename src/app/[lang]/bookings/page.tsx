@@ -55,31 +55,41 @@ export default function MyBookingsPage() {
     if (!user) return;
     setLoading(true);
 
-    let q = supabase
-      .from("bookings")
-      .select(
-        "*, vendor:vendors(business_name,business_name_ar,city,city_ar), vehicle:vehicles(*)",
-      )
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
+    try {
+      const q = supabase
+        .from("bookings")
+        .select(
+          "*, vendor:vendors(business_name,business_name_ar,city,city_ar), vehicle:vehicles(*)",
+        )
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
 
-    const { data } = await q;
-    let all = data ?? [];
+      const { data } = await q;
+      let all = data ?? [];
 
-    if (filter === "active")
-      all = all.filter((b: any) => ACTIVE_STATUSES.includes(b.status));
-    else if (filter === "completed")
-      all = all.filter((b: any) =>
-        ["completed", "cancelled", "no_show"].includes(b.status),
-      );
+      if (filter === "active")
+        all = all.filter((b: any) => ACTIVE_STATUSES.includes(b.status));
+      else if (filter === "completed")
+        all = all.filter((b: any) =>
+          ["completed", "cancelled", "no_show"].includes(b.status),
+        );
 
-    setBookings(all);
-    setLoading(false);
+      setBookings(all);
+    } finally {
+      // Always clear the gate — otherwise a failed request leaves the page
+      // showing skeletons until the user reloads.
+      setLoading(false);
+    }
   }, [user, filter, supabase]);
 
   useEffect(() => {
     loadBookings();
   }, [loadBookings]);
+
+  // Auth settled but nobody is signed in — nothing to load, stop waiting.
+  useEffect(() => {
+    if (!authLoading && !user) setLoading(false);
+  }, [authLoading, user]);
 
   const handleCancel = async () => {
     if (!cancelConfirmId) return;

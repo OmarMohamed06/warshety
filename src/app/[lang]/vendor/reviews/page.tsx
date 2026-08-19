@@ -220,7 +220,7 @@ function ReviewCard({
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function VendorReviewsPage() {
-  const { vendor } = useAuth();
+  const { vendor, isLoading: authLoading } = useAuth();
   const { t } = useLanguage();
 
   const [reviews, setReviews] = useState<DbReview[]>([]);
@@ -230,14 +230,24 @@ export default function VendorReviewsPage() {
   const load = useCallback(async () => {
     if (!vendor) return;
     setLoading(true);
-    const data = await getVendorReviews(vendor.id);
-    setReviews(data);
-    setLoading(false);
+    try {
+      const data = await getVendorReviews(vendor.id);
+      setReviews(data);
+    } finally {
+      // Always clear the gate — otherwise a failed request leaves the page
+      // showing skeletons until the user reloads.
+      setLoading(false);
+    }
   }, [vendor]);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  // Auth settled but this user has no vendor — nothing to load, stop waiting.
+  useEffect(() => {
+    if (!authLoading && !vendor) setLoading(false);
+  }, [authLoading, vendor]);
 
   function handleReplySubmitted(id: string, reply: string) {
     setReviews((prev) =>

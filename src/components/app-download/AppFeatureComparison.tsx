@@ -129,7 +129,7 @@ export function AppFeatureComparison({ locale = "en" }: Props) {
                 </span>
               </div>
               <h3 className="font-black text-lg text-white">
-                {isAr ? "تطبيق ورشتي" : "Warshety App"}
+                {isAr ? "تطبيق ورشتي" : "Mobile App"}
               </h3>
             </div>
             <ul className="space-y-3">

@@ -115,10 +115,19 @@ export default function BranchManagersPage({
     setLoading(true);
     setError(null);
 
-    const [branchData, { data: mgrs, error: mgrsErr }] = await Promise.all([
+    const result = await Promise.all([
       getBranch(branchId),
       getBranchManagersList(branchId),
-    ]);
+    ]).catch(() => null);
+
+    if (!result) {
+      // Request failed — surface it instead of spinning forever.
+      setError(t("vendor.errBranchNotFound"));
+      setLoading(false);
+      return;
+    }
+
+    const [branchData, { data: mgrs, error: mgrsErr }] = result;
 
     if (!branchData) {
       setError(t("vendor.errBranchNotFound"));
@@ -144,6 +153,11 @@ export default function BranchManagersPage({
   useEffect(() => {
     if (!authLoading) load();
   }, [authLoading, load]);
+
+  // Auth settled but this user has no vendor — nothing to load, stop waiting.
+  useEffect(() => {
+    if (!authLoading && (!user || !vendor)) setLoading(false);
+  }, [authLoading, user, vendor]);
 
   // ── Assign ────────────────────────────────────────────────────────────────
 

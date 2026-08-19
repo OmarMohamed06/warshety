@@ -48,6 +48,14 @@ export interface AuthContextValue {
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
+/**
+ * How long to wait for supabase-js to emit its first auth event (normally
+ * INITIAL_SESSION, within milliseconds) before we stop blocking the UI.
+ * Comfortably longer than one bounded network round-trip, so it only ever
+ * fires when the auth client is genuinely wedged.
+ */
+const AUTH_INIT_TIMEOUT_MS = 15_000;
+
 // Fallback value when Supabase env vars are not configured
 const NULL_AUTH: AuthContextValue = {
   session: null,
@@ -213,9 +221,28 @@ function AuthProviderInner({
   useEffect(() => {
     isMountedRef.current = true;
 
+    // Failsafe: `isLoading` is only ever cleared from inside this callback, so
+    // if supabase-js never emits an event the gate stays shut forever and every
+    // page that waits on `authLoading` renders skeletons until a manual reload.
+    // That can happen when the client's internal initialize() stalls (e.g. a
+    // token refresh on a dead connection, or a cross-tab auth lock that is
+    // never released). Release the gate after AUTH_INIT_TIMEOUT_MS so pages
+    // render with whatever we already have instead of hanging.
+    const initFailsafe = setTimeout(() => {
+      if (!isMountedRef.current) return;
+      console.warn(
+        "[AuthContext] no auth event within",
+        AUTH_INIT_TIMEOUT_MS,
+        "ms — releasing the loading gate",
+      );
+      setIsLoading(false);
+    }, AUTH_INIT_TIMEOUT_MS);
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, s) => {
+      // An event arrived — the normal paths below own `isLoading` from here.
+      clearTimeout(initFailsafe);
       if (!isMountedRef.current) return;
       setSession(s);
       setAuthUser(s?.user ?? null);
@@ -263,6 +290,7 @@ function AuthProviderInner({
 
     return () => {
       isMountedRef.current = false;
+      clearTimeout(initFailsafe);
       subscription.unsubscribe();
     };
   }, [supabase, loadProfile]);

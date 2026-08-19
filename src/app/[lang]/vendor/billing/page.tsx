@@ -205,7 +205,7 @@ function PaymentModal({
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function VendorBillingPage() {
-  const { vendor, vendorType } = useAuth();
+  const { vendor, vendorType, isLoading: authLoading } = useAuth();
   const { t } = useLanguage();
   const isService = vendorType === "service_center";
 
@@ -370,17 +370,26 @@ export default function VendorBillingPage() {
       setEnsuring(false);
     }
 
-    if (isService) {
-      const { data } = await getMyBillingHistory(vendor.id);
-      setBills(data);
+    try {
+      if (isService) {
+        const { data } = await getMyBillingHistory(vendor.id);
+        setBills(data);
+      }
+    } finally {
+      // Always clear the gate — otherwise a failed request leaves the page
+      // showing skeletons until the user reloads.
+      setLoading(false);
     }
-
-    setLoading(false);
   }, [vendor, isService]);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  // Auth settled but this user has no vendor — nothing to load, stop waiting.
+  useEffect(() => {
+    if (!authLoading && !vendor) setLoading(false);
+  }, [authLoading, vendor]);
 
   // ─────────────────────────────────────────────────────────────────────────
   // Loading skeleton

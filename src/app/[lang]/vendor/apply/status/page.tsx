@@ -36,10 +36,17 @@ export default function VendorStatusPage() {
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle()
-      .then(({ data }) => {
-        setApp(data ?? null);
-        setAppLoading(false);
-      });
+      .then(
+        ({ data }) => {
+          setApp(data ?? null);
+          setAppLoading(false);
+        },
+        () => {
+          // Request failed — drop the full-screen spinner rather than
+          // trapping the user on it until they reload.
+          setAppLoading(false);
+        },
+      );
   }, [authLoading, session, supabase]);
 
   // ── Loading ───────────────────────────────────────────────────────────────

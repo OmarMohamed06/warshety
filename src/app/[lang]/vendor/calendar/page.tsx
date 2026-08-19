@@ -150,7 +150,7 @@ function slotChipCls(slot: TimeSlot): string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function VendorCalendarPage() {
-  const { vendor, vendorType } = useAuth();
+  const { vendor, vendorType, isLoading: authLoading } = useAuth();
   const { t, locale } = useLanguage();
   const supabase = useMemo(() => createClient(), []);
 
@@ -218,40 +218,53 @@ export default function VendorCalendarPage() {
   const loadBookings = useCallback(async () => {
     if (!vendor) return;
     setLoadingCal(true);
-    const from = localDateStr(new Date(year, month, 1));
-    const to = localDateStr(new Date(year, month + 1, 0));
-    let q = supabase
-      .from("bookings")
-      .select(
-        "id,booking_date,booking_time,booking_type,service_key,status,notes,total_price," +
-          "user:users!left(full_name,phone)," +
-          "vehicle:vehicles!left(make,model,year)",
-      )
-      .eq("vendor_id", vendor.id)
-      .gte("booking_date", from)
-      .lte("booking_date", to)
-      .order("booking_time");
-    // Apply branch filter only when a branch is explicitly selected
-    if (selectedBranch) q = q.eq("branch_id", selectedBranch);
-    const { data } = await q;
-    setBookings((data ?? []) as unknown as CalendarBooking[]);
-    setLoadingCal(false);
+    try {
+      const from = localDateStr(new Date(year, month, 1));
+      const to = localDateStr(new Date(year, month + 1, 0));
+      let q = supabase
+        .from("bookings")
+        .select(
+          "id,booking_date,booking_time,booking_type,service_key,status,notes,total_price," +
+            "user:users!left(full_name,phone)," +
+            "vehicle:vehicles!left(make,model,year)",
+        )
+        .eq("vendor_id", vendor.id)
+        .gte("booking_date", from)
+        .lte("booking_date", to)
+        .order("booking_time");
+      // Apply branch filter only when a branch is explicitly selected
+      if (selectedBranch) q = q.eq("branch_id", selectedBranch);
+      const { data } = await q;
+      setBookings((data ?? []) as unknown as CalendarBooking[]);
+    } finally {
+      // Always clear the gate — otherwise a failed request leaves the page
+      // showing skeletons until the user reloads.
+      setLoadingCal(false);
+    }
   }, [vendor, year, month, supabase, selectedBranch]);
 
   useEffect(() => {
     loadBookings();
   }, [loadBookings]);
 
+  // Auth settled but this user has no vendor — nothing to load, stop waiting.
+  useEffect(() => {
+    if (!authLoading && !vendor) setLoadingCal(false);
+  }, [authLoading, vendor]);
+
   // ── Load time slots for the selected date ────────────────────────────────
   const loadSlots = useCallback(
     async (date: string) => {
       if (!vendor) return;
       setLoadingSlots(true);
-      const slots = selectedBranch
-        ? await getAvailableSlotsForBranch(selectedBranch, date)
-        : await getAvailableSlots(vendor.id, date);
-      setDaySlots(slots);
-      setLoadingSlots(false);
+      try {
+        const slots = selectedBranch
+          ? await getAvailableSlotsForBranch(selectedBranch, date)
+          : await getAvailableSlots(vendor.id, date);
+        setDaySlots(slots);
+      } finally {
+        setLoadingSlots(false);
+      }
     },
     [vendor, selectedBranch],
   );
