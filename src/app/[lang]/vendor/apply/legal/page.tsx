@@ -86,6 +86,17 @@ export default function VendorLegalPage() {
     const hasFront = frontFile || frontUrl;
     const hasBack = backFile || backUrl;
 
+    // If no files uploaded at all, allow skipping (optional step)
+    if (!hasFront && !hasBack) {
+      router.push(
+        localePath(
+          isPartsSeller ? "/vendor/apply/bank" : "/vendor/apply/operations",
+        ),
+      );
+      return;
+    }
+
+    // If partially filled, prompt to complete both
     if (!hasFront || !hasBack) {
       setError(t("vendor.applyPages.legalErrorBothId"));
       return;
@@ -161,7 +172,7 @@ export default function VendorLegalPage() {
     return (
       <div className="flex-1">
         <p className="text-xs font-bold uppercase text-slate-500 tracking-wider mb-2">
-          {label} <span className="text-red-500">*</span>
+          {label}
         </p>
         <input
           ref={inputRef}
