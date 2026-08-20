@@ -95,7 +95,12 @@ export async function createVendorApplicationWithAccount(params: {
   city: string;
   governorate: string;
 }): Promise<{ applicationId: string | null; error: string | null }> {
-  const admin = adminClient();
+  let admin: ReturnType<typeof adminClient>;
+  try {
+    admin = adminClient();
+  } catch (e: any) {
+    return { applicationId: null, error: e?.message ?? "Server configuration error." };
+  }
 
   // Create auth user — email not confirmed, so they cannot sign in yet
   const { data: authData, error: authErr } = await admin.auth.admin.createUser({
@@ -189,7 +194,12 @@ export async function submitVendorApplication(params: {
   maps_link?: string;
   shop_photos?: string[];
 }): Promise<{ applicationId: string | null; error: string | null }> {
-  const admin = adminClient();
+  let admin: ReturnType<typeof adminClient>;
+  try {
+    admin = adminClient();
+  } catch (e: any) {
+    return { applicationId: null, error: e?.message ?? "Server configuration error." };
+  }
 
   const { data: authData, error: authErr } = await admin.auth.admin.createUser({
     email: params.email,
