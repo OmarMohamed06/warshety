@@ -5,6 +5,7 @@ import {
   notifyVendorNewBooking,
   resolveBookingRecipient,
 } from "@/services/outboundNotificationService";
+import { createInAppNotification } from "@/services/inAppNotificationService";
 
 /**
  * POST /api/bookings/notify
@@ -108,6 +109,15 @@ export async function POST(req: NextRequest) {
         console.error("[notify-booking] customer notification error:", e),
       );
     }
+
+    // Customer: in-app notification (feeds the notification bell / list)
+    await createInAppNotification({
+      userId: booking.user_id,
+      type: "booking_confirmed",
+      title: "Booking Confirmed ✓",
+      body: `Your booking at ${centerName} on ${dateTime} has been confirmed.`,
+      link: bookingLink,
+    });
 
     // Vendor: SMS + Email
     // Recipient = branch manager (if assigned to this branch) or vendor owner

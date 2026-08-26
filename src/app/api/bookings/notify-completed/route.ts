@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { notifyCustomerBookingCompleted } from "@/services/outboundNotificationService";
+import { createInAppNotification } from "@/services/inAppNotificationService";
 
 /**
  * POST /api/bookings/notify-completed
@@ -51,10 +52,6 @@ export async function POST(req: NextRequest) {
       (booking.vendor as { business_name?: string } | null)?.business_name ??
       "the service center";
 
-    if (!userRow?.phone && !userRow?.email) {
-      return NextResponse.json({ ok: true, skipped: "no contact info" });
-    }
-
     // Read the points awarded by the DB trigger for this booking
     // Small delay to let the DB trigger commit before we query
     await new Promise((r) => setTimeout(r, 800));
@@ -67,15 +64,29 @@ export async function POST(req: NextRequest) {
 
     const pointsEarned = (txn as { points?: number } | null)?.points ?? 0;
 
-    await notifyCustomerBookingCompleted({
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://warshety.com";
+    await createInAppNotification({
       userId: booking.user_id,
-      phone: userRow?.phone ?? undefined,
-      email: userRow?.email ?? undefined,
-      customerName: userRow?.full_name ?? undefined,
-      centerName,
-      bookingId,
-      pointsEarned: pointsEarned > 0 ? pointsEarned : undefined,
+      type: "booking_completed",
+      title: "Service Completed ✓",
+      body:
+        pointsEarned > 0
+          ? `Your service at ${centerName} is complete. You earned ${pointsEarned} points!`
+          : `Your service at ${centerName} is complete.`,
+      link: `${appUrl}/en/bookings/${bookingId}`,
     });
+
+    if (userRow?.phone || userRow?.email) {
+      await notifyCustomerBookingCompleted({
+        userId: booking.user_id,
+        phone: userRow?.phone ?? undefined,
+        email: userRow?.email ?? undefined,
+        customerName: userRow?.full_name ?? undefined,
+        centerName,
+        bookingId,
+        pointsEarned: pointsEarned > 0 ? pointsEarned : undefined,
+      });
+    }
 
     return NextResponse.json({ ok: true });
   } catch (e) {

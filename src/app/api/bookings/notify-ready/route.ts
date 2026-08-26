@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { notifyCustomerCarReady } from "@/services/outboundNotificationService";
+import { createInAppNotification } from "@/services/inAppNotificationService";
 
 function getServiceClient() {
   return createClient(
@@ -54,6 +55,15 @@ export async function POST(req: NextRequest) {
         bookingId,
       });
     }
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://warshety.com";
+    await createInAppNotification({
+      userId: booking.user_id,
+      type: "ready_for_pickup",
+      title: "Your Car is Ready 🚗",
+      body: `Your vehicle at ${centerName} has been serviced and is ready for pickup.`,
+      link: `${appUrl}/en/bookings/${bookingId}`,
+    });
 
     return NextResponse.json({ ok: true });
   } catch (e) {
