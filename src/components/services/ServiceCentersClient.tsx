@@ -550,8 +550,9 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                   key={sc.id}
                   className="overflow-hidden hover:shadow-md transition-shadow"
                 >
-                  {/* Image */}
-                  <div className="w-full h-40 relative">
+                  {/* Image — shrink-0 so it keeps its height when the card is
+                      stretched to match a taller sibling in the row. */}
+                  <div className="w-full h-40 relative shrink-0">
                     {sc.image ? (
                       <NextImage
                         src={sc.image}
@@ -583,8 +584,11 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                     )}
                   </div>
 
-                  {/* Details */}
-                  <CardContent className="p-4 flex flex-col justify-between min-w-0">
+                  {/* Details — flex-1 makes this fill the (already equal-height)
+                      card, so justify-between pins the Book Now footer to the
+                      bottom and every card in a row lines up regardless of how
+                      many chips it has. */}
+                  <CardContent className="p-4 flex-1 flex flex-col justify-between min-w-0">
                     <div>
                       <div className="flex items-start justify-between gap-2 mb-1">
                         <h3 className="font-bold text-base leading-tight">
@@ -645,8 +649,11 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                           )}
                         </div>
                       </div>
+                      {/* Capped like the services row below — an unbounded list
+                          of makes was the other reason cards drifted out of
+                          line (2 chips on one card, 6 on the next). */}
                       <div className="flex flex-wrap gap-1.5 mb-2">
-                        {sc.specializations.map((s) => (
+                        {sc.specializations.slice(0, 4).map((s) => (
                           <Badge
                             key={s}
                             variant="secondary"
@@ -655,6 +662,14 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                             {s}
                           </Badge>
                         ))}
+                        {sc.specializations.length > 4 && (
+                          <Badge
+                            variant="secondary"
+                            className="text-[10px] font-semibold text-muted-foreground"
+                          >
+                            +{sc.specializations.length - 4}
+                          </Badge>
+                        )}
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {sc.services.slice(0, 3).map((svc) => (

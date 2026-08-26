@@ -214,9 +214,14 @@ export default function FeaturedServiceCenters({ initialData }: Props = {}) {
                         ))}
                       </div>
 
-                      {/* Book button */}
-                      <div className="mt-2 w-full text-center text-[11px] font-bold text-[#FF4B19] border border-[#FF4B19]/30 rounded-lg py-1.5 group-hover:bg-[#FF4B19] group-hover:text-white transition-colors">
-                        {t("home.bookInspection")}
+                      {/* Book button — matches the small Book Now on the
+                          service centers listing. A span, not a Button/Link:
+                          the whole card is already an anchor, and nesting
+                          interactive elements inside one is invalid. */}
+                      <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700 flex items-center justify-end">
+                        <span className="inline-flex items-center justify-center h-7 px-3 rounded-md bg-[#FF4B19] text-white text-xs font-medium group-hover:bg-[#e34314] transition-colors">
+                          {t("services.bookNow")}
+                        </span>
                       </div>
                     </div>
                   </Link>
