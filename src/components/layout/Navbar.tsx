@@ -49,6 +49,7 @@ import {
   ChevronRight,
   Gift,
   ClipboardList,
+  Navigation,
 } from "lucide-react";
 
 const LANGUAGES = [
@@ -61,6 +62,11 @@ const NAV_LINKS = [
     tKey: "nav.serviceCenters",
     href: "/services",
     icon: <Wrench className="w-4 h-4" />,
+  },
+  {
+    tKey: "nav.nearMe",
+    href: "/near-me",
+    icon: <Navigation className="w-4 h-4" />,
   },
   {
     tKey: "nav.rewards",

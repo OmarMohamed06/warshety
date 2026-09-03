@@ -1,5 +1,6 @@
 {
   "nav": {
+    "nearMe": "Near Me",
     "myGarage": "My Garage",
     "selectVehicle": "Select vehicle",
     "manage": "Manage",
@@ -1918,5 +1919,41 @@
     "supportedMakes": "Supported Car Makes",
     "closedToday": "Closed",
     "newCenter": "New"
+  },
+  "nearMe": {
+    "heading": "Service Centers Near You",
+    "subtitle": "Find the closest workshops on the map, sorted by distance.",
+    "enableTitle": "Show the centers closest to you",
+    "enableBody": "We read your location once, in your browser, to sort centers by distance. It is never saved.",
+    "useMyLocation": "Use my location",
+    "requesting": "Getting your location…",
+    "showingNearYou": "Showing the centers nearest to you",
+    "updateLocation": "Update my location",
+    "deniedTitle": "Location is blocked",
+    "deniedBody": "Near Me needs your location to sort centers by distance. Allow location for this site in your browser's site settings, then try again.",
+    "unavailableTitle": "Couldn't get your location",
+    "unavailableBody": "Your device couldn't provide a location just now. You can still browse every center below.",
+    "insecureTitle": "Location needs a secure connection",
+    "insecureBody": "Browsers only share location over HTTPS. Open this site with https:// to use Near Me.",
+    "unsupportedTitle": "Location isn't available in this browser",
+    "unsupportedBody": "You can still browse every service center below.",
+    "loadErrorTitle": "Couldn't load service centers",
+    "loadErrorBody": "Something went wrong reaching the server.",
+    "tryAgain": "Try again",
+    "noCenters": "No service centers are available yet.",
+    "noneInRadius": "No centers found within {radius} km of you.",
+    "noMappableCenters": "No centers have shared a map location yet.",
+    "noDistance": "Distance unavailable",
+    "viewCenter": "View Center",
+    "getDirections": "Get Directions",
+    "showOnMap": "Show on map",
+    "noLocationShared": "No location shared",
+    "close": "Close",
+    "youAreHere": "You are here",
+    "distanceAway": "{distance} away",
+    "unit": {
+      "m": "m",
+      "km": "km"
+    }
   }
 }

@@ -350,3 +350,76 @@ export function getUserLocation(timeoutMs = 8000): Promise<UserLocationResult> {
     );
   });
 }
+
+// ── Near Me helpers ───────────────────────────────────────────────────────────
+
+/**
+ * A center is only mappable when it has real coordinates: non-null, finite,
+ * in range, and not the (0,0) placeholder that unresolved rows carry.
+ */
+export function hasUsableCoordinates(
+  lat: number | null | undefined,
+  lng: number | null | undefined,
+): boolean {
+  if (lat == null || lng == null) return false;
+  if (!isValidCoordinates(lat, lng)) return false;
+  // (0,0) is in the Gulf of Guinea — always a placeholder here, never a center.
+  if (lat === 0 && lng === 0) return false;
+  return true;
+}
+
+/**
+ * Split a distance into a number and a unit, matching the mobile app's rules:
+ *   < 1 km   → metres rounded to the nearest 10   ("350", "m")
+ *   1–10 km  → one decimal                        ("4.8", "km")
+ *   >= 10 km → whole number                       ("18",  "km")
+ *
+ * Returned as parts so the caller can localize the unit and the
+ * "{distance} away" wrapper.
+ */
+export function formatDistanceParts(km: number): {
+  value: string;
+  unit: "m" | "km";
+} {
+  if (!isFinite(km) || km < 0) return { value: "0", unit: "m" };
+  if (km < 1) {
+    return { value: String(Math.round((km * 1000) / 10) * 10), unit: "m" };
+  }
+  if (km < 10) return { value: km.toFixed(1), unit: "km" };
+  return { value: String(Math.round(km)), unit: "km" };
+}
+
+/**
+ * Build a Google Maps directions URL for a center.
+ *
+ * Prefers the center's own `maps_link` (which may point at a specific storefront
+ * rather than a bare pin), falling back to its coordinates. Returns null when
+ * the center has shared neither — the caller must then disable the button
+ * rather than making the user copy coordinates.
+ *
+ * Only http(s) links are accepted: `maps_link` is operator-supplied data, and
+ * javascript:/data: URLs must never reach an href.
+ */
+export function buildDirectionsUrl(center: {
+  maps_link?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+}): string | null {
+  const raw = center.maps_link?.trim();
+  if (raw) {
+    try {
+      const url = new URL(raw);
+      if (url.protocol === "http:" || url.protocol === "https:") {
+        return url.toString();
+      }
+    } catch {
+      // Malformed link — fall through to coordinates.
+    }
+  }
+
+  if (hasUsableCoordinates(center.latitude, center.longitude)) {
+    return `https://www.google.com/maps/dir/?api=1&destination=${center.latitude},${center.longitude}`;
+  }
+
+  return null;
+}
