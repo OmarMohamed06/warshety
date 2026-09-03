@@ -17,7 +17,7 @@
 import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import type { NearbyCenter } from "@/services/nearbyService";
+import type { LocatableCenter } from "@/services/nearbyService";
 import { hasUsableCoordinates, type Coordinates } from "@/lib/geo";
 
 /** Cairo — a sensible view before any fix arrives. */
@@ -58,13 +58,16 @@ function userDotIcon(): L.DivIcon {
 }
 
 export interface CenterMapProps {
-  centers: NearbyCenter[];
+  centers: LocatableCenter[];
   userCoords: Coordinates | null;
   selectedId: string | null;
   onSelect: (id: string) => void;
   /** Accessible label for the visitor's own marker. */
   youAreHereLabel: string;
-  displayName: (c: NearbyCenter) => string;
+  /** Keyed by id rather than taking the row, so this stays independent of
+   *  whatever shape the calling page holds — and survives next/dynamic, which
+   *  erases generic type parameters. */
+  displayName: (id: string) => string;
 }
 
 export default function CenterMap({
@@ -172,8 +175,8 @@ export default function CenterMap({
         icon: centerPinIcon(false),
         // Leaflet gives keyboard-focusable markers that fire click on Enter.
         keyboard: true,
-        title: displayName(c),
-        alt: displayName(c),
+        title: displayName(c.id),
+        alt: displayName(c.id),
         riseOnHover: true,
       })
         .addTo(map)

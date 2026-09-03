@@ -1,7 +1,8 @@
 ﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
 import NextImage from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import { tGov, tArea } from "@/lib/locationData";
@@ -29,9 +30,33 @@ import {
   Car,
   Award,
   ChevronDown,
+  Navigation,
+  Map as MapIcon,
+  List as ListIcon,
+  ExternalLink,
 } from "lucide-react";
 import { useGarage } from "@/hooks/useGarage";
 import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
+import { useGeolocation } from "@/hooks/useGeolocation";
+import { fetchDistances } from "@/services/nearbyService";
+import {
+  formatDistanceParts,
+  hasUsableCoordinates,
+  buildDirectionsUrl,
+} from "@/lib/geo";
+import { Skeleton } from "@/components/ui/skeleton";
+import { CenterMarkerCard } from "./CenterMarkerCard";
+
+// Leaflet reaches for `window` as it loads, so the map is client-only and is
+// not downloaded at all until the visitor switches to the map view.
+const CenterMap = dynamic(() => import("./CenterMap"), {
+  ssr: false,
+  loading: () => <Skeleton className="h-full w-full rounded-xl" />,
+});
+
+type SortOption = "relevance" | "rating" | "nearest";
+type ViewMode = "list" | "map";
 
 export interface ServiceCenterDisplay {
   id: string;
@@ -41,6 +66,10 @@ export interface ServiceCenterDisplay {
   badge: string | null;
   governorate: string;
   district?: string;
+  /** Street address, when the center has given one. */
+  address?: string | null;
+  /** Operator-supplied Google Maps link, used for directions. */
+  mapsLink?: string | null;
   latitude: number | null;
   longitude: number | null;
   featured: boolean;
@@ -156,9 +185,27 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
       });
   }, []);
 
-  const [sortOption, setSortOption] = useState<"relevance" | "rating">(
-    "relevance",
-  );
+  const [sortOption, setSortOption] = useState<SortOption>("relevance");
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [selectedMapId, setSelectedMapId] = useState<string | null>(null);
+  // Advanced filters are a lot of chrome on a phone — collapsed there by
+  // default, always open from lg up.
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  // ── Distance from the visitor ─────────────────────────────────────────────
+  const geo = useGeolocation();
+  const [distances, setDistances] = useState<Map<string, number>>(new Map());
+
+  /** Ask for location, then measure. Both steps hang off the click. */
+  const useMyLocation = useCallback(async () => {
+    const coords = await geo.request();
+    if (!coords) return;
+    const { byId } = await fetchDistances(coords, initialCenters);
+    setDistances(byId);
+    setSortOption("nearest");
+  }, [geo, initialCenters]);
+
+  const hasDistances = distances.size > 0;
 
   const { vehicles, vehicleLabel } = useGarage();
 
@@ -282,6 +329,18 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
       return true;
     })
     .sort((a, b) => {
+      // Sorting by distance is the one case where "featured" must not win:
+      // the visitor asked for closest first, so answer that question.
+      if (sortOption === "nearest") {
+        const da = distances.get(a.id);
+        const db = distances.get(b.id);
+        // Centers we cannot place sink to the bottom rather than disappearing.
+        if (da === undefined && db === undefined) return b.rating - a.rating;
+        if (da === undefined) return 1;
+        if (db === undefined) return -1;
+        return da - db;
+      }
+
       // 1. Featured first (always)
       if (a.featured !== b.featured) return a.featured ? -1 : 1;
       if (a.featuredPriority !== b.featuredPriority)
@@ -296,13 +355,68 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
       return b.rating - a.rating;
     });
 
+  // ── Derived helpers ───────────────────────────────────────────────────────
+
+  const displayName = useCallback(
+    (sc: ServiceCenterDisplay) => (isAr ? sc.name_ar || sc.name : sc.name),
+    [isAr],
+  );
+
+  const locationLine = useCallback(
+    (sc: ServiceCenterDisplay): string | null => {
+      if (sc.address) return sc.address;
+      const parts = [sc.district, sc.governorate].filter(Boolean);
+      return parts.length ? parts.join(" · ") : null;
+    },
+    [],
+  );
+
+  const distanceLabel = useCallback(
+    (id: string): string | null => {
+      const km = distances.get(id);
+      if (km === undefined) return null;
+      const { value, unit } = formatDistanceParts(km);
+      return t("nearMe.distanceAway", {
+        distance: `${value} ${t(`nearMe.unit.${unit}`)}`,
+      });
+    },
+    [distances, t],
+  );
+
+  /** Only centers we can actually place get a pin. */
+  const mappable = useMemo(
+    () => filtered.filter((sc) => hasUsableCoordinates(sc.latitude, sc.longitude)),
+    [filtered],
+  );
+
+  const selectedCenter = useMemo(
+    () => filtered.find((sc) => sc.id === selectedMapId) ?? null,
+    [filtered, selectedMapId],
+  );
+
+  // Esc closes the marker card.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setSelectedMapId(null);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  /** How many advanced filters are set — shown on the mobile Filters button. */
+  const advancedFilterCount =
+    (selectedGovernorate ? 1 : 0) +
+    (selectedDistrict ? 1 : 0) +
+    (selectedMake ? 1 : 0) +
+    (selectedVehicleId ? 1 : 0);
+
   return (
     <div className="min-h-screen bg-muted/30 flex flex-col">
       {/* Search Header */}
-      <div className="bg-background border-b px-4 sm:px-6 lg:px-20 py-6">
-        <div className="max-w-7xl mx-auto flex flex-col gap-5">
+      <div className="bg-background border-b px-4 sm:px-6 lg:px-20 py-4 sm:py-6">
+        <div className="max-w-7xl mx-auto flex flex-col gap-4 sm:gap-5">
           <div>
-            <Breadcrumb className="mb-2">
+            <Breadcrumb className="mb-2 hidden sm:block">
               <BreadcrumbList>
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
@@ -321,10 +435,10 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-            <h1 className="text-3xl font-black tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
               {t("services.bookService")}
             </h1>
-            <p className="text-muted-foreground text-sm mt-1">
+            <p className="text-muted-foreground text-sm mt-1 hidden sm:block">
               {t("services.subtitle")}
             </p>
           </div>
@@ -359,51 +473,6 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
               />
             </div>
 
-            <div className="flex gap-2">
-              {/* Governorate */}
-              <div className="relative flex-1 min-w-0">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
-                <select
-                  value={selectedGovernorate}
-                  onChange={(e) => {
-                    setSelectedGovernorate(e.target.value);
-                    setSelectedDistrict("");
-                  }}
-                  className="w-full pl-9 pr-8 py-2 h-9 rounded-md border border-input bg-background text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 appearance-none cursor-pointer"
-                  style={{ WebkitAppearance: "none", MozAppearance: "none" }}
-                >
-                  <option value="">{t("services.allGovernorates")}</option>
-                  {availableGovernorates.map((gov) => (
-                    <option key={gov} value={gov}>
-                      {tGov(gov, locale)}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-              </div>
-
-              {/* District */}
-              <div className="relative flex-1 min-w-0">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
-                <select
-                  value={selectedDistrict}
-                  onChange={(e) => setSelectedDistrict(e.target.value)}
-                  disabled={
-                    !selectedGovernorate || availableDistricts.length === 0
-                  }
-                  className="w-full pl-9 pr-8 py-2 h-9 rounded-md border border-input bg-background text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ WebkitAppearance: "none", MozAppearance: "none" }}
-                >
-                  <option value="">{t("services.allDistricts")}</option>
-                  {availableDistricts.map((dist) => (
-                    <option key={dist} value={dist}>
-                      {tArea(dist, locale)}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-              </div>
-            </div>
           </div>
 
           {/* Quick filters + Near Me */}
@@ -430,7 +499,114 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                 {icon} {label}
               </Button>
             ))}
+
+            {/* Near me — asks for location, then ranks by distance. Only ever
+                fires from this tap, never on page load. */}
+            <Button
+              variant={sortOption === "nearest" ? "default" : "outline"}
+              size="sm"
+              className="h-8 gap-1.5"
+              onClick={() => {
+                if (hasDistances) {
+                  setSortOption((o) => (o === "nearest" ? "relevance" : "nearest"));
+                } else {
+                  void useMyLocation();
+                }
+              }}
+              disabled={geo.loading}
+            >
+              <Navigation className="h-3.5 w-3.5" />
+              {geo.loading ? t("nearMe.requesting") : t("services.nearMe")}
+            </Button>
+
+            {/* Filters — phone only; the block below is always open from lg up */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1.5 lg:hidden ms-auto"
+              onClick={() => setFiltersOpen((o) => !o)}
+              aria-expanded={filtersOpen}
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" />
+              {t("services.filters")}
+              {advancedFilterCount > 0 && (
+                <span className="ms-0.5 rounded-full bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 font-bold">
+                  {advancedFilterCount}
+                </span>
+              )}
+            </Button>
           </div>
+
+          {/* Location trouble — explained inline rather than as a dead button */}
+          {(geo.status === "denied" ||
+            geo.status === "unavailable" ||
+            geo.status === "timeout" ||
+            geo.status === "insecure" ||
+            geo.status === "unsupported") && (
+            <p className="text-xs text-muted-foreground -mt-2">
+              {geo.status === "denied"
+                ? t("nearMe.deniedBody")
+                : geo.status === "insecure"
+                  ? t("nearMe.insecureBody")
+                  : geo.status === "unsupported"
+                    ? t("nearMe.unsupportedBody")
+                    : t("nearMe.unavailableBody")}
+            </p>
+          )}
+
+          {/* Advanced filters — collapsed on phones, always open from lg up */}
+          <div
+            className={cn(
+              "flex-col gap-5",
+              filtersOpen ? "flex" : "hidden lg:flex",
+            )}
+          >
+              <div className="flex gap-2">
+                {/* Governorate */}
+                <div className="relative flex-1 min-w-0">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
+                  <select
+                    value={selectedGovernorate}
+                    onChange={(e) => {
+                      setSelectedGovernorate(e.target.value);
+                      setSelectedDistrict("");
+                    }}
+                    className="w-full pl-9 pr-8 py-2 h-9 rounded-md border border-input bg-background text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 appearance-none cursor-pointer"
+                    style={{ WebkitAppearance: "none", MozAppearance: "none" }}
+                  >
+                    <option value="">{t("services.allGovernorates")}</option>
+                    {availableGovernorates.map((gov) => (
+                      <option key={gov} value={gov}>
+                        {tGov(gov, locale)}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                </div>
+
+                {/* District */}
+                <div className="relative flex-1 min-w-0">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
+                  <select
+                    value={selectedDistrict}
+                    onChange={(e) => setSelectedDistrict(e.target.value)}
+                    disabled={
+                      !selectedGovernorate || availableDistricts.length === 0
+                    }
+                    className="w-full pl-9 pr-8 py-2 h-9 rounded-md border border-input bg-background text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ WebkitAppearance: "none", MozAppearance: "none" }}
+                  >
+                    <option value="">{t("services.allDistricts")}</option>
+                    {availableDistricts.map((dist) => (
+                      <option key={dist} value={dist}>
+                        {tArea(dist, locale)}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                </div>
+              </div>
+
 
           {/* Filter by My Vehicle */}
           <div className="flex flex-col gap-2">
@@ -507,6 +683,7 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
               </button>
             )}
           </div>
+          </div>
         </div>
       </div>
 
@@ -514,24 +691,116 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
       <div className="flex-1 max-w-7xl w-full mx-auto">
         {/* List */}
         <div className="w-full p-4 sm:p-6">
-          <div className="flex items-center justify-between mb-5">
-            <p className="text-sm font-semibold text-muted-foreground">
+          <div className="sticky top-0 z-20 -mx-4 sm:mx-0 px-4 sm:px-0 py-2 sm:py-0 mb-4 sm:mb-5 bg-muted/30 sm:bg-transparent backdrop-blur supports-[backdrop-filter]:bg-muted/60 sm:supports-[backdrop-filter]:bg-transparent flex items-center justify-between gap-2">
+            <p className="text-sm font-semibold text-muted-foreground shrink-0">
               {filtered.length} {t("services.centersFound")}
             </p>
-            <div className="flex items-center gap-2">
-              <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
-              <select
-                value={sortOption}
-                onChange={(e) =>
-                  setSortOption(e.target.value as "relevance" | "rating")
-                }
-                className="bg-transparent text-sm font-medium focus:outline-none cursor-pointer"
-              >
-                <option value="relevance">{t("services.relevance")}</option>
-                <option value="rating">{t("services.highestRated")}</option>
-              </select>
+
+            <div className="flex items-center gap-2 min-w-0">
+              {/* List / Map. The map bundle is only fetched once picked. */}
+              <div className="flex rounded-md border p-0.5">
+                <button
+                  onClick={() => setViewMode("list")}
+                  aria-pressed={viewMode === "list"}
+                  className={cn(
+                    "flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
+                    viewMode === "list"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <ListIcon className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">
+                    {t("services.viewList")}
+                  </span>
+                </button>
+                <button
+                  onClick={() => setViewMode("map")}
+                  aria-pressed={viewMode === "map"}
+                  className={cn(
+                    "flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
+                    viewMode === "map"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <MapIcon className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">
+                    {t("services.viewMap")}
+                  </span>
+                </button>
+              </div>
+
+              <div className="flex items-center gap-1.5 min-w-0">
+                <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                <select
+                  value={sortOption}
+                  onChange={(e) => {
+                    const next = e.target.value as SortOption;
+                    // Picking "nearest" without a fix yet asks for one.
+                    if (next === "nearest" && !hasDistances) {
+                      void useMyLocation();
+                      return;
+                    }
+                    setSortOption(next);
+                  }}
+                  className="bg-transparent text-sm font-medium focus:outline-none cursor-pointer min-w-0 truncate"
+                >
+                  <option value="relevance">{t("services.relevance")}</option>
+                  <option value="rating">{t("services.highestRated")}</option>
+                  <option value="nearest">{t("services.nearest")}</option>
+                </select>
+              </div>
             </div>
           </div>
+
+          {/* Map — rendered above the results so the same list works in both
+              views; no duplicated card markup, and it collapses cleanly on a
+              phone where a side-by-side split would be unusable. */}
+          {viewMode === "map" && (
+            <div className="relative h-[55vh] lg:h-[65vh] mb-5">
+              {mappable.length === 0 ? (
+                <div className="h-full w-full rounded-xl border bg-card flex items-center justify-center p-6 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    {t("nearMe.noMappableCenters")}
+                  </p>
+                </div>
+              ) : (
+                <CenterMap
+                  centers={mappable}
+                  userCoords={geo.coords}
+                  selectedId={selectedMapId}
+                  onSelect={setSelectedMapId}
+                  youAreHereLabel={t("nearMe.youAreHere")}
+                  displayName={(id) => {
+                    const c = filtered.find((x) => x.id === id);
+                    return c ? displayName(c) : "";
+                  }}
+                />
+              )}
+
+              {selectedCenter && (
+                <div className="absolute bottom-3 left-3 right-3 z-[500]">
+                  <CenterMarkerCard
+                    name={displayName(selectedCenter)}
+                    locationLine={locationLine(selectedCenter)}
+                    distanceLabel={distanceLabel(selectedCenter.id)}
+                    rating={selectedCenter.rating}
+                    reviewCount={selectedCenter.reviewCount}
+                    tags={selectedCenter.specializations}
+                    href={`/services/${selectedCenter.slug ?? selectedCenter.id}`}
+                    directionsUrl={buildDirectionsUrl({
+                      maps_link: selectedCenter.mapsLink,
+                      latitude: selectedCenter.latitude,
+                      longitude: selectedCenter.longitude,
+                    })}
+                    onClose={() => setSelectedMapId(null)}
+                    t={t}
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {filtered.length === 0 ? (
@@ -610,6 +879,11 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                           )}
                         </div>
                       </div>
+                      {distanceLabel(sc.id) && (
+                        <p className="text-xs font-semibold text-primary mb-1.5">
+                          {distanceLabel(sc.id)}
+                        </p>
+                      )}
                       <div className="flex items-start gap-1 text-muted-foreground text-xs mb-2.5">
                         <MapPin className="h-3 w-3 shrink-0 mt-0.5" />
                         <div className="flex flex-col gap-1 min-w-0">
@@ -691,8 +965,53 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                         )}
                       </div>
                     </div>
-                    <div className="mt-3 pt-3 border-t flex items-center justify-end">
-                      <Button size="sm" className="h-7 text-xs" asChild>
+                    <div className="mt-3 pt-3 border-t flex items-center gap-2">
+                      {hasUsableCoordinates(sc.latitude, sc.longitude) && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 text-xs gap-1 px-2"
+                          onClick={() => {
+                            setViewMode("map");
+                            setSelectedMapId(sc.id);
+                          }}
+                        >
+                          <MapIcon className="h-3 w-3" />
+                          <span className="hidden sm:inline">
+                            {t("nearMe.showOnMap")}
+                          </span>
+                        </Button>
+                      )}
+                      {buildDirectionsUrl({
+                        maps_link: sc.mapsLink,
+                        latitude: sc.latitude,
+                        longitude: sc.longitude,
+                      }) && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 text-xs gap-1 px-2"
+                          asChild
+                        >
+                          <a
+                            href={
+                              buildDirectionsUrl({
+                                maps_link: sc.mapsLink,
+                                latitude: sc.latitude,
+                                longitude: sc.longitude,
+                              })!
+                            }
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            <span className="hidden sm:inline">
+                              {t("nearMe.getDirections")}
+                            </span>
+                          </a>
+                        </Button>
+                      )}
+                      <Button size="sm" className="h-7 text-xs ms-auto" asChild>
                         <Link href={`/services/${sc.slug ?? sc.id}`}>
                           {t("services.bookNow")}
                         </Link>

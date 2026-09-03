@@ -469,6 +469,11 @@
     "emailPlaceholder": "your@email.com"
   },
   "services": {
+    "nearMe": "Near me",
+    "nearest": "Nearest",
+    "filters": "Filters",
+    "viewList": "List",
+    "viewMap": "Map",
     "bookService": "Book a Service",
     "subtitle": "Find trusted service centers for inspections & diagnostics across Egypt",
     "byService": "By Service",

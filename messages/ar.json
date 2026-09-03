@@ -469,6 +469,11 @@
     "emailPlaceholder": "بريدك@الإلكتروني"
   },
   "services": {
+    "nearMe": "بالقرب مني",
+    "nearest": "الأقرب",
+    "filters": "الفلاتر",
+    "viewList": "قائمة",
+    "viewMap": "خريطة",
     "bookService": "احجز خدمة",
     "subtitle": "ابحث عن مراكز خدمة موثوقة للفحوصات والتشخيص في مصر",
     "byService": "بحث بالخدمة",

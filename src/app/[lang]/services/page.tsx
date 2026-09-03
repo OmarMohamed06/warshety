@@ -49,7 +49,7 @@ export default async function AllServiceCentersPage({
       (supabase as any)
         .from("vendors")
         .select(
-          "id, slug, business_name, business_name_ar, city, governorate, district, latitude, longitude, featured, featured_priority, rating, total_reviews, cover_image_url, status, specializations, supported_makes",
+          "id, slug, business_name, business_name_ar, city, governorate, district, address, maps_link, latitude, longitude, featured, featured_priority, rating, total_reviews, cover_image_url, status, specializations, supported_makes",
         )
         .eq("vendor_type", "service_center")
         .in("status", ["approved", "pending"])
@@ -106,6 +106,8 @@ export default async function AllServiceCentersPage({
       badge: v.status === "pending" ? "Pending Approval" : null,
       governorate: v.governorate ?? "Cairo",
       district: v.district ?? v.city ?? undefined,
+      address: v.address ?? null,
+      mapsLink: v.maps_link ?? null,
       latitude: v.latitude ?? null,
       longitude: v.longitude ?? null,
       featured: v.featured ?? false,
