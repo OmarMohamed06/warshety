@@ -96,20 +96,30 @@ export function FloatingAppBanner() {
               close
             </span>
           </button>
-          <a
-            href={APP_CONFIG.urls.deepLink}
-            className="text-xs font-bold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
-          >
-            {isAr ? "فتح" : "Open"}
-          </a>
-          <a
-            href={storeUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs font-black text-white bg-[#FF4B19] rounded-xl px-3 py-2 hover:opacity-90 transition"
-          >
-            {isAr ? "تنزيل" : "Download"}
-          </a>
+          {/* Pre-launch there is nothing to open or install, so the actions
+              become a single non-interactive label rather than dead links. */}
+          {APP_CONFIG.released ? (
+            <>
+              <a
+                href={APP_CONFIG.urls.deepLink}
+                className="text-xs font-bold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+              >
+                {isAr ? "فتح" : "Open"}
+              </a>
+              <a
+                href={storeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-black text-white bg-[#FF4B19] rounded-xl px-3 py-2 hover:opacity-90 transition"
+              >
+                {isAr ? "تنزيل" : "Download"}
+              </a>
+            </>
+          ) : (
+            <span className="text-xs font-black text-white bg-[#FF4B19] rounded-xl px-3 py-2">
+              {isAr ? "قريباً" : "Coming soon"}
+            </span>
+          )}
         </div>
       </div>
     </div>

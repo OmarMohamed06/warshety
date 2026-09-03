@@ -1,13 +1,23 @@
 /**
- * app-download.ts — Central configuration for the "Download the App" system.
+ * app-download.ts — Central configuration for the app promotion system.
  *
  * Toggle features on/off here without touching individual components.
- * Update store URLs as soon as the app is published.
  */
 
 export const APP_CONFIG = {
-  /** Toggle entire app-download system without deleting components */
+  /** Toggle entire app promotion system without deleting components */
   enabled: true,
+
+  /**
+   * Is the app actually published yet?
+   *
+   * While false, every surface promotes the app as "coming soon": store
+   * badges render as non-interactive labels, the /download page stops
+   * redirecting to the stores, and no dead App Store / Google Play link is
+   * shown anywhere. Flip this to true on launch day — the store URLs below
+   * are already in place, so nothing else needs editing.
+   */
+  released: false,
 
   /** Individual feature toggles */
   features: {

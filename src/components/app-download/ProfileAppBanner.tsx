@@ -1,7 +1,6 @@
 "use client";
 
 import { APP_CONFIG } from "@/config/app-download";
-import { AppStoreBadges } from "./AppStoreBadges";
 
 const BENEFITS = [
   {
@@ -59,13 +58,21 @@ export function ProfileAppBanner({ locale = "en" }: Props) {
 
         <p className="font-black text-xl leading-tight mb-1">
           {isAr
-            ? "حمّل تطبيق ورشتي للتجربة الكاملة."
-            : "Download the Warshety app for the complete experience."}
+            ? APP_CONFIG.released
+              ? "حمّل تطبيق ورشتي للتجربة الكاملة."
+              : "تطبيق ورشتي قادم قريباً."
+            : APP_CONFIG.released
+              ? "Download the Warshety app for the complete experience."
+              : "The Warshety app is coming soon."}
         </p>
         <p className="text-white/80 text-sm mb-5">
           {isAr
-            ? "الميزات المتقدمة متاحة فقط على التطبيق."
-            : "Advanced features are available exclusively on the app."}
+            ? APP_CONFIG.released
+              ? "الميزات المتقدمة متاحة فقط على التطبيق."
+              : "ميزات متقدمة في طريقها إليك."
+            : APP_CONFIG.released
+              ? "Advanced features are available exclusively on the app."
+              : "Advanced features are on their way."}
         </p>
 
         {/* Benefits */}
@@ -87,30 +94,69 @@ export function ProfileAppBanner({ locale = "en" }: Props) {
 
         {/* Badges (inverted for readability on orange bg) */}
         <div className="flex flex-wrap gap-3">
-          <a
-            href={APP_CONFIG.urls.ios}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-black/30 hover:bg-black/40 transition border border-white/20 text-white rounded-2xl px-4 py-2.5 text-sm font-bold"
+          <Store
+            href={APP_CONFIG.released ? APP_CONFIG.urls.ios : null}
+            label={isAr ? "قريباً" : "Coming soon"}
           >
             <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current shrink-0">
               <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
             </svg>
             App Store
-          </a>
-          <a
-            href={APP_CONFIG.urls.android}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-black/30 hover:bg-black/40 transition border border-white/20 text-white rounded-2xl px-4 py-2.5 text-sm font-bold"
+          </Store>
+          <Store
+            href={APP_CONFIG.released ? APP_CONFIG.urls.android : null}
+            label={isAr ? "قريباً" : "Coming soon"}
           >
             <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current shrink-0">
               <path d="M3.18 23.76A1 1 0 0 1 3 23.1V.9A1 1 0 0 1 3.18.24l11.27 11.76zm1.87-.9 10.14-5.76-2.27-2.37zm10.14-14.76L5.05 2.14l7.87 8.21zM16.82 7.1 13.6 12l3.22 4.9 4.1-2.34a1 1 0 0 0 0-1.72z" />
             </svg>
             Google Play
-          </a>
+          </Store>
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * One store badge, inverted for the orange banner background.
+ *
+ * With no href — i.e. before launch — it renders as a plain label carrying a
+ * "Coming soon to" line, rather than a link to a store page that does not
+ * exist yet.
+ */
+function Store({
+  href,
+  label,
+  children,
+}: {
+  href: string | null;
+  label: string;
+  children: React.ReactNode;
+}) {
+  const cls =
+    "inline-flex items-center gap-2 bg-black/30 border border-white/20 text-white rounded-2xl px-4 py-2.5 text-sm font-bold";
+
+  if (!href) {
+    return (
+      <span className={`${cls} cursor-default`}>
+        {children}
+        {/* Reads "App Store · Coming soon" */}
+        <span className="text-[10px] font-normal opacity-70 ms-0.5">
+          · {label}
+        </span>
+      </span>
+    );
+  }
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`${cls} hover:bg-black/40 transition`}
+    >
+      {children}
+    </a>
   );
 }

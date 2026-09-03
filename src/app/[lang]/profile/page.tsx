@@ -16,6 +16,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { LocaleLink as Link } from "@/components/ui/locale-link";
 import { createClient } from "@/lib/supabase/client";
 import { ProfileAppBanner } from "@/components/app-download/ProfileAppBanner";
+import { APP_CONFIG } from "@/config/app-download";
 
 export default function ProfilePage() {
   const {
@@ -373,8 +374,12 @@ export default function ProfilePage() {
                     </button>
                   </div>
 
-                  {/* App store buttons */}
-                  <div className="flex gap-2 pt-1">
+                  {/* App store buttons — hidden before launch. The share
+                      link above is the useful half of this card either way,
+                      and two dead store links are just noise. */}
+                  <div
+                    className={`gap-2 pt-1 ${APP_CONFIG.released ? "flex" : "hidden"}`}
+                  >
                     <a
                       href={`https://apps.apple.com/app/warshety`}
                       target="_blank"

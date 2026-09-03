@@ -20,8 +20,11 @@ export function BookingTrackingCTA({ locale = "en" }: Props) {
       dir={isAr ? "rtl" : "ltr"}
     >
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-        {/* QR code */}
-        <div className="shrink-0 hidden sm:block">
+        {/* QR code — only worth showing once there is an app to install.
+            Before launch it would just resolve to the coming-soon page. */}
+        <div
+          className={`shrink-0 ${APP_CONFIG.released ? "hidden sm:block" : "hidden"}`}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={qrUrl}
@@ -49,8 +52,12 @@ export function BookingTrackingCTA({ locale = "en" }: Props) {
 
           <p className="font-black text-base leading-tight mb-1">
             {isAr
-              ? "للتحديثات المباشرة والإشعارات، استخدم تطبيق ورشتي."
-              : "For live updates and notifications, use the Warshety app."}
+              ? APP_CONFIG.released
+                ? "للتحديثات المباشرة والإشعارات، استخدم تطبيق ورشتي."
+                : "تطبيق ورشتي قادم قريباً بالتحديثات المباشرة والإشعارات."
+              : APP_CONFIG.released
+                ? "For live updates and notifications, use the Warshety app."
+                : "Live updates and notifications are coming to the Warshety app."}
           </p>
           <p className="text-slate-300 text-xs mb-4">
             {isAr

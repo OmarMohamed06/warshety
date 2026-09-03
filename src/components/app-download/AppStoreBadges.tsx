@@ -1,6 +1,7 @@
 "use client";
 
 import { APP_CONFIG } from "@/config/app-download";
+import { useLanguage } from "@/context/LanguageContext";
 import { cn } from "@/lib/utils";
 
 interface AppStoreBadgesProps {
@@ -45,29 +46,62 @@ export function AppStoreBadges({
   className,
   source = "web",
 }: AppStoreBadgesProps) {
-  const iosUrl = `${APP_CONFIG.urls.ios}?utm_source=${source}`;
-  const androidUrl = `${APP_CONFIG.urls.android}&utm_source=${source}`;
+  const { locale } = useLanguage();
+  const isAr = locale === "ar";
 
   const cls = cn(
-    "inline-flex items-center rounded-2xl font-bold transition-all active:scale-95",
+    "inline-flex items-center rounded-2xl font-bold transition-all",
     SIZE_CLS[size],
   );
 
+  const wrapperCls = cn(
+    "flex flex-wrap gap-3",
+    direction === "col" && "flex-col",
+    className,
+  );
+
+  // ── Pre-launch ────────────────────────────────────────────────────────────
+  // The app is not on the stores yet, so the badges become plain labels.
+  // Linking to a store page that does not exist would be worse than saying
+  // nothing, and a disabled-looking button invites a pointless click.
+  if (!APP_CONFIG.released) {
+    const comingSoon = isAr ? "قريباً على" : "Coming soon to";
+    // Keeps each badge's own solid colour rather than a translucent treatment:
+    // these sit on both white and near-black sections, and the site pins the
+    // light theme, so a background-dependent style would be unreadable on one
+    // of them. Same shape and weight as the live badges — only the sub-line
+    // and the absence of a link change.
+    return (
+      <div className={wrapperCls}>
+        {[
+          { icon: IOS_ICON, store: "App Store", tone: "bg-slate-900 text-white" },
+          { icon: ANDROID_ICON, store: "Google Play", tone: "bg-[#FF4B19] text-white" },
+        ].map(({ icon, store, tone }) => (
+          <div key={store} className={cn(cls, tone, "cursor-default")}>
+            {icon}
+            <div className="text-start leading-tight">
+              <p className="text-[10px] opacity-70 font-normal">{comingSoon}</p>
+              <p className="font-black leading-none">{store}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── Live ──────────────────────────────────────────────────────────────────
+  const iosUrl = `${APP_CONFIG.urls.ios}?utm_source=${source}`;
+  const androidUrl = `${APP_CONFIG.urls.android}&utm_source=${source}`;
+
   return (
-    <div
-      className={cn(
-        "flex flex-wrap gap-3",
-        direction === "col" && "flex-col",
-        className,
-      )}
-    >
+    <div className={wrapperCls}>
       {/* App Store */}
       <a
         href={iosUrl}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Download on the App Store"
-        className={cn(cls, "bg-black text-white hover:bg-slate-800")}
+        className={cn(cls, "bg-black text-white hover:bg-slate-800 active:scale-95")}
       >
         {IOS_ICON}
         <div className="text-start leading-tight">
@@ -82,7 +116,7 @@ export function AppStoreBadges({
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Get it on Google Play"
-        className={cn(cls, "bg-[#FF4B19] text-white hover:bg-[#e84213]")}
+        className={cn(cls, "bg-[#FF4B19] text-white hover:bg-[#e84213] active:scale-95")}
       >
         {ANDROID_ICON}
         <div className="text-start leading-tight">

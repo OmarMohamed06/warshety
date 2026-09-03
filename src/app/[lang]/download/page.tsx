@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { APP_CONFIG } from "@/config/app-download";
 
-const IOS_STORE_URL = "https://apps.apple.com/app/warshety";
-const ANDROID_STORE_URL =
-  "https://play.google.com/store/apps/details?id=com.warshety.app";
+const IOS_STORE_URL = APP_CONFIG.urls.ios;
+const ANDROID_STORE_URL = APP_CONFIG.urls.android;
 
 function detectOS(): "ios" | "android" | "other" {
   if (typeof navigator === "undefined") return "other";
@@ -36,8 +36,11 @@ export default function DownloadPage() {
     }
   }, [ref]);
 
-  // Auto-redirect mobile users to the correct store after a short countdown
+  // Auto-redirect mobile users to the correct store after a short countdown.
+  // Skipped before launch: sending someone to a store page that does not
+  // exist is the worst possible landing for a referral link.
   useEffect(() => {
+    if (!APP_CONFIG.released) return;
     if (os === "other") return;
     const storeUrl = os === "ios" ? IOS_STORE_URL : ANDROID_STORE_URL;
     if (countdown <= 0) {
@@ -50,6 +53,7 @@ export default function DownloadPage() {
 
   const iosUrl = IOS_STORE_URL;
   const androidUrl = ANDROID_STORE_URL;
+  const released = APP_CONFIG.released;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-[#1a0a00] flex flex-col items-center justify-center px-6 py-16 text-white">
@@ -64,6 +68,11 @@ export default function DownloadPage() {
         <p className="text-slate-300 text-sm text-center max-w-xs">
           Egypt&apos;s #1 platform for certified auto service centers
         </p>
+        {!released && (
+          <p className="mt-1 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white">
+            App coming soon
+          </p>
+        )}
       </div>
 
       {/* Referral badge */}
@@ -76,7 +85,7 @@ export default function DownloadPage() {
             {ref.toUpperCase()}
           </p>
           <p className="text-slate-300 text-xs mt-1.5">
-            Download the app and earn{" "}
+            {APP_CONFIG.released ? "Download the app and earn" : "Earn"}{" "}
             <span className="text-green-400 font-bold">+250 bonus points</span>{" "}
             after your first booking.
           </p>
@@ -84,7 +93,7 @@ export default function DownloadPage() {
       )}
 
       {/* Auto-redirect notice */}
-      {os !== "other" && (
+      {APP_CONFIG.released && os !== "other" && (
         <p className="text-slate-400 text-sm mb-6">
           Redirecting to the {os === "ios" ? "App Store" : "Play Store"} in{" "}
           <span className="font-black text-white">{countdown}</span>…
@@ -93,10 +102,7 @@ export default function DownloadPage() {
 
       {/* App store buttons */}
       <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
-        <a
-          href={iosUrl}
-          className="flex-1 flex items-center justify-center gap-2.5 bg-white text-black text-sm font-bold rounded-2xl py-4 px-5 hover:bg-slate-100 transition shadow-lg"
-        >
+        <StoreButton href={released ? iosUrl : null}>
           <svg
             viewBox="0 0 24 24"
             className="w-5 h-5 fill-current shrink-0"
@@ -106,16 +112,13 @@ export default function DownloadPage() {
           </svg>
           <div className="text-left">
             <p className="text-xs text-slate-500 leading-none font-normal">
-              Download on the
+              {released ? "Download on the" : "Coming soon to"}
             </p>
             <p className="font-black leading-tight">App Store</p>
           </div>
-        </a>
+        </StoreButton>
 
-        <a
-          href={androidUrl}
-          className="flex-1 flex items-center justify-center gap-2.5 bg-white text-black text-sm font-bold rounded-2xl py-4 px-5 hover:bg-slate-100 transition shadow-lg"
-        >
+        <StoreButton href={released ? androidUrl : null}>
           <svg
             viewBox="0 0 24 24"
             className="w-5 h-5 fill-current shrink-0"
@@ -125,11 +128,11 @@ export default function DownloadPage() {
           </svg>
           <div className="text-left">
             <p className="text-xs text-slate-500 leading-none font-normal">
-              Get it on
+              {released ? "Get it on" : "Coming soon to"}
             </p>
             <p className="font-black leading-tight">Google Play</p>
           </div>
-        </a>
+        </StoreButton>
       </div>
 
       {/* Features */}
@@ -151,5 +154,29 @@ export default function DownloadPage() {
         ))}
       </div>
     </div>
+  );
+}
+
+/**
+ * A store button that becomes a plain label before launch, so the page never
+ * links to an App Store or Play listing that is not published yet.
+ */
+function StoreButton({
+  href,
+  children,
+}: {
+  href: string | null;
+  children: React.ReactNode;
+}) {
+  const cls =
+    "flex-1 flex items-center justify-center gap-2.5 bg-white text-black text-sm font-bold rounded-2xl py-4 px-5 shadow-lg";
+
+  if (!href) {
+    return <div className={`${cls} cursor-default opacity-90`}>{children}</div>;
+  }
+  return (
+    <a href={href} className={`${cls} hover:bg-slate-100 transition`}>
+      {children}
+    </a>
   );
 }
