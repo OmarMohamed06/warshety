@@ -208,6 +208,19 @@ export async function replyToReview(
     .update({ vendor_reply: reply, updated_at: new Date().toISOString() })
     .eq("id", reviewId);
 
+  if (!error) {
+    // Notify the reviewer (in-app + push) — fire-and-forget, never blocks
+    // the reply itself. Routed through an API endpoint since sending push
+    // needs firebase-admin, which can't run in the browser bundle.
+    fetch("/api/reviews/notify-reply", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reviewId, vendorId }),
+    }).catch(() => {
+      /* non-fatal */
+    });
+  }
+
   return { error: error?.message ?? null };
 }
 

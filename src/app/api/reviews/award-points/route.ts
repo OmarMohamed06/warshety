@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { createInAppNotification } from "@/services/inAppNotificationService";
 
 /**
  * POST /api/reviews/award-points
@@ -83,6 +84,16 @@ export async function POST(req: NextRequest) {
     // result: 50 = awarded, 0 = already rewarded, -1 = not found, -2 = unauthorized
     if (typeof result !== "number" || result < 0) {
       return NextResponse.json({ ok: true, pointsAwarded: 0 });
+    }
+
+    if (result > 0) {
+      await createInAppNotification({
+        userId,
+        type: "points_earned",
+        title: "Points Earned 🎉",
+        body: `You earned ${result} points for submitting a review.`,
+        link: "/rewards",
+      });
     }
 
     return NextResponse.json({ ok: true, pointsAwarded: result });

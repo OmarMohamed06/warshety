@@ -11,6 +11,7 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
+import { sendPushNotification } from "@/services/pushNotificationService";
 
 export type InAppNotificationType =
   | "booking_confirmed"
@@ -65,4 +66,9 @@ export async function createInAppNotification({
   } catch (err) {
     console.error("[inAppNotificationService] insert failed:", err);
   }
+
+  // Runs independently of the insert above — a user should still get paged
+  // even if, say, the in-app row failed to write for some other reason.
+  const referenceId = link?.split("/").filter(Boolean).pop();
+  await sendPushNotification({ userId, title, body, type, referenceId });
 }

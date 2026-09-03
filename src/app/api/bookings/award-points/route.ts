@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { createInAppNotification } from "@/services/inAppNotificationService";
 
 /**
  * POST /api/bookings/award-points
@@ -112,6 +113,37 @@ export async function POST(req: NextRequest) {
       referralResult = refData as Record<string, unknown>;
     } else if (refErr) {
       console.error("[award-points] process_referral_reward:", refErr);
+    }
+
+    // ── Notify the customer of everything they just earned ───────────────────
+    const refereePoints =
+      referralResult.awarded === true
+        ? Number(referralResult["referee_points"] ?? 0)
+        : 0;
+    const customerTotal = servicePoints + firstBookingBonus + refereePoints;
+    if (customerTotal > 0) {
+      await createInAppNotification({
+        userId: booking.user_id,
+        type: "points_earned",
+        title: "Points Earned 🎉",
+        body: `You earned ${customerTotal} points for your completed booking.`,
+        link: "/rewards",
+      });
+    }
+
+    // Referrer gets their own notification on a different account
+    if (referralResult.awarded === true) {
+      const referrerId = referralResult["referrer_id"] as string | undefined;
+      const referrerPoints = Number(referralResult["referrer_points"] ?? 0);
+      if (referrerId && referrerPoints > 0) {
+        await createInAppNotification({
+          userId: referrerId,
+          type: "points_earned",
+          title: "Points Earned 🎉",
+          body: `You earned ${referrerPoints} points — your friend completed their first booking!`,
+          link: "/rewards",
+        });
+      }
     }
 
     return NextResponse.json({
