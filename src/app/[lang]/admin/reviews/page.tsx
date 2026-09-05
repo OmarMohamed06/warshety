@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/context/LanguageContext";
+import { reportError } from "@/lib/errors";
 
 function cn(...c: (string | boolean | undefined)[]) {
   return c.filter(Boolean).join(" ");
@@ -58,7 +59,7 @@ export default function ReviewsPage() {
   async function deleteReview(id: string) {
     if (!confirm("Delete this review? This cannot be undone.")) return;
     const { error } = await supabase.from("reviews").delete().eq("id", id);
-    setMsg(error ? `Error: ${error.message}` : "Review deleted.");
+    setMsg(error ? reportError("AdminReviews", error) : "Review deleted.");
     setTimeout(() => setMsg(null), 3000);
     load();
   }

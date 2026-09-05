@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import { reportError } from "@/lib/errors";
 
 function cn(...c: (string | boolean | undefined)[]) {
   return c.filter(Boolean).join(" ");
@@ -102,7 +103,9 @@ export default function ServiceCentersPage() {
       .update({ status })
       .eq("id", id);
     setMsg(
-      error ? `Error: ${error.message}` : `Vendor status set to ${status}.`,
+      error
+        ? reportError("AdminServiceCenters", error)
+        : `Vendor status set to ${status}.`,
     );
     setTimeout(() => setMsg(null), 3000);
     load();

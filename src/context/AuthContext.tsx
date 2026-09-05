@@ -20,6 +20,8 @@ import {
 } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import { useLanguage } from "@/context/LanguageContext";
+import { friendlyError } from "@/lib/errors";
 import type { DbUser, DbVendor, UserRole, VendorType } from "@/types/database";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -131,6 +133,9 @@ function AuthProviderInner({
   // createBrowserClient is a singleton per URL+key, but referential stability
   // prevents loadProfile / loadVendors from being recreated on every render.
   const [supabase] = useState(() => createClient());
+
+  // Used to localise the error copy returned by the auth actions below.
+  const { t } = useLanguage();
 
   const [session, setSession] = useState<Session | null>(null);
   const [authUser, setAuthUser] = useState<User | null>(null);
@@ -314,17 +319,19 @@ function AuthProviderInner({
         password,
       });
       if (error) {
+        console.error("[AuthContext] signIn error:", error);
         if (
           error.message.toLowerCase().includes("email not confirmed") ||
           error.message.toLowerCase().includes("email_not_confirmed")
         ) {
+          // Sentinel: the login page renders a "resend confirmation" flow.
           return "__email_not_confirmed__";
         }
-        return error.message;
+        return friendlyError(error, t);
       }
       return null;
     },
-    [supabase],
+    [supabase, t],
   );
 
   const signUp = useCallback(
@@ -343,20 +350,15 @@ function AuthProviderInner({
         },
       });
       if (error) {
-        if (
-          error.message.toLowerCase().includes("rate limit") ||
-          error.message.toLowerCase().includes("email rate")
-        ) {
-          return "Too many sign-up attempts. Please wait a few minutes and try again, or contact support.";
-        }
+        console.error("[AuthContext] signUp error:", error);
         if (error.message.toLowerCase().includes("email not authorized")) {
-          return "This email address is not authorized for registration. Please use a different email.";
+          return t("auth.emailNotAuthorized");
         }
-        return error.message;
+        return friendlyError(error, t);
       }
       return null;
     },
-    [supabase],
+    [supabase, t],
   );
 
   const signInWithGoogle = useCallback(async (): Promise<string | null> => {
@@ -369,8 +371,12 @@ function AuthProviderInner({
         redirectTo: `${origin}/auth/callback`,
       },
     });
-    return error?.message ?? null;
-  }, [supabase]);
+    if (error) {
+      console.error("[AuthContext] signInWithGoogle error:", error);
+      return friendlyError(error, t);
+    }
+    return null;
+  }, [supabase, t]);
 
   const signOut = useCallback(async () => {
     try {

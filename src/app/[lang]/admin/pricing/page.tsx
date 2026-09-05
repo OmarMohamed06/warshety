@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/context/LanguageContext";
+import { reportError } from "@/lib/errors";
 
 function cn(...c: (string | boolean | undefined)[]) {
   return c.filter(Boolean).join(" ");
@@ -104,7 +105,7 @@ export default function PricingPage() {
       );
     setMsg(
       error
-        ? { text: `Error: ${error.message}`, ok: false }
+        ? { text: reportError("AdminPricing", error), ok: false }
         : { text: `"${key}" saved.`, ok: true },
     );
     setTimeout(() => setMsg(null), 3000);

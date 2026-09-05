@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
+import { reportError } from "@/lib/errors";
 import { LocaleLink as Link } from "@/components/ui/locale-link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -71,7 +72,7 @@ export default function ResetPasswordPage() {
     const { error: err } = await supabase.auth.updateUser({ password });
     setLoading(false);
     if (err) {
-      setError(err.message);
+      setError(reportError("ResetPassword", err, t));
     } else {
       setDone(true);
       setTimeout(() => router.replace(localePath("/auth/login")), 3000);

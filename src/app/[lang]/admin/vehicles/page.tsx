@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/context/LanguageContext";
+import { reportError } from "@/lib/errors";
 
 function cn(...c: (string | boolean | undefined)[]) {
   return c.filter(Boolean).join(" ");
@@ -94,7 +95,7 @@ export default function VehiclesPage() {
       country_of_origin: newMakeOrigin.trim() || null,
       is_active: true,
     });
-    if (error) showMsg(`Error: ${error.message}`, false);
+    if (error) showMsg(reportError("AdminVehicles", error), false);
     else {
       showMsg(`${newMakeName} added.`, true);
       setNewMakeName("");
@@ -131,7 +132,7 @@ export default function VehiclesPage() {
       year_to: newModelYearTo ? parseInt(newModelYearTo) : null,
       is_active: true,
     });
-    if (error) showMsg(`Error: ${error.message}`, false);
+    if (error) showMsg(reportError("AdminVehicles", error), false);
     else {
       showMsg(`${newModelName} added.`, true);
       setNewModelName("");

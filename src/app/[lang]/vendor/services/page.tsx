@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import VendorLayout from "@/components/vendor/VendorLayout";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { reportError } from "@/lib/errors";
 import { createClient } from "@/lib/supabase/client";
 import { SERVICE_CATEGORIES } from "@/lib/serviceCategories";
 import { getBranches } from "@/services/branchService";
@@ -244,7 +245,7 @@ export default function VendorServicesPage() {
       err = e;
     }
     if (err) {
-      setError(err.message);
+      setError(reportError("VendorServices", err, t));
       setSaving(false);
       return;
     }

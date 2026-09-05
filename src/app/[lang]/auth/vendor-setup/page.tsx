@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { reportError } from "@/lib/errors";
 import { completeVendorSetup } from "@/app/actions/adminActions";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -100,7 +101,7 @@ export default function VendorSetupPage() {
     // 1. Set password so vendor can sign in with email+password in the future
     const { error: pwErr } = await supabase.auth.updateUser({ password });
     if (pwErr) {
-      setError(pwErr.message);
+      setError(reportError("VendorSetup", pwErr, t));
       setState("setup");
       return;
     }

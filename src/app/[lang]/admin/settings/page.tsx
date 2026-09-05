@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/context/LanguageContext";
+import { reportError } from "@/lib/errors";
 
 function cn(...c: (string | boolean | undefined)[]) {
   return c.filter(Boolean).join(" ");
@@ -65,7 +66,7 @@ export default function SettingsPage() {
       .from("system_settings")
       .upsert({ key, value: newVal }, { onConflict: "key" });
     if (error) {
-      setMsg({ text: `Error saving ${key}: ${error.message}`, ok: false });
+      setMsg({ text: reportError("AdminSettings", error), ok: false });
     } else {
       setMsg({ text: `"${key}" updated successfully.`, ok: true });
       setEdited((prev) => {

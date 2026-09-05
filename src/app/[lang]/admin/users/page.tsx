@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import { reportError } from "@/lib/errors";
 
 function cn(...c: (string | boolean | undefined)[]) {
   return c.filter(Boolean).join(" ");
@@ -77,7 +78,7 @@ export default function AdminUsersPage() {
       .from("users")
       .update({ role: newRole })
       .eq("id", userId);
-    setActionMsg(error ? `Error: ${error.message}` : "User updated.");
+    setActionMsg(error ? reportError("AdminUsers", error) : "User updated.");
     setTimeout(() => setActionMsg(null), 3000);
     load();
   }
@@ -87,7 +88,9 @@ export default function AdminUsersPage() {
       .from("users")
       .update({ role: "admin" })
       .eq("id", userId);
-    setActionMsg(error ? `Error: ${error.message}` : "User promoted to admin.");
+    setActionMsg(
+      error ? reportError("AdminUsers", error) : "User promoted to admin.",
+    );
     setTimeout(() => setActionMsg(null), 3000);
     load();
   }

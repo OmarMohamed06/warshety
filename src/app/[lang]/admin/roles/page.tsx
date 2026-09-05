@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import { reportError } from "@/lib/errors";
 
 function cn(...c: (string | boolean | undefined)[]) {
   return c.filter(Boolean).join(" ");
@@ -126,7 +127,7 @@ export default function RolesPage() {
       .eq("id", userId);
     setMsg(
       error
-        ? { text: `Error: ${error.message}`, ok: false }
+        ? { text: reportError("AdminRoles", error), ok: false }
         : { text: `${email} is now ${newRole}.`, ok: true },
     );
     setTimeout(() => setMsg(null), 3000);

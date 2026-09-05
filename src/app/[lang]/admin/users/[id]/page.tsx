@@ -4,6 +4,7 @@ import { use, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import { reportError } from "@/lib/errors";
 
 function cn(...c: (string | boolean | undefined)[]) {
   return c.filter(Boolean).join(" ");
@@ -65,7 +66,9 @@ export default function UserDetailPage({
       .from("users")
       .update({ role: newRole })
       .eq("id", id);
-    setMsg(error ? `Error: ${error.message}` : `Role updated to ${newRole}.`);
+    setMsg(
+      error ? reportError("AdminUser", error) : `Role updated to ${newRole}.`,
+    );
     setTimeout(() => setMsg(null), 4000);
     if (!error && user) setUser({ ...user, role: newRole });
   }

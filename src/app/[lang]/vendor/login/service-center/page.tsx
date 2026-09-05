@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Wrench, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { reportError } from "@/lib/errors";
 
 export default function ServiceCenterLoginPage() {
   const router = useRouter();
@@ -40,7 +41,7 @@ export default function ServiceCenterLoginPage() {
     });
 
     if (authErr) {
-      setError(authErr.message);
+      setError(reportError("ServiceCenterLogin", authErr, t));
       setLoading(false);
       return;
     }

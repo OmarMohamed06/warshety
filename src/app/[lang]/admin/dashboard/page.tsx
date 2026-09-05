@@ -9,6 +9,7 @@ import {
   rejectVendorApplication,
 } from "@/app/actions/adminActions";
 import type { VendorStatus } from "@/types/database";
+import { SkeletonList } from "@/components/ui/skeleton";
 
 function cn(...classes: (string | boolean | undefined)[]) {
   return classes.filter(Boolean).join(" ");
@@ -555,15 +556,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-12 text-slate-400">
-            <span
-              className="material-symbols-outlined animate-spin mr-2"
-              style={{ fontSize: 22 }}
-            >
-              progress_activity
-            </span>
-            Loading…
-          </div>
+          <SkeletonList rows={3} className="py-4" />
         ) : applications.length === 0 ? (
           <div className="text-center py-12 text-slate-400">
             <span

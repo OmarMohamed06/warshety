@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { Skeleton } from "@/components/ui/skeleton";
 import { LocaleLink as Link } from "@/components/ui/locale-link";
 import { createClient } from "@/lib/supabase/client";
 import { ProfileAppBanner } from "@/components/app-download/ProfileAppBanner";
@@ -497,7 +498,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <p className="font-bold text-sm">Branch Management</p>
-                  <p className="text-xs text-slate-400">Loading branch info…</p>
+                  <Skeleton className="mt-1 h-3 w-28" />
                 </div>
               </div>
             )}

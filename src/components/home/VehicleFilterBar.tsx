@@ -139,7 +139,9 @@ export default function VehicleFilterBar() {
           onChange={handleMakeChange}
           options={makes.map((m) => ({ value: m.id, label: m.name }))}
           disabled={makesLoading}
-          placeholder={makesLoading ? "Loading…" : t("home.brandPlaceholder")}
+          placeholder={
+            makesLoading ? t("common.loading") : t("home.brandPlaceholder")
+          }
         />
 
         <Divider />
@@ -153,7 +155,9 @@ export default function VehicleFilterBar() {
             (m) => ({ value: m.name, label: m.name }),
           )}
           disabled={!selectedMakeId || modelsLoading}
-          placeholder={modelsLoading ? "Loading…" : t("home.modelPlaceholder")}
+          placeholder={
+            modelsLoading ? t("common.loading") : t("home.modelPlaceholder")
+          }
         />
 
         <Divider />

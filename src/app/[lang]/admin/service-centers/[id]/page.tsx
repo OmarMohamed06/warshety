@@ -9,6 +9,7 @@ import {
   rejectVendorApplication,
 } from "@/app/actions/adminActions";
 import { useLanguage } from "@/context/LanguageContext";
+import { reportError } from "@/lib/errors";
 
 function cn(...c: (string | boolean | undefined)[]) {
   return c.filter(Boolean).join(" ");
@@ -63,7 +64,7 @@ export default function ServiceCenterDetailPage({
       setMsg(`Points per booking updated to ${pts} pts ✓`);
       pointsToastTimer.current = setTimeout(() => setMsg(null), 3000);
     } else {
-      setMsg(`Error: ${error.message}`);
+      setMsg(reportError("AdminServiceCenter", error));
     }
   }
 
@@ -141,7 +142,11 @@ export default function ServiceCenterDetailPage({
       .from("vendors")
       .update({ status })
       .eq("id", id);
-    setMsg(error ? `Error: ${error.message}` : `Status changed to ${status}.`);
+    setMsg(
+      error
+        ? reportError("AdminServiceCenter", error)
+        : `Status changed to ${status}.`,
+    );
     if (!error && data) setData({ ...data, status });
   }
 

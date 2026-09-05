@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import { reportError } from "@/lib/errors";
 
 function cn(...c: (string | boolean | undefined)[]) {
   return c.filter(Boolean).join(" ");
@@ -108,7 +109,7 @@ export default function AdminBookingsPage() {
       .from("bookings")
       .update({ status: "cancelled" })
       .eq("id", id);
-    setMsg(error ? `Error: ${error.message}` : "Booking cancelled.");
+    setMsg(error ? reportError("AdminBookings", error) : "Booking cancelled.");
     setTimeout(() => setMsg(null), 3000);
     setUpdating(null);
     load();

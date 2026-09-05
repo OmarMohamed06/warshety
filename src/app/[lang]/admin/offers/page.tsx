@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Ticket, PlusCircle, Pencil, Trash2, Copy, Check } from "lucide-react";
+import { reportError } from "@/lib/errors";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -141,7 +142,7 @@ export default function AdminPromoCodesPage() {
 
     setSaving(false);
     if (err) {
-      setError(err.message);
+      setError(reportError("AdminOffers", err));
       return;
     }
     setDialogOpen(false);

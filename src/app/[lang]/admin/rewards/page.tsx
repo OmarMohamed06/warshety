@@ -36,6 +36,7 @@ import {
   Loader2,
   X,
 } from "lucide-react";
+import { reportError } from "@/lib/errors";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -251,7 +252,7 @@ export default function AdminRewardsPage() {
     }
     setStpSaving(false);
     if (err) {
-      setStpError(err.message);
+      setStpError(reportError("AdminRewards", err));
       return;
     }
     setStpDialogOpen(false);
@@ -268,7 +269,7 @@ export default function AdminRewardsPage() {
       .eq("id", id);
     setStpDeletingId(null);
     if (error) {
-      showToast(`Error: ${error.message}`, false);
+      showToast(reportError("AdminRewards", error), false);
     } else {
       showToast("Service type deleted.");
       setServiceTypes((prev) => prev.filter((s) => s.id !== id));
@@ -383,7 +384,7 @@ export default function AdminRewardsPage() {
     setSaving(false);
 
     if (err) {
-      setError(err.message);
+      setError(reportError("AdminRewards", err));
       return;
     }
 
@@ -404,7 +405,7 @@ export default function AdminRewardsPage() {
     const { error } = await supabase.from("rewards").delete().eq("id", id);
     setDeletingId(null);
     if (error) {
-      showToast(`Error: ${error.message}`, false);
+      showToast(reportError("AdminRewards", error), false);
     } else {
       showToast("Reward deleted.");
       setRewards((prev) => prev.filter((r) => r.id !== id));

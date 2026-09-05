@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import VendorLayout from "@/components/vendor/VendorLayout";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { reportError } from "@/lib/errors";
 import { createClient } from "@/lib/supabase/client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -128,7 +129,7 @@ export default function VendorSettingsPage() {
 
     setSaving(false);
     if (e) {
-      setError(e.message);
+      setError(reportError("VendorSettings", e, t));
       return;
     }
     await refreshProfile();

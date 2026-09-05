@@ -14,6 +14,7 @@ import { useEffect, useState, useCallback, useMemo, use } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { reportError } from "@/lib/errors";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { SERVICE_CATEGORIES } from "@/lib/serviceCategories";
@@ -2173,7 +2174,7 @@ function ServicesTab({
       err = e;
     }
     if (err) {
-      setError(err.message);
+      setError(reportError("BranchServices", err, t));
       setSaving(false);
       return;
     }

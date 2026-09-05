@@ -343,7 +343,7 @@ export default function GaragePage() {
                   <SelectTrigger>
                     <SelectValue
                       placeholder={
-                        makesLoading ? "Loading…" : t("garage.selectBrand")
+                        makesLoading ? t("common.loading") : t("garage.selectBrand")
                       }
                     />
                   </SelectTrigger>
@@ -370,7 +370,7 @@ export default function GaragePage() {
                   <SelectTrigger>
                     <SelectValue
                       placeholder={
-                        modelsLoading ? "Loading…" : t("garage.selectModel")
+                        modelsLoading ? t("common.loading") : t("garage.selectModel")
                       }
                     />
                   </SelectTrigger>

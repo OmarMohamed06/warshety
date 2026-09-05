@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/context/LanguageContext";
+import { reportError } from "@/lib/errors";
 
 function cn(...c: (string | boolean | undefined)[]) {
   return c.filter(Boolean).join(" ");
@@ -75,7 +76,7 @@ export default function NotificationsPage() {
     });
     setMsg(
       error
-        ? { text: `Error: ${error.message}`, ok: false }
+        ? { text: reportError("AdminNotifications", error), ok: false }
         : { text: "Broadcast sent successfully!", ok: true },
     );
     setTimeout(() => setMsg(null), 4000);

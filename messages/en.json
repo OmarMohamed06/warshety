@@ -1,4 +1,38 @@
 {
+  "common": {
+    "loading": "Loading…",
+    "loadingVehicles": "Loading vehicles…",
+    "retry": "Try again",
+    "refresh": "Refresh",
+    "goHome": "Back to home",
+    "goBack": "Go back",
+    "contactSupport": "Contact support",
+    "somethingWentWrong": "Something went wrong",
+    "pageNotFound": "This page doesn't exist",
+    "pageNotFoundDesc": "The link may be broken, or the page may have been moved.",
+    "noResults": "Nothing to show yet",
+    "technicalDetails": "Technical details"
+  },
+  "errors": {
+    "title": "Something went wrong",
+    "network": "We couldn't reach the server. Check your internet connection and try again.",
+    "timeout": "That took longer than expected. Please try again.",
+    "unauthorized": "Your session has expired. Please sign in again.",
+    "forbidden": "You don't have permission to do that.",
+    "notFound": "We couldn't find what you were looking for.",
+    "invalidCredentials": "The email or password you entered is incorrect.",
+    "emailNotConfirmed": "Please confirm your email address first — check your inbox for the link.",
+    "emailTaken": "An account with this email already exists. Try signing in.",
+    "rateLimited": "Too many attempts. Please wait a moment and try again.",
+    "duplicate": "That already exists. Try a different value.",
+    "inUse": "This item is still being used elsewhere, so it can't be removed.",
+    "validation": "Some of the details entered aren't valid. Please review them.",
+    "payment": "The payment couldn't be completed. Please try another method.",
+    "server": "Something went wrong on our end. Please try again in a moment.",
+    "unknown": "Something went wrong. Please try again.",
+    "loadFailed": "We couldn't load this. Please try again.",
+    "saveFailed": "We couldn't save your changes. Please try again."
+  },
   "nav": {
     "nearMe": "Near Me",
     "myGarage": "My Garage",
@@ -379,7 +413,8 @@
     "chooseStrongPassword": "Choose a strong password for your Warshety account.",
     "verifyingResetLink": "Verifying reset link…",
     "activateVendorAccount": "Activate Vendor Account",
-    "settingUpAccount": "Setting up your account…"
+    "settingUpAccount": "Setting up your account…",
+    "emailNotAuthorized": "This email address isn't eligible for registration. Please use a different one."
   },
   "checkout": {
     "delivery": "Delivery",
@@ -822,7 +857,7 @@
     "totalStat": "Total",
     "activeStat": "Active",
     "inactiveStat": "Inactive",
-    "searchByPhone": "Search by name, email or phone\u2026",
+    "searchByPhone": "Search by name, email or phone…",
     "uniqueCustomersAt": "unique customers at this branch",
     "servicesAt": "services at this branch",
     "cancelBookingTitle": "Cancel Booking?",
@@ -1251,7 +1286,6 @@
       "legalUploadedReplace": "Uploaded — click to replace",
       "legalClickUpload": "Click to upload",
       "legalFileTypes": "JPG, PNG or PDF",
-      "errorPasswordLength": "Password must be at least 8 characters.",
       "errorPasswordMatch": "Passwords do not match.",
       "vendorTypeServiceCenter": "Service Center / Workshop",
       "vendorTypePartsSeller": "Spare Parts Shop",
@@ -1410,10 +1444,10 @@
     "navPartsSellerBadge": "Parts Seller",
     "navViewStore": "View Store",
     "navSignOut": "Sign out",
-    "navSearchBookings": "Search bookings, customers\u2026",
-    "navSearchProducts": "Search products, orders\u2026",
-    "bannerSuspended": "\u26a0\ufe0f Your vendor account has been suspended. Contact support.",
-    "bannerPending": "\u23f3 Your account is pending approval. Features will unlock once approved.",
+    "navSearchBookings": "Search bookings, customers…",
+    "navSearchProducts": "Search products, orders…",
+    "bannerSuspended": "⚠️ Your vendor account has been suspended. Contact support.",
+    "bannerPending": "⏳ Your account is pending approval. Features will unlock once approved.",
     "routineMaintenance": "Routine Maintenance",
     "inspection": "Inspection"
   },
@@ -1827,9 +1861,7 @@
       "thursdayPayoutNote": "Payouts processed every Thursday",
       "weekSummary": "Week Summary",
       "amountToTransfer": "Amount to Transfer"
-    },
-    "routineMaintenance": "Routine Maintenance",
-    "inspection": "Inspection"
+    }
   },
   "bookingSidebar": {
     "title": "Book an Appointment",

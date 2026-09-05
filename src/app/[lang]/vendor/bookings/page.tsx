@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import VendorLayout from "@/components/vendor/VendorLayout";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { reportError } from "@/lib/errors";
 import { createClient } from "@/lib/supabase/client";
 import type { BookingStatus } from "@/types/database";
 import { notifyBookingCancelled } from "@/services/notificationService";
@@ -192,7 +193,7 @@ export default function VendorBookingsPage() {
       .update({ status })
       .eq("id", bookingId);
     if (error) {
-      toast.error(`${t("vendor.errUpdateStatus")}: ${error.message}`);
+      toast.error(reportError("VendorBookings.updateStatus", error, t));
       setUpdating(false);
       return;
     }
@@ -234,7 +235,7 @@ export default function VendorBookingsPage() {
       .update({ status: "completed" })
       .eq("id", bookingId);
     if (error) {
-      toast.error(`${t("vendor.errCompleteBooking")}: ${error.message}`);
+      toast.error(reportError("VendorBookings.complete", error, t));
       setCompleting(false);
       return;
     }

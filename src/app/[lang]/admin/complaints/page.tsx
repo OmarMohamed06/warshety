@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/context/LanguageContext";
+import { reportError } from "@/lib/errors";
 
 function cn(...c: (string | boolean | undefined)[]) {
   return c.filter(Boolean).join(" ");
@@ -85,7 +86,9 @@ export default function ComplaintsPage() {
 
     const { error } = await db.from("complaints").update(updates).eq("id", id);
     setMsg(
-      error ? `Error: ${error.message}` : `Complaint marked as ${status}.`,
+      error
+        ? reportError("AdminComplaints", error)
+        : `Complaint marked as ${status}.`,
     );
     setTimeout(() => setMsg(null), 3000);
     setUpdating(false);

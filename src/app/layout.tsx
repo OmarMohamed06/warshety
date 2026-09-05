@@ -89,12 +89,32 @@ export default async function RootLayout({
           rel="preconnect"
           href="https://ldscfwokohxoxdtyqzzz.supabase.co"
         />
-        {/* ── Google Material Symbols icon font ── */}
+        {/* ── Google Material Symbols icon font ──
+            display=block (not swap) is essential: Material Symbols is a
+            LIGATURE font, so with `swap` the fallback font paints the raw
+            ligature text ("home", "search", ...) until the font arrives.
+            `block` keeps the glyph invisible during the block period instead. */}
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block"
           rel="stylesheet"
         />
+        {/* Belt-and-braces for the FOUT above: icons stay `visibility:hidden`
+            (layout space reserved, so no shift) until the font is actually
+            ready. Runs before paint, so the ligature text is never shown. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var d=document,r=d.documentElement;function go(){r.classList.add('icon-font-ready')}
+if(!d.fonts||!d.fonts.load){go();return}
+try{d.fonts.load('24px "Material Symbols Outlined"').then(go).catch(go)}catch(e){go()}
+setTimeout(go,3000)})();`,
+          }}
+        />
+        {/* No JS means the class above never lands and icons would stay
+            hidden forever — reveal them unconditionally in that case. */}
+        <noscript>
+          <style>{`html:not(.icon-font-ready) .material-symbols-outlined{visibility:visible;width:auto;min-width:0;overflow:visible}`}</style>
+        </noscript>
       </head>
       <body
         className={`${figtree.variable} ${cairo.variable} font-sans bg-[#f6f6f8] dark:bg-[#111621] text-slate-900 dark:text-slate-100 antialiased`}
