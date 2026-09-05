@@ -40,8 +40,7 @@ export function BookingTrackingCTA({ locale = "en" }: Props) {
           {/* Icon + label */}
           <div className="flex items-center gap-2 mb-2">
             <span
-              className="material-symbols-outlined text-[#FF4B19]"
-              style={{ fontSize: 18 }}
+              className="material-symbols-outlined text-primary text-[18px]"
             >
               smartphone
             </span>

@@ -86,16 +86,14 @@ function StatCard({
           )}
         >
           <span
-            className={cn("material-symbols-outlined", color)}
-            style={{ fontSize: 22 }}
-          >
+            className={cn("material-symbols-outlined text-[24px]", color)}
+            >
             {icon}
           </span>
         </div>
         {href && (
           <span
-            className="material-symbols-outlined text-slate-300 group-hover:text-[#FF4B19] transition-colors"
-            style={{ fontSize: 16 }}
+            className="material-symbols-outlined text-muted-foreground group-hover:text-primary transition-colors text-[16px]"
           >
             arrow_forward
           </span>
@@ -277,7 +275,7 @@ export default function AdminDashboardPage() {
           onClick={loadData}
           className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-[#FF4B19] transition-colors font-semibold"
         >
-          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+          <span className="material-symbols-outlined text-[18px]" >
             refresh
           </span>
           {t("admin.refresh")}
@@ -298,8 +296,7 @@ export default function AdminDashboardPage() {
               )}
             >
               <span
-                className="material-symbols-outlined"
-                style={{ fontSize: 18 }}
+                className="material-symbols-outlined text-[18px]"
               >
                 {a.icon}
               </span>
@@ -405,8 +402,7 @@ export default function AdminDashboardPage() {
           {loading ? (
             <div className="flex items-center justify-center py-12 text-slate-400">
               <span
-                className="material-symbols-outlined animate-spin mr-2"
-                style={{ fontSize: 22 }}
+                className="material-symbols-outlined animate-spin mr-2 text-[24px]"
               >
                 progress_activity
               </span>
@@ -430,9 +426,8 @@ export default function AdminDashboardPage() {
                     )}
                   >
                     <span
-                      className={cn("material-symbols-outlined", a.color)}
-                      style={{ fontSize: 16 }}
-                    >
+                      className={cn("material-symbols-outlined text-[16px]", a.color)}
+                      >
                       {a.icon}
                     </span>
                   </div>
@@ -516,16 +511,14 @@ export default function AdminDashboardPage() {
                 )}
               >
                 <span
-                  className={cn("material-symbols-outlined", q.color)}
-                  style={{ fontSize: 18 }}
-                >
+                  className={cn("material-symbols-outlined text-[18px]", q.color)}
+                  >
                   {q.icon}
                 </span>
               </div>
               <span className="font-semibold text-sm flex-1">{q.label}</span>
               <span
-                className="material-symbols-outlined text-slate-300 group-hover:text-[#FF4B19] transition-colors"
-                style={{ fontSize: 16 }}
+                className="material-symbols-outlined text-muted-foreground group-hover:text-primary transition-colors text-[16px]"
               >
                 chevron_right
               </span>
@@ -560,8 +553,7 @@ export default function AdminDashboardPage() {
         ) : applications.length === 0 ? (
           <div className="text-center py-12 text-slate-400">
             <span
-              className="material-symbols-outlined block mx-auto mb-2"
-              style={{ fontSize: 36 }}
+              className="material-symbols-outlined block mx-auto mb-2 text-[32px]"
             >
               task_alt
             </span>
@@ -638,8 +630,7 @@ export default function AdminDashboardPage() {
                         className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 text-xs font-bold rounded-lg hover:bg-blue-100 transition-colors whitespace-nowrap"
                       >
                         <span
-                          className="material-symbols-outlined"
-                          style={{ fontSize: 13 }}
+                          className="material-symbols-outlined text-[14px]"
                         >
                           open_in_new
                         </span>
@@ -669,8 +660,7 @@ export default function AdminDashboardPage() {
                             className="px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 disabled:opacity-60 transition-colors flex items-center gap-1"
                           >
                             <span
-                              className="material-symbols-outlined"
-                              style={{ fontSize: 14 }}
+                              className="material-symbols-outlined text-[14px]"
                             >
                               send
                             </span>
@@ -682,8 +672,7 @@ export default function AdminDashboardPage() {
                             className="px-3 py-1.5 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 text-xs font-bold rounded-lg hover:bg-red-200 disabled:opacity-60 transition-colors flex items-center gap-1"
                           >
                             <span
-                              className="material-symbols-outlined"
-                              style={{ fontSize: 14 }}
+                              className="material-symbols-outlined text-[14px]"
                             >
                               close
                             </span>

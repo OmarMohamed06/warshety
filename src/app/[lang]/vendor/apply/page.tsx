@@ -83,7 +83,7 @@ export default function VendorLandingPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-slate-950/80 via-slate-950/60 to-primary/50" />
         <div className="relative max-w-5xl mx-auto px-6 py-24 text-center">
           <div className="inline-flex items-center gap-2 bg-primary/20 text-primary border border-primary/30 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest mb-8">
-            <span className="material-symbols-outlined text-base">
+            <span className="material-symbols-outlined text-[16px]">
               storefront
             </span>
             {t("vendor.applyPages.badge")}
@@ -164,7 +164,7 @@ export default function VendorLandingPage() {
                 className="flex flex-col items-center text-center"
               >
                 <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-5">
-                  <span className="material-symbols-outlined text-primary text-4xl">
+                  <span className="material-symbols-outlined text-primary text-[32px]">
                     {b.icon}
                   </span>
                 </div>
@@ -199,7 +199,7 @@ export default function VendorLandingPage() {
                   {i + 1}
                 </div>
                 <div className="w-16 h-16 rounded-2xl bg-white dark:bg-slate-700 shadow-sm flex items-center justify-center mb-4">
-                  <span className="material-symbols-outlined text-primary text-3xl">
+                  <span className="material-symbols-outlined text-primary text-[32px]">
                     {step.icon}
                   </span>
                 </div>
@@ -235,7 +235,7 @@ export default function VendorLandingPage() {
                     {t(`vendor.applyPages.faq${i}Q`)}
                   </span>
                   <span
-                    className="material-symbols-outlined text-muted-foreground text-xl shrink-0 ml-4 transition-transform"
+                    className="material-symbols-outlined text-muted-foreground shrink-0 ml-4 transition-transform text-[20px]"
                     style={{
                       transform:
                         openFaq === i ? "rotate(180deg)" : "rotate(0deg)",
@@ -258,7 +258,7 @@ export default function VendorLandingPage() {
       {/* ── CTA ── */}
       <section className="py-24 bg-slate-950 text-white text-center">
         <div className="max-w-2xl mx-auto px-6">
-          <span className="material-symbols-outlined text-primary text-5xl mb-4 block">
+          <span className="material-symbols-outlined text-primary mb-4 block text-[48px]">
             rocket_launch
           </span>
           <h2 className="text-4xl font-black mb-4">

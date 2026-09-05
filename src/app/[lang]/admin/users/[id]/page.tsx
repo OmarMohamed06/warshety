@@ -77,8 +77,7 @@ export default function UserDetailPage({
     return (
       <div className="flex items-center justify-center min-h-64">
         <span
-          className="material-symbols-outlined animate-spin text-[#FF4B19]"
-          style={{ fontSize: 36 }}
+          className="material-symbols-outlined animate-spin text-primary text-[32px]"
         >
           progress_activity
         </span>
@@ -104,7 +103,7 @@ export default function UserDetailPage({
           href="/admin/users"
           className="text-slate-400 hover:text-[#FF4B19] transition-colors"
         >
-          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+          <span className="material-symbols-outlined text-[20px]" >
             arrow_back
           </span>
         </Link>
@@ -188,8 +187,7 @@ export default function UserDetailPage({
           <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700">
             <h3 className="font-black flex items-center gap-2">
               <span
-                className="material-symbols-outlined text-blue-500"
-                style={{ fontSize: 20 }}
+                className="material-symbols-outlined text-[20px]"
               >
                 directions_car
               </span>
@@ -222,8 +220,7 @@ export default function UserDetailPage({
           <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700">
             <h3 className="font-black flex items-center gap-2">
               <span
-                className="material-symbols-outlined text-amber-500"
-                style={{ fontSize: 20 }}
+                className="material-symbols-outlined text-[20px]"
               >
                 calendar_month
               </span>

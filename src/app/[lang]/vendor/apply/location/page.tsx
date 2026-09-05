@@ -346,14 +346,14 @@ export default function VendorLocationPage() {
                         />
                         {/* Change overlay on hover */}
                         <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
-                          <span className="material-symbols-outlined text-white text-2xl">
+                          <span className="material-symbols-outlined text-white text-[24px]">
                             edit
                           </span>
                         </div>
                       </>
                     ) : (
                       <>
-                        <span className="material-symbols-outlined text-slate-300 text-2xl">
+                        <span className="material-symbols-outlined text-muted-foreground text-[24px]">
                           add_photo_alternate
                         </span>
                         <p className="text-xs text-slate-400 text-center px-1">
@@ -375,7 +375,7 @@ export default function VendorLocationPage() {
               href={localePath("/vendor/apply/operations")}
               className="text-sm text-slate-500 hover:text-slate-800 flex items-center gap-1"
             >
-              <span className="material-symbols-outlined text-sm">
+              <span className="material-symbols-outlined text-[14px]">
                 arrow_back
               </span>
               {t("vendor.applyPages.back")}
@@ -388,7 +388,7 @@ export default function VendorLocationPage() {
               {saving
                 ? t("vendor.applyPages.submitting")
                 : t("vendor.applyPages.submitApplication")}
-              <span className="material-symbols-outlined text-sm">
+              <span className="material-symbols-outlined text-[14px]">
                 check_circle
               </span>
             </button>

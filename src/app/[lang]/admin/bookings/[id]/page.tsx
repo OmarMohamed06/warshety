@@ -97,8 +97,7 @@ export default function BookingDetailPage({
     return (
       <div className="flex items-center justify-center min-h-64">
         <span
-          className="material-symbols-outlined animate-spin text-[#FF4B19]"
-          style={{ fontSize: 36 }}
+          className="material-symbols-outlined animate-spin text-primary text-[32px]"
         >
           progress_activity
         </span>
@@ -131,7 +130,7 @@ export default function BookingDetailPage({
           href="/admin/bookings"
           className="text-slate-400 hover:text-[#FF4B19] transition-colors"
         >
-          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+          <span className="material-symbols-outlined text-[20px]" >
             arrow_back
           </span>
         </Link>
@@ -198,8 +197,7 @@ export default function BookingDetailPage({
                   >
                     {done && (
                       <span
-                        className="material-symbols-outlined text-white"
-                        style={{ fontSize: 12 }}
+                        className="material-symbols-outlined text-white text-[14px]"
                       >
                         check
                       </span>
@@ -237,8 +235,7 @@ export default function BookingDetailPage({
                 className="w-full px-4 py-2.5 bg-[#FF4B19] text-white text-sm font-bold rounded-xl hover:bg-[#e03d12] disabled:opacity-60 transition-colors flex items-center justify-center gap-2"
               >
                 <span
-                  className="material-symbols-outlined"
-                  style={{ fontSize: 16 }}
+                  className="material-symbols-outlined text-[16px]"
                 >
                   arrow_forward
                 </span>
@@ -252,8 +249,7 @@ export default function BookingDetailPage({
                 className="w-full px-4 py-2.5 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 text-sm font-bold rounded-xl hover:bg-red-200 disabled:opacity-60 transition-colors flex items-center justify-center gap-2"
               >
                 <span
-                  className="material-symbols-outlined"
-                  style={{ fontSize: 16 }}
+                  className="material-symbols-outlined text-[16px]"
                 >
                   cancel
                 </span>
@@ -269,8 +265,7 @@ export default function BookingDetailPage({
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-5">
             <h3 className="font-black text-sm mb-3 flex items-center gap-2">
               <span
-                className="material-symbols-outlined text-blue-500"
-                style={{ fontSize: 18 }}
+                className="material-symbols-outlined text-[18px]"
               >
                 person
               </span>
@@ -289,8 +284,7 @@ export default function BookingDetailPage({
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-5">
             <h3 className="font-black text-sm mb-3 flex items-center gap-2">
               <span
-                className="material-symbols-outlined text-purple-500"
-                style={{ fontSize: 18 }}
+                className="material-symbols-outlined text-[18px]"
               >
                 storefront
               </span>
@@ -310,8 +304,7 @@ export default function BookingDetailPage({
             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-5">
               <h3 className="font-black text-sm mb-3 flex items-center gap-2">
                 <span
-                  className="material-symbols-outlined text-amber-500"
-                  style={{ fontSize: 18 }}
+                  className="material-symbols-outlined text-[18px]"
                 >
                   directions_car
                 </span>

@@ -196,7 +196,7 @@ export default function VendorLegalPage() {
               : "border-slate-200 dark:border-slate-700 hover:border-[#FF4B19]/60"
           }`}
         >
-          <span className="material-symbols-outlined text-3xl text-slate-400">
+          <span className="material-symbols-outlined text-muted-foreground text-[32px]">
             {hasContent ? "check_circle" : "upload_file"}
           </span>
           <div className="text-center">
@@ -279,7 +279,7 @@ export default function VendorLegalPage() {
               href={localePath("/vendor/apply/form")}
               className="text-sm text-slate-500 hover:text-slate-800 flex items-center gap-1"
             >
-              <span className="material-symbols-outlined text-sm">
+              <span className="material-symbols-outlined text-[14px]">
                 arrow_back
               </span>
               {t("vendor.applyPages.back")}
@@ -292,7 +292,7 @@ export default function VendorLegalPage() {
               {saving
                 ? t("vendor.applyPages.saving")
                 : t("vendor.applyPages.continueBtn")}
-              <span className="material-symbols-outlined text-sm">
+              <span className="material-symbols-outlined text-[14px]">
                 arrow_forward
               </span>
             </button>

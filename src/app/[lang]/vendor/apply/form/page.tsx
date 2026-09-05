@@ -99,7 +99,7 @@ export default function VendorApplyFormPage() {
         {/* Header */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-2xl mb-6">
-            <span className="material-symbols-outlined text-white text-3xl">
+            <span className="material-symbols-outlined text-white text-[32px]">
               storefront
             </span>
           </div>
@@ -122,9 +122,8 @@ export default function VendorApplyFormPage() {
           {error && (
             <div className="mb-5 flex items-center gap-2 px-4 py-3 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-300">
               <span
-                className="material-symbols-outlined shrink-0"
-                style={{ fontSize: "18px" }}
-              >
+                className="material-symbols-outlined shrink-0 text-[18px]"
+                >
                 error
               </span>
               {error}
@@ -221,7 +220,7 @@ export default function VendorApplyFormPage() {
               className="px-8 py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:opacity-90 transition-all flex items-center gap-2 shadow-lg shadow-primary/20"
             >
               {t("vendor.applyPages.continueBtn")}
-              <span className="material-symbols-outlined text-sm">
+              <span className="material-symbols-outlined text-[14px]">
                 arrow_forward
               </span>
             </button>

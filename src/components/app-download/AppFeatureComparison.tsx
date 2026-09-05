@@ -84,8 +84,7 @@ export function AppFeatureComparison({ locale = "en" }: Props) {
             <div className="flex items-center gap-3 mb-5">
               <div className="w-10 h-10 rounded-2xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
                 <span
-                  className="material-symbols-outlined text-slate-500"
-                  style={{ fontSize: 20 }}
+                  className="material-symbols-outlined text-muted-foreground text-[20px]"
                 >
                   language
                 </span>
@@ -101,8 +100,8 @@ export function AppFeatureComparison({ locale = "en" }: Props) {
                   className="flex items-center gap-2.5 text-sm text-slate-600 dark:text-slate-300"
                 >
                   <span
-                    className="material-symbols-outlined text-green-500 shrink-0"
-                    style={{ fontSize: 16, fontVariationSettings: "'FILL' 1" }}
+                    className="material-symbols-outlined text-green-600 dark:text-green-400 shrink-0 text-[16px]"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
                   >
                     check_circle
                   </span>
@@ -122,8 +121,7 @@ export function AppFeatureComparison({ locale = "en" }: Props) {
             <div className="flex items-center gap-3 mb-5">
               <div className="w-10 h-10 rounded-2xl bg-[#FF4B19] flex items-center justify-center">
                 <span
-                  className="material-symbols-outlined text-white"
-                  style={{ fontSize: 20 }}
+                  className="material-symbols-outlined text-white text-[20px]"
                 >
                   phone_iphone
                 </span>
@@ -139,9 +137,8 @@ export function AppFeatureComparison({ locale = "en" }: Props) {
                   className="flex items-center gap-2.5 text-sm text-white/90"
                 >
                   <span
-                    className="material-symbols-outlined shrink-0"
+                    className="material-symbols-outlined shrink-0 text-[16px]"
                     style={{
-                      fontSize: 16,
                       fontVariationSettings: "'FILL' 1",
                       color: "#4ade80",
                     }}

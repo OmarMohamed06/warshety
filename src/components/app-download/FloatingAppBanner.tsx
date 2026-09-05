@@ -62,8 +62,7 @@ export function FloatingAppBanner() {
         {/* App icon */}
         <div className="w-12 h-12 bg-[#FF4B19] rounded-2xl flex items-center justify-center shrink-0 shadow-md shadow-[#FF4B19]/30">
           <span
-            className="material-symbols-outlined text-white"
-            style={{ fontSize: 22 }}
+            className="material-symbols-outlined text-white text-[24px]"
           >
             directions_car
           </span>
@@ -90,8 +89,7 @@ export function FloatingAppBanner() {
             className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1"
           >
             <span
-              className="material-symbols-outlined"
-              style={{ fontSize: 18 }}
+              className="material-symbols-outlined text-[18px]"
             >
               close
             </span>

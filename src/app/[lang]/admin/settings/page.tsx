@@ -171,8 +171,7 @@ export default function SettingsPage() {
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <span
-            className="material-symbols-outlined animate-spin text-slate-400"
-            style={{ fontSize: 40 }}
+            className="material-symbols-outlined animate-spin text-muted-foreground text-[32px]"
           >
             progress_activity
           </span>
@@ -223,8 +222,7 @@ export default function SettingsPage() {
                             className="px-3 py-1.5 bg-[#FF4B19] text-white text-xs font-bold rounded-lg hover:bg-[#e04416] disabled:opacity-60 transition-colors flex items-center gap-1"
                           >
                             <span
-                              className="material-symbols-outlined"
-                              style={{ fontSize: 14 }}
+                              className="material-symbols-outlined text-[14px]"
                             >
                               save
                             </span>
@@ -240,8 +238,7 @@ export default function SettingsPage() {
                               className="px-3 py-1.5 bg-[#FF4B19] text-white text-xs font-bold rounded-lg hover:bg-[#e04416] disabled:opacity-60 transition-colors flex items-center gap-1"
                             >
                               <span
-                                className="material-symbols-outlined"
-                                style={{ fontSize: 14 }}
+                                className="material-symbols-outlined text-[14px]"
                               >
                                 save
                               </span>

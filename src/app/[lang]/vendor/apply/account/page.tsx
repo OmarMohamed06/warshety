@@ -128,7 +128,7 @@ export default function VendorAccountPage() {
         {/* Header */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-2xl mb-6">
-            <span className="material-symbols-outlined text-white text-3xl">
+            <span className="material-symbols-outlined text-white text-[32px]">
               lock
             </span>
           </div>
@@ -159,9 +159,8 @@ export default function VendorAccountPage() {
           {error && (
             <div className="flex items-center gap-2 px-4 py-3 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-300">
               <span
-                className="material-symbols-outlined shrink-0"
-                style={{ fontSize: "18px" }}
-              >
+                className="material-symbols-outlined shrink-0 text-[18px]"
+                >
                 error
               </span>
               {error}
@@ -212,8 +211,7 @@ export default function VendorAccountPage() {
                   tabIndex={-1}
                 >
                   <span
-                    className="material-symbols-outlined"
-                    style={{ fontSize: 18 }}
+                    className="material-symbols-outlined text-[18px]"
                   >
                     {showPass ? "visibility_off" : "visibility"}
                   </span>
@@ -244,16 +242,14 @@ export default function VendorAccountPage() {
                 />
                 {confirmPassword && confirmPassword !== password && (
                   <span
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 material-symbols-outlined"
-                    style={{ fontSize: 18 }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 material-symbols-outlined text-[18px]"
                   >
                     error
                   </span>
                 )}
                 {confirmPassword && confirmPassword === password && (
                   <span
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500 material-symbols-outlined"
-                    style={{ fontSize: 18 }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500 material-symbols-outlined text-[18px]"
                   >
                     check_circle
                   </span>
@@ -277,7 +273,7 @@ export default function VendorAccountPage() {
             >
               {saving ? (
                 <>
-                  <span className="material-symbols-outlined animate-spin text-sm">
+                  <span className="material-symbols-outlined animate-spin text-[14px]">
                     progress_activity
                   </span>
                   {t("vendor.applyPages.saving") ?? "Submitting..."}
@@ -286,7 +282,7 @@ export default function VendorAccountPage() {
                 <>
                   {t("vendor.applyPages.submitApplication") ??
                     "Submit Application"}
-                  <span className="material-symbols-outlined text-sm">
+                  <span className="material-symbols-outlined text-[14px]">
                     send
                   </span>
                 </>

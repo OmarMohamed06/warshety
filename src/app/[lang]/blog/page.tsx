@@ -217,7 +217,7 @@ export default async function BlogPage({ params }: Props) {
       <section className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
         <div className="max-w-2xl mx-auto px-6 py-16 text-center">
           <div className="w-12 h-12 rounded-2xl bg-[#FF4B19]/10 flex items-center justify-center mx-auto mb-4">
-            <span className="material-symbols-outlined text-[#FF4B19] text-2xl">
+            <span className="material-symbols-outlined text-primary text-[24px]">
               mail
             </span>
           </div>

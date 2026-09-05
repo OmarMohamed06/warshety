@@ -154,8 +154,7 @@ export default function ServiceCenterDetailPage({
     return (
       <div className="flex items-center justify-center min-h-64">
         <span
-          className="material-symbols-outlined animate-spin text-[#FF4B19]"
-          style={{ fontSize: 36 }}
+          className="material-symbols-outlined animate-spin text-primary text-[32px]"
         >
           progress_activity
         </span>
@@ -186,7 +185,7 @@ export default function ServiceCenterDetailPage({
           href="/admin/service-centers"
           className="text-slate-400 hover:text-[#FF4B19] transition-colors"
         >
-          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+          <span className="material-symbols-outlined text-[20px]" >
             arrow_back
           </span>
         </Link>
@@ -322,8 +321,7 @@ export default function ServiceCenterDetailPage({
                     </p>
                     <p className="font-bold flex items-center gap-1">
                       <span
-                        className="material-symbols-outlined text-amber-400"
-                        style={{ fontSize: 14 }}
+                        className="material-symbols-outlined text-amber-400 text-[14px]"
                       >
                         star
                       </span>
@@ -370,8 +368,7 @@ export default function ServiceCenterDetailPage({
                   className="px-5 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 disabled:opacity-60 transition-colors flex items-center gap-2"
                 >
                   <span
-                    className="material-symbols-outlined"
-                    style={{ fontSize: 18 }}
+                    className="material-symbols-outlined text-[18px]"
                   >
                     send
                   </span>
@@ -383,8 +380,7 @@ export default function ServiceCenterDetailPage({
                   className="px-5 py-2.5 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 font-bold rounded-xl hover:bg-red-200 disabled:opacity-60 transition-colors flex items-center gap-2"
                 >
                   <span
-                    className="material-symbols-outlined"
-                    style={{ fontSize: 18 }}
+                    className="material-symbols-outlined text-[18px]"
                   >
                     close
                   </span>
@@ -729,13 +725,12 @@ export default function ServiceCenterDetailPage({
                             <span
                               key={i}
                               className={cn(
-                                "material-symbols-outlined",
+                                "material-symbols-outlined text-[12px]",
                                 i < Number(r.rating)
                                   ? "text-amber-400"
                                   : "text-slate-200 dark:text-slate-700",
                               )}
-                              style={{ fontSize: 12 }}
-                            >
+                              >
                               star
                             </span>
                           ))}

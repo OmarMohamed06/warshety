@@ -87,7 +87,7 @@ export default function OnboardingProgress({
               }`}
             >
               {currentStep > step.id ? (
-                <span className="material-symbols-outlined text-sm">check</span>
+                <span className="material-symbols-outlined text-[14px]">check</span>
               ) : (
                 step.id
               )}

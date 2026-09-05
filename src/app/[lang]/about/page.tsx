@@ -219,7 +219,7 @@ export default async function AboutPage({ params }: Props) {
               className="inline-flex items-center gap-2 bg-[#FF4B19] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#e04316] transition-colors"
             >
               {isAr ? "احجز خدمة" : "Book a Service"}
-              <span className="material-symbols-outlined text-base">
+              <span className="material-symbols-outlined text-[16px]">
                 {isAr ? "arrow_back" : "arrow_forward"}
               </span>
             </Link>
@@ -230,7 +230,7 @@ export default async function AboutPage({ params }: Props) {
             <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 text-white shadow-2xl">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-full bg-[#FF4B19] flex items-center justify-center">
-                  <span className="material-symbols-outlined text-white text-lg">
+                  <span className="material-symbols-outlined text-white text-[18px]">
                     directions_car
                   </span>
                 </div>
@@ -274,7 +274,7 @@ export default async function AboutPage({ params }: Props) {
                   key={item.textEn}
                   className="flex items-center gap-3 mb-3 last:mb-0"
                 >
-                  <span className="material-symbols-outlined text-[#FF4B19] text-base">
+                  <span className="material-symbols-outlined text-primary text-[16px]">
                     {item.icon}
                   </span>
                   <span className="text-sm text-slate-300">
@@ -309,7 +309,7 @@ export default async function AboutPage({ params }: Props) {
                 className="flex flex-col items-center text-center p-6 rounded-2xl bg-[#f6f6f8] dark:bg-slate-800 hover:shadow-lg transition-shadow"
               >
                 <div className="w-14 h-14 rounded-2xl bg-[#FF4B19]/10 flex items-center justify-center mb-4">
-                  <span className="material-symbols-outlined text-[#FF4B19] text-2xl">
+                  <span className="material-symbols-outlined text-primary text-[24px]">
                     {v.icon}
                   </span>
                 </div>

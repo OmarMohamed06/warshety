@@ -63,9 +63,8 @@ function SummaryCard({
         )}
       >
         <span
-          className={cn("material-symbols-outlined", color)}
-          style={{ fontSize: 22 }}
-        >
+          className={cn("material-symbols-outlined text-[24px]", color)}
+          >
           {icon}
         </span>
       </div>
@@ -327,8 +326,7 @@ export default function BillingPage() {
             </select>
             <div className="ml-auto flex items-center gap-2 px-4 py-2.5 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 text-xs font-semibold rounded-xl">
               <span
-                className="material-symbols-outlined"
-                style={{ fontSize: 16 }}
+                className="material-symbols-outlined text-[16px]"
               >
                 schedule
               </span>
@@ -338,14 +336,13 @@ export default function BillingPage() {
 
           {/* Formula info box */}
           <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-2xl p-4">
-            <div className="flex gap-3 items-start">
+            <div className="flex gap-3 items-start text-blue-700 dark:text-blue-400">
               <span
-                className="material-symbols-outlined text-blue-600 shrink-0"
-                style={{ fontSize: 20 }}
+                className="material-symbols-outlined shrink-0 text-[20px]"
               >
                 calculate
               </span>
-              <div className="text-xs text-blue-700 dark:text-blue-400 space-y-0.5">
+              <div className="text-xs space-y-0.5">
                 <p className="font-bold text-sm">
                   {t("admin.billing.scFormulaTitle")}
                 </p>
@@ -385,8 +382,7 @@ export default function BillingPage() {
                     <tr>
                       <td colSpan={8} className="px-4 py-16 text-center">
                         <span
-                          className="material-symbols-outlined animate-spin text-slate-400"
-                          style={{ fontSize: 28 }}
+                          className="material-symbols-outlined animate-spin text-muted-foreground text-[32px]"
                         >
                           progress_activity
                         </span>
@@ -477,8 +473,7 @@ export default function BillingPage() {
                               )}
                             >
                               <span
-                                className="material-symbols-outlined"
-                                style={{ fontSize: 14 }}
+                                className="material-symbols-outlined text-[14px]"
                               >
                                 check
                               </span>
@@ -574,8 +569,7 @@ export default function BillingPage() {
               {settingsLoading ? (
                 <div className="flex items-center justify-center py-16">
                   <span
-                    className="material-symbols-outlined animate-spin text-slate-400"
-                    style={{ fontSize: 32 }}
+                    className="material-symbols-outlined animate-spin text-muted-foreground text-[32px]"
                   >
                     progress_activity
                   </span>
@@ -588,8 +582,7 @@ export default function BillingPage() {
                     <div className="px-6 py-5 space-y-4 border-b border-slate-100 dark:border-slate-700">
                       <div className="flex items-center gap-2 mb-1">
                         <span
-                          className="material-symbols-outlined text-[#FF4B19]"
-                          style={{ fontSize: 18 }}
+                          className="material-symbols-outlined text-primary text-[18px]"
                         >
                           event_note
                         </span>
@@ -626,8 +619,7 @@ export default function BillingPage() {
                     <div className="px-6 py-5 space-y-4">
                       <div className="flex items-center gap-2 mb-1">
                         <span
-                          className="material-symbols-outlined text-[#FF4B19]"
-                          style={{ fontSize: 18 }}
+                          className="material-symbols-outlined text-primary text-[18px]"
                         >
                           inventory_2
                         </span>
@@ -668,8 +660,7 @@ export default function BillingPage() {
                       className="flex items-center gap-2 px-5 py-2.5 bg-[#FF4B19] text-white text-sm font-bold rounded-xl hover:bg-[#e04416] disabled:opacity-60 transition-colors"
                     >
                       <span
-                        className="material-symbols-outlined"
-                        style={{ fontSize: 18 }}
+                        className="material-symbols-outlined text-[18px]"
                       >
                         save
                       </span>
@@ -695,8 +686,7 @@ export default function BillingPage() {
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700">
               <h3 className="font-black text-lg flex items-center gap-2">
                 <span
-                  className="material-symbols-outlined text-emerald-600"
-                  style={{ fontSize: 22 }}
+                  className="material-symbols-outlined text-[24px]"
                 >
                   payments
                 </span>
@@ -708,8 +698,7 @@ export default function BillingPage() {
                 className="text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-40"
               >
                 <span
-                  className="material-symbols-outlined"
-                  style={{ fontSize: 22 }}
+                  className="material-symbols-outlined text-[24px]"
                 >
                   close
                 </span>
@@ -750,8 +739,7 @@ export default function BillingPage() {
                 {markingPaid ? (
                   <>
                     <span
-                      className="material-symbols-outlined animate-spin"
-                      style={{ fontSize: 16 }}
+                      className="material-symbols-outlined animate-spin text-[16px]"
                     >
                       progress_activity
                     </span>
@@ -760,8 +748,7 @@ export default function BillingPage() {
                 ) : (
                   <>
                     <span
-                      className="material-symbols-outlined"
-                      style={{ fontSize: 16 }}
+                      className="material-symbols-outlined text-[16px]"
                     >
                       check_circle
                     </span>
@@ -789,8 +776,7 @@ export default function BillingPage() {
                 className="text-slate-400 hover:text-slate-600 transition-colors"
               >
                 <span
-                  className="material-symbols-outlined"
-                  style={{ fontSize: 22 }}
+                  className="material-symbols-outlined text-[24px]"
                 >
                   close
                 </span>
@@ -826,8 +812,7 @@ export default function BillingPage() {
                 className="flex items-center gap-2 px-4 py-2.5 bg-red-600 text-white text-sm font-bold rounded-xl hover:bg-red-700 transition-colors"
               >
                 <span
-                  className="material-symbols-outlined"
-                  style={{ fontSize: 16 }}
+                  className="material-symbols-outlined text-[16px]"
                 >
                   undo
                 </span>

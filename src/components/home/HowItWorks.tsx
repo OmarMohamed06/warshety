@@ -49,7 +49,7 @@ export default function HowItWorks() {
               {/* Icon circle */}
               <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 border-[#FF4B19] bg-background shadow-sm">
                 <span
-                  className="material-symbols-outlined text-[22px] text-[#FF4B19]"
+                  className="material-symbols-outlined text-primary text-[24px]"
                   style={{ fontVariationSettings: "'FILL' 1" }}
                 >
                   {step.icon}

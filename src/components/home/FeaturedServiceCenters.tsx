@@ -160,7 +160,7 @@ export default function FeaturedServiceCenters({ initialData }: Props = {}) {
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center opacity-30">
-                          <span className="material-symbols-outlined text-5xl text-slate-500">
+                          <span className="material-symbols-outlined text-muted-foreground text-[48px]">
                             car_repair
                           </span>
                         </div>

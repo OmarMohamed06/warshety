@@ -169,11 +169,10 @@ export default function PricingPage() {
                 </span>
                 <span
                   className={cn(
-                    "w-8 h-8 rounded-xl flex items-center justify-center material-symbols-outlined",
+                    "w-8 h-8 rounded-xl flex items-center justify-center material-symbols-outlined text-[18px]",
                     k.color,
                   )}
-                  style={{ fontSize: 18 }}
-                >
+                  >
                   {k.icon}
                 </span>
               </div>
@@ -186,8 +185,7 @@ export default function PricingPage() {
       {loading ? (
         <div className="flex items-center justify-center py-16">
           <span
-            className="material-symbols-outlined animate-spin text-slate-400"
-            style={{ fontSize: 36 }}
+            className="material-symbols-outlined animate-spin text-muted-foreground text-[32px]"
           >
             progress_activity
           </span>
@@ -198,8 +196,7 @@ export default function PricingPage() {
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-2">
               <span
-                className="material-symbols-outlined text-[#FF4B19]"
-                style={{ fontSize: 20 }}
+                className="material-symbols-outlined text-primary text-[20px]"
               >
                 receipt_long
               </span>
@@ -231,8 +228,7 @@ export default function PricingPage() {
                             }`}
                           >
                             <span
-                              className="material-symbols-outlined"
-                              style={{ fontSize: 10 }}
+                              className="material-symbols-outlined text-[14px]"
                             >
                               {type === "fixed" ? "event_note" : "percent"}
                             </span>
@@ -283,8 +279,7 @@ export default function PricingPage() {
                             className="px-3 py-2 bg-[#FF4B19] text-white text-xs font-bold rounded-xl hover:bg-[#e04416] disabled:opacity-60 transition-colors flex items-center gap-1"
                           >
                             <span
-                              className="material-symbols-outlined"
-                              style={{ fontSize: 14 }}
+                              className="material-symbols-outlined text-[14px]"
                             >
                               save
                             </span>
@@ -331,8 +326,7 @@ export default function PricingPage() {
           <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 space-y-3">
             <div className="flex gap-3">
               <span
-                className="material-symbols-outlined text-slate-500 shrink-0"
-                style={{ fontSize: 20 }}
+                className="material-symbols-outlined text-muted-foreground shrink-0 text-[20px]"
               >
                 info
               </span>
@@ -344,8 +338,7 @@ export default function PricingPage() {
               <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-xl p-4 space-y-1 text-blue-700 dark:text-blue-400">
                 <p className="font-bold flex items-center gap-1">
                   <span
-                    className="material-symbols-outlined"
-                    style={{ fontSize: 14 }}
+                    className="material-symbols-outlined text-[14px]"
                   >
                     event_note
                   </span>
@@ -366,8 +359,7 @@ export default function PricingPage() {
               <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-800 rounded-xl p-4 space-y-1 text-orange-700 dark:text-orange-400">
                 <p className="font-bold flex items-center gap-1">
                   <span
-                    className="material-symbols-outlined"
-                    style={{ fontSize: 14 }}
+                    className="material-symbols-outlined text-[14px]"
                   >
                     percent
                   </span>

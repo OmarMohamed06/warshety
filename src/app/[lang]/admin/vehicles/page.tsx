@@ -214,8 +214,7 @@ export default function VehiclesPage() {
                 className="px-3 py-2 bg-[#FF4B19] text-white text-xs font-bold rounded-xl hover:bg-[#e04416] disabled:opacity-50 transition-colors flex items-center gap-1"
               >
                 <span
-                  className="material-symbols-outlined"
-                  style={{ fontSize: 16 }}
+                  className="material-symbols-outlined text-[16px]"
                 >
                   add
                 </span>
@@ -226,8 +225,7 @@ export default function VehiclesPage() {
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <span
-                className="material-symbols-outlined animate-spin text-slate-400"
-                style={{ fontSize: 30 }}
+                className="material-symbols-outlined animate-spin text-muted-foreground text-[32px]"
               >
                 progress_activity
               </span>
@@ -276,8 +274,7 @@ export default function VehiclesPage() {
                       )}
                     >
                       <span
-                        className="material-symbols-outlined"
-                        style={{ fontSize: 16 }}
+                        className="material-symbols-outlined text-[16px]"
                       >
                         {m.is_active ? "visibility_off" : "visibility"}
                       </span>
@@ -287,8 +284,7 @@ export default function VehiclesPage() {
                       className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                     >
                       <span
-                        className="material-symbols-outlined"
-                        style={{ fontSize: 16 }}
+                        className="material-symbols-outlined text-[16px]"
                       >
                         delete
                       </span>
@@ -352,8 +348,7 @@ export default function VehiclesPage() {
                   className="px-3 py-2 bg-[#FF4B19] text-white text-xs font-bold rounded-xl hover:bg-[#e04416] disabled:opacity-50 transition-colors"
                 >
                   <span
-                    className="material-symbols-outlined"
-                    style={{ fontSize: 16 }}
+                    className="material-symbols-outlined text-[16px]"
                   >
                     add
                   </span>
@@ -365,8 +360,7 @@ export default function VehiclesPage() {
           {!selectedMake ? (
             <div className="flex flex-col items-center justify-center py-20 text-slate-400">
               <span
-                className="material-symbols-outlined mb-2"
-                style={{ fontSize: 40 }}
+                className="material-symbols-outlined mb-2 text-[32px]"
               >
                 directions_car
               </span>
@@ -375,8 +369,7 @@ export default function VehiclesPage() {
           ) : modelsLoading ? (
             <div className="flex items-center justify-center py-12">
               <span
-                className="material-symbols-outlined animate-spin text-slate-400"
-                style={{ fontSize: 30 }}
+                className="material-symbols-outlined animate-spin text-muted-foreground text-[32px]"
               >
                 progress_activity
               </span>
@@ -384,8 +377,7 @@ export default function VehiclesPage() {
           ) : models.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-slate-400">
               <span
-                className="material-symbols-outlined mb-2"
-                style={{ fontSize: 36 }}
+                className="material-symbols-outlined mb-2 text-[32px]"
               >
                 add_circle
               </span>
@@ -424,8 +416,7 @@ export default function VehiclesPage() {
                       )}
                     >
                       <span
-                        className="material-symbols-outlined"
-                        style={{ fontSize: 16 }}
+                        className="material-symbols-outlined text-[16px]"
                       >
                         {m.is_active ? "visibility_off" : "visibility"}
                       </span>
@@ -435,8 +426,7 @@ export default function VehiclesPage() {
                       className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                     >
                       <span
-                        className="material-symbols-outlined"
-                        style={{ fontSize: 16 }}
+                        className="material-symbols-outlined text-[16px]"
                       >
                         delete
                       </span>

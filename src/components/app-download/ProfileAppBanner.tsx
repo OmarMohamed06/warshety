@@ -46,8 +46,7 @@ export function ProfileAppBanner({ locale = "en" }: Props) {
       <div className="relative">
         <div className="flex items-center gap-2 mb-3">
           <span
-            className="material-symbols-outlined text-white/80"
-            style={{ fontSize: 18 }}
+            className="material-symbols-outlined text-white/80 text-[18px]"
           >
             phone_iphone
           </span>
@@ -80,8 +79,8 @@ export function ProfileAppBanner({ locale = "en" }: Props) {
           {BENEFITS.map((b) => (
             <div key={b.en} className="flex items-center gap-1.5">
               <span
-                className="material-symbols-outlined text-white"
-                style={{ fontSize: 14, fontVariationSettings: "'FILL' 1" }}
+                className="material-symbols-outlined text-white text-[14px]"
+                style={{ fontVariationSettings: "'FILL' 1" }}
               >
                 {b.icon}
               </span>

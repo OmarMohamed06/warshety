@@ -171,9 +171,8 @@ export default function PaymentsPage() {
               )}
             >
               <span
-                className={cn("material-symbols-outlined", s.color)}
-                style={{ fontSize: 22 }}
-              >
+                className={cn("material-symbols-outlined text-[24px]", s.color)}
+                >
                 {s.icon}
               </span>
             </div>
@@ -256,8 +255,7 @@ export default function PaymentsPage() {
                   <tr>
                     <td colSpan={9} className="px-5 py-16 text-center">
                       <span
-                        className="material-symbols-outlined animate-spin text-slate-400"
-                        style={{ fontSize: 28 }}
+                        className="material-symbols-outlined animate-spin text-muted-foreground text-[32px]"
                       >
                         progress_activity
                       </span>

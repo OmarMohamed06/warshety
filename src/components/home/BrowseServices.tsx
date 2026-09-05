@@ -72,7 +72,7 @@ export default function BrowseServices() {
 
                   {/* Icon badge — top left */}
                   <div className="absolute top-3 left-3">
-                    <span className="material-symbols-outlined text-white text-2xl drop-shadow">
+                    <span className="material-symbols-outlined text-white drop-shadow text-[24px]">
                       {cat.icon}
                     </span>
                   </div>

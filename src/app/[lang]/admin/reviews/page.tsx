@@ -119,8 +119,7 @@ export default function ReviewsPage() {
             >
               {r}
               <span
-                className="material-symbols-outlined"
-                style={{ fontSize: 12 }}
+                className="material-symbols-outlined text-[14px]"
               >
                 star
               </span>
@@ -133,8 +132,7 @@ export default function ReviewsPage() {
       {loading ? (
         <div className="flex items-center justify-center py-16">
           <span
-            className="material-symbols-outlined animate-spin text-slate-400"
-            style={{ fontSize: 36 }}
+            className="material-symbols-outlined animate-spin text-muted-foreground text-[32px]"
           >
             progress_activity
           </span>
@@ -142,8 +140,7 @@ export default function ReviewsPage() {
       ) : reviews.length === 0 ? (
         <div className="text-center py-16 text-slate-400">
           <span
-            className="material-symbols-outlined block mx-auto mb-2"
-            style={{ fontSize: 40 }}
+            className="material-symbols-outlined block mx-auto mb-2 text-[32px]"
           >
             star_border
           </span>
@@ -164,13 +161,12 @@ export default function ReviewsPage() {
                         <span
                           key={i}
                           className={cn(
-                            "material-symbols-outlined",
+                            "material-symbols-outlined text-[16px]",
                             i < r.rating
                               ? "text-amber-400"
                               : "text-slate-200 dark:text-slate-700",
                           )}
-                          style={{ fontSize: 16 }}
-                        >
+                          >
                           star
                         </span>
                       ))}
@@ -232,8 +228,7 @@ export default function ReviewsPage() {
                     title="Delete review"
                   >
                     <span
-                      className="material-symbols-outlined"
-                      style={{ fontSize: 16 }}
+                      className="material-symbols-outlined text-[16px]"
                     >
                       delete
                     </span>

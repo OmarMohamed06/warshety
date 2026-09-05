@@ -119,8 +119,7 @@ export default function AdminUsersPage() {
       <div className="flex flex-wrap gap-3 items-center">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
           <span
-            className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-            style={{ fontSize: 18 }}
+            className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[18px]"
           >
             search
           </span>
@@ -182,8 +181,7 @@ export default function AdminUsersPage() {
                 <tr>
                   <td colSpan={5} className="px-5 py-16 text-center">
                     <span
-                      className="material-symbols-outlined animate-spin text-slate-400"
-                      style={{ fontSize: 28 }}
+                      className="material-symbols-outlined animate-spin text-muted-foreground text-[32px]"
                     >
                       progress_activity
                     </span>
@@ -250,8 +248,7 @@ export default function AdminUsersPage() {
                           className="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors flex items-center gap-1"
                         >
                           <span
-                            className="material-symbols-outlined"
-                            style={{ fontSize: 14 }}
+                            className="material-symbols-outlined text-[14px]"
                           >
                             visibility
                           </span>

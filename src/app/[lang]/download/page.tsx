@@ -60,7 +60,7 @@ export default function DownloadPage() {
       {/* Logo / brand */}
       <div className="mb-8 flex flex-col items-center gap-3">
         <div className="w-20 h-20 bg-[#FF4B19] rounded-3xl flex items-center justify-center shadow-2xl shadow-[#FF4B19]/40">
-          <span className="material-symbols-outlined text-4xl text-white">
+          <span className="material-symbols-outlined text-white text-[32px]">
             directions_car
           </span>
         </div>
@@ -146,7 +146,7 @@ export default function DownloadPage() {
             key={f.label}
             className="bg-white/5 border border-white/10 rounded-2xl py-4 px-3"
           >
-            <span className="material-symbols-outlined text-2xl text-[#FF4B19] block mb-2">
+            <span className="material-symbols-outlined text-primary block mb-2 text-[24px]">
               {f.icon}
             </span>
             <p className="text-slate-300 text-xs font-semibold">{f.label}</p>

@@ -193,7 +193,7 @@ export default function ProfilePage() {
               href={stat.href}
               className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 flex flex-col items-center gap-2 text-center hover:border-[#FF4B19]/30 hover:shadow-md transition-all"
             >
-              <span className="material-symbols-outlined text-[#FF4B19] text-2xl">
+              <span className="material-symbols-outlined text-primary text-[24px]">
                 {stat.icon}
               </span>
               <p className="text-2xl font-black">{stat.value}</p>
@@ -253,7 +253,7 @@ export default function ProfilePage() {
 
           {error && (
             <p className="mt-4 text-red-500 text-xs flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-sm">error</span>
+              <span className="material-symbols-outlined text-[14px]">error</span>
               {error}
             </p>
           )}
@@ -272,7 +272,7 @@ export default function ProfilePage() {
               ) : saved ? (
                 <>
                   <span
-                    className="material-symbols-outlined text-lg"
+                    className="material-symbols-outlined text-[18px]"
                     style={{ fontVariationSettings: "'FILL' 1" }}
                   >
                     check_circle
@@ -308,8 +308,8 @@ export default function ProfilePage() {
               <div className="mt-6 bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-100 dark:border-slate-700">
                 {/* Header */}
                 <div className="flex items-start gap-3 mb-5">
-                  <div className="w-10 h-10 bg-amber-50 dark:bg-amber-950/30 rounded-xl flex items-center justify-center shrink-0">
-                    <span className="material-symbols-outlined text-amber-500">
+                  <div className="w-10 h-10 bg-amber-50 dark:bg-amber-950/30 text-amber-500 dark:text-amber-400 rounded-xl flex items-center justify-center shrink-0">
+                    <span className="material-symbols-outlined">
                       smartphone
                     </span>
                   </div>
@@ -366,7 +366,7 @@ export default function ProfilePage() {
                       }}
                       className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg bg-[#FF4B19] text-white hover:opacity-90 transition shrink-0"
                     >
-                      <span className="material-symbols-outlined text-sm">
+                      <span className="material-symbols-outlined text-[14px]">
                         {linkCopied ? "check" : "content_copy"}
                       </span>
                       {linkCopied
@@ -451,7 +451,7 @@ export default function ProfilePage() {
               className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 flex items-center gap-4 hover:border-[#FF4B19]/30 hover:shadow-md transition-all"
             >
               <div className="w-10 h-10 bg-[#FF4B19]/10 rounded-xl flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-[#FF4B19]">
+                <span className="material-symbols-outlined text-primary">
                   {link.icon}
                 </span>
               </div>
@@ -459,7 +459,7 @@ export default function ProfilePage() {
                 <p className="font-bold text-sm">{link.label}</p>
                 <p className="text-xs text-slate-400">{link.desc}</p>
               </div>
-              <span className="material-symbols-outlined text-slate-300 ml-auto">
+              <span className="material-symbols-outlined text-muted-foreground ml-auto">
                 chevron_right
               </span>
             </Link>
@@ -485,14 +485,14 @@ export default function ProfilePage() {
                     Manage bookings, schedule &amp; services for your branch
                   </p>
                 </div>
-                <span className="material-symbols-outlined text-[#FF4B19] ml-auto">
+                <span className="material-symbols-outlined text-primary ml-auto">
                   chevron_right
                 </span>
               </Link>
             ) : (
               <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-slate-200 dark:border-slate-700 flex items-center gap-4 w-full opacity-60">
                 <div className="w-10 h-10 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center shrink-0">
-                  <span className="material-symbols-outlined text-slate-400">
+                  <span className="material-symbols-outlined text-muted-foreground">
                     store
                   </span>
                 </div>

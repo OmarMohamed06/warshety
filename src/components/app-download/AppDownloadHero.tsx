@@ -75,8 +75,7 @@ export function AppDownloadHero({ locale = "en" }: Props) {
                   className="inline-flex items-center gap-2 bg-white/8 border border-white/12 rounded-full px-3.5 py-2 backdrop-blur-sm"
                 >
                   <span
-                    className="material-symbols-outlined text-[#FF4B19]"
-                    style={{ fontSize: 14 }}
+                    className="material-symbols-outlined text-primary text-[14px]"
                   >
                     {f.icon}
                   </span>

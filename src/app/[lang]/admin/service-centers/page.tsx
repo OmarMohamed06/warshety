@@ -178,8 +178,7 @@ export default function ServiceCentersPage() {
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <span
-                  className="material-symbols-outlined animate-spin text-slate-400"
-                  style={{ fontSize: 28 }}
+                  className="material-symbols-outlined animate-spin text-muted-foreground text-[32px]"
                 >
                   progress_activity
                 </span>
@@ -205,8 +204,7 @@ export default function ServiceCentersPage() {
                         <div className="flex flex-wrap gap-4 mt-2 text-sm text-slate-600 dark:text-slate-300">
                           <span className="flex items-center gap-1">
                             <span
-                              className="material-symbols-outlined text-slate-400"
-                              style={{ fontSize: 14 }}
+                              className="material-symbols-outlined text-muted-foreground text-[14px]"
                             >
                               person
                             </span>
@@ -214,8 +212,7 @@ export default function ServiceCentersPage() {
                           </span>
                           <span className="flex items-center gap-1">
                             <span
-                              className="material-symbols-outlined text-slate-400"
-                              style={{ fontSize: 14 }}
+                              className="material-symbols-outlined text-muted-foreground text-[14px]"
                             >
                               mail
                             </span>
@@ -223,8 +220,7 @@ export default function ServiceCentersPage() {
                           </span>
                           <span className="flex items-center gap-1">
                             <span
-                              className="material-symbols-outlined text-slate-400"
-                              style={{ fontSize: 14 }}
+                              className="material-symbols-outlined text-muted-foreground text-[14px]"
                             >
                               phone
                             </span>
@@ -233,8 +229,7 @@ export default function ServiceCentersPage() {
                           {app.city && (
                             <span className="flex items-center gap-1">
                               <span
-                                className="material-symbols-outlined text-slate-400"
-                                style={{ fontSize: 14 }}
+                                className="material-symbols-outlined text-muted-foreground text-[14px]"
                               >
                                 location_on
                               </span>
@@ -298,8 +293,7 @@ export default function ServiceCentersPage() {
                             className="px-3 py-1.5 text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-lg hover:bg-blue-200 transition-colors flex items-center gap-1"
                           >
                             <span
-                              className="material-symbols-outlined"
-                              style={{ fontSize: 14 }}
+                              className="material-symbols-outlined text-[14px]"
                             >
                               open_in_new
                             </span>
@@ -391,8 +385,7 @@ export default function ServiceCentersPage() {
           <div className="flex flex-wrap gap-3">
             <div className="relative flex-1 min-w-[200px] max-w-xs">
               <span
-                className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                style={{ fontSize: 18 }}
+                className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[18px]"
               >
                 search
               </span>
@@ -467,8 +460,7 @@ export default function ServiceCentersPage() {
                     <tr>
                       <td colSpan={7} className="px-5 py-16 text-center">
                         <span
-                          className="material-symbols-outlined animate-spin text-slate-400"
-                          style={{ fontSize: 28 }}
+                          className="material-symbols-outlined animate-spin text-muted-foreground text-[32px]"
                         >
                           progress_activity
                         </span>
@@ -506,8 +498,7 @@ export default function ServiceCentersPage() {
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-1">
                             <span
-                              className="material-symbols-outlined text-amber-400"
-                              style={{ fontSize: 14 }}
+                              className="material-symbols-outlined text-amber-400 text-[14px]"
                             >
                               star
                             </span>

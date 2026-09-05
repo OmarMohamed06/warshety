@@ -172,9 +172,8 @@ export function Modal({
                 )}
               >
                 <span
-                  className="material-symbols-outlined"
-                  style={{ fontSize: "20px" }}
-                >
+                  className="material-symbols-outlined text-[20px]"
+                  >
                   close
                 </span>
               </button>

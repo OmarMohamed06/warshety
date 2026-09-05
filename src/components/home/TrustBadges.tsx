@@ -33,7 +33,7 @@ export default function TrustBadges() {
               className="flex flex-1 flex-col items-center gap-1 text-center"
             >
               <span
-                className="material-symbols-outlined text-[22px] sm:text-[28px] text-[#FF4B19]"
+                className="material-symbols-outlined sm: text-primary text-[24px]"
                 style={{ fontVariationSettings: "'FILL' 1" }}
               >
                 {b.icon}

@@ -44,8 +44,8 @@ export function RewardsAppPromo({ locale = "en" }: Props) {
           <div className="flex items-center gap-2 mb-2">
             <div className="w-9 h-9 rounded-2xl bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
               <span
-                className="material-symbols-outlined text-white"
-                style={{ fontSize: 20, fontVariationSettings: "'FILL' 1" }}
+                className="material-symbols-outlined text-white text-[20px]"
+                style={{ fontVariationSettings: "'FILL' 1" }}
               >
                 card_giftcard
               </span>
@@ -71,8 +71,7 @@ export function RewardsAppPromo({ locale = "en" }: Props) {
             {BENEFITS.map((b) => (
               <div key={b.en} className="flex items-center gap-2">
                 <span
-                  className="material-symbols-outlined text-amber-500"
-                  style={{ fontSize: 14 }}
+                  className="material-symbols-outlined text-amber-400 text-[14px]"
                 >
                   {b.icon}
                 </span>

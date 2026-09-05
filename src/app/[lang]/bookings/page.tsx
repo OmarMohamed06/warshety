@@ -188,7 +188,7 @@ export default function MyBookingsPage() {
           </div>
         ) : bookings.length === 0 ? (
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-16 text-center">
-            <span className="material-symbols-outlined text-5xl text-slate-300 mb-4 block">
+            <span className="material-symbols-outlined text-muted-foreground mb-4 block text-[48px]">
               calendar_month
             </span>
             <p className="font-black text-lg mb-2">
@@ -217,7 +217,7 @@ export default function MyBookingsPage() {
             if (displayed.length === 0)
               return (
                 <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-16 text-center">
-                  <span className="material-symbols-outlined text-5xl text-slate-300 mb-4 block">
+                  <span className="material-symbols-outlined text-muted-foreground mb-4 block text-[48px]">
                     calendar_month
                   </span>
                   <p className="font-black text-lg mb-2">
@@ -250,7 +250,7 @@ export default function MyBookingsPage() {
                                 t("bookings.serviceCenter"))}
                           </p>
                           <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-                            <span className="material-symbols-outlined text-[12px]">
+                            <span className="material-symbols-outlined text-[14px]">
                               location_on
                             </span>
                             {locale === "ar"

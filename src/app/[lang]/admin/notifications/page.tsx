@@ -123,8 +123,7 @@ export default function NotificationsPage() {
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-6 space-y-4 sticky top-6">
             <h2 className="font-black text-lg flex items-center gap-2">
               <span
-                className="material-symbols-outlined text-[#FF4B19]"
-                style={{ fontSize: 22 }}
+                className="material-symbols-outlined text-primary text-[24px]"
               >
                 campaign
               </span>
@@ -209,8 +208,7 @@ export default function NotificationsPage() {
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-full bg-[#FF4B19] flex items-center justify-center shrink-0">
                     <span
-                      className="material-symbols-outlined text-white"
-                      style={{ fontSize: 16 }}
+                      className="material-symbols-outlined text-white text-[16px]"
                     >
                       notifications
                     </span>
@@ -231,8 +229,7 @@ export default function NotificationsPage() {
               className="w-full py-3 bg-[#FF4B19] text-white font-black rounded-xl hover:bg-[#e04416] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
             >
               <span
-                className="material-symbols-outlined"
-                style={{ fontSize: 18 }}
+                className="material-symbols-outlined text-[18px]"
               >
                 send
               </span>
@@ -249,8 +246,7 @@ export default function NotificationsPage() {
           {loading ? (
             <div className="flex items-center justify-center py-16">
               <span
-                className="material-symbols-outlined animate-spin text-slate-400"
-                style={{ fontSize: 36 }}
+                className="material-symbols-outlined animate-spin text-muted-foreground text-[32px]"
               >
                 progress_activity
               </span>
@@ -258,8 +254,7 @@ export default function NotificationsPage() {
           ) : broadcasts.length === 0 ? (
             <div className="text-center py-16 text-slate-400 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
               <span
-                className="material-symbols-outlined block mx-auto mb-2"
-                style={{ fontSize: 40 }}
+                className="material-symbols-outlined block mx-auto mb-2 text-[32px]"
               >
                 inbox
               </span>
@@ -303,8 +298,7 @@ export default function NotificationsPage() {
                       className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shrink-0"
                     >
                       <span
-                        className="material-symbols-outlined"
-                        style={{ fontSize: 16 }}
+                        className="material-symbols-outlined text-[16px]"
                       >
                         delete
                       </span>

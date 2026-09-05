@@ -143,8 +143,7 @@ export default function ComplaintsPage() {
           {loading ? (
             <div className="flex items-center justify-center py-16">
               <span
-                className="material-symbols-outlined animate-spin text-slate-400"
-                style={{ fontSize: 36 }}
+                className="material-symbols-outlined animate-spin text-muted-foreground text-[32px]"
               >
                 progress_activity
               </span>
@@ -152,8 +151,7 @@ export default function ComplaintsPage() {
           ) : complaints.length === 0 ? (
             <div className="text-center py-16 text-slate-400 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
               <span
-                className="material-symbols-outlined block mx-auto mb-2"
-                style={{ fontSize: 40 }}
+                className="material-symbols-outlined block mx-auto mb-2 text-[32px]"
               >
                 check_circle
               </span>
@@ -196,8 +194,7 @@ export default function ComplaintsPage() {
                     <div className="flex items-center gap-3 mt-2 text-xs text-slate-400">
                       <span className="flex items-center gap-1">
                         <span
-                          className="material-symbols-outlined"
-                          style={{ fontSize: 12 }}
+                          className="material-symbols-outlined text-[14px]"
                         >
                           person
                         </span>
@@ -206,8 +203,7 @@ export default function ComplaintsPage() {
                       {c.vendors && (
                         <span className="flex items-center gap-1">
                           <span
-                            className="material-symbols-outlined"
-                            style={{ fontSize: 12 }}
+                            className="material-symbols-outlined text-[14px]"
                           >
                             storefront
                           </span>
@@ -223,8 +219,7 @@ export default function ComplaintsPage() {
                     </div>
                   </div>
                   <span
-                    className="material-symbols-outlined text-slate-300 shrink-0"
-                    style={{ fontSize: 18 }}
+                    className="material-symbols-outlined text-muted-foreground shrink-0 text-[18px]"
                   >
                     chevron_right
                   </span>
@@ -267,8 +262,7 @@ export default function ComplaintsPage() {
           {!selected ? (
             <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center py-20 text-slate-400">
               <span
-                className="material-symbols-outlined mb-2"
-                style={{ fontSize: 40 }}
+                className="material-symbols-outlined mb-2 text-[32px]"
               >
                 report
               </span>
@@ -280,8 +274,7 @@ export default function ComplaintsPage() {
                 <h3 className="font-black">{t("admin.complaintDetails")}</h3>
                 <button onClick={() => setSelected(null)}>
                   <span
-                    className="material-symbols-outlined text-slate-400"
-                    style={{ fontSize: 18 }}
+                    className="material-symbols-outlined text-muted-foreground text-[18px]"
                   >
                     close
                   </span>
@@ -385,8 +378,7 @@ export default function ComplaintsPage() {
                     className="w-full px-4 py-2.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-sm font-bold rounded-xl hover:bg-amber-200 disabled:opacity-60 transition-colors flex items-center justify-center gap-2"
                   >
                     <span
-                      className="material-symbols-outlined"
-                      style={{ fontSize: 16 }}
+                      className="material-symbols-outlined text-[16px]"
                     >
                       manage_search
                     </span>
@@ -401,8 +393,7 @@ export default function ComplaintsPage() {
                     className="w-full px-4 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 disabled:opacity-60 transition-colors flex items-center justify-center gap-2"
                   >
                     <span
-                      className="material-symbols-outlined"
-                      style={{ fontSize: 16 }}
+                      className="material-symbols-outlined text-[16px]"
                     >
                       check_circle
                     </span>
@@ -416,8 +407,7 @@ export default function ComplaintsPage() {
                     className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-slate-200 disabled:opacity-60 transition-colors flex items-center justify-center gap-2"
                   >
                     <span
-                      className="material-symbols-outlined"
-                      style={{ fontSize: 16 }}
+                      className="material-symbols-outlined text-[16px]"
                     >
                       lock
                     </span>

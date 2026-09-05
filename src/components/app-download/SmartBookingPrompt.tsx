@@ -50,8 +50,8 @@ export function SmartBookingPrompt({ open, onClose, locale = "en" }: Props) {
           <div className="flex items-center gap-3 mb-5">
             <div className="w-12 h-12 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
               <span
-                className="material-symbols-outlined text-green-600 dark:text-green-400"
-                style={{ fontSize: 26, fontVariationSettings: "'FILL' 1" }}
+                className="material-symbols-outlined text-green-600 dark:text-green-400 text-[24px]"
+                style={{ fontVariationSettings: "'FILL' 1" }}
               >
                 check_circle
               </span>
@@ -76,8 +76,7 @@ export function SmartBookingPrompt({ open, onClose, locale = "en" }: Props) {
                 className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 rounded-xl p-2.5"
               >
                 <span
-                  className="material-symbols-outlined text-[#FF4B19]"
-                  style={{ fontSize: 16 }}
+                  className="material-symbols-outlined text-primary text-[16px]"
                 >
                   {b.icon}
                 </span>

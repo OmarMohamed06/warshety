@@ -265,7 +265,7 @@ export default function VendorOperationsPage() {
                 <div key={cat.key}>
                   {/* Category heading */}
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="material-symbols-outlined text-[#FF4B19] text-lg">
+                    <span className="material-symbols-outlined text-primary text-[18px]">
                       {cat.icon}
                     </span>
                     <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200">
@@ -325,7 +325,7 @@ export default function VendorOperationsPage() {
                         ? supportedMakes[0]
                         : `${supportedMakes.length} ${t("vendor.applyPages.makesSelected")}`}
                   </span>
-                  <span className="material-symbols-outlined text-slate-400 text-base ml-2">
+                  <span className="material-symbols-outlined text-muted-foreground ml-2 text-[16px]">
                     {makesOpen ? "expand_less" : "expand_more"}
                   </span>
                 </button>
@@ -370,9 +370,8 @@ export default function VendorOperationsPage() {
                           >
                             {supportedMakes.length === 0 && (
                               <span
-                                className="material-symbols-outlined text-white"
-                                style={{ fontSize: "12px" }}
-                              >
+                                className="material-symbols-outlined text-white text-[12px]"
+                                >
                                 check
                               </span>
                             )}
@@ -404,9 +403,8 @@ export default function VendorOperationsPage() {
                                 >
                                   {selected && (
                                     <span
-                                      className="material-symbols-outlined text-white"
-                                      style={{ fontSize: "12px" }}
-                                    >
+                                      className="material-symbols-outlined text-white text-[12px]"
+                                      >
                                       check
                                     </span>
                                   )}
@@ -450,9 +448,8 @@ export default function VendorOperationsPage() {
                         className="hover:opacity-70"
                       >
                         <span
-                          className="material-symbols-outlined"
-                          style={{ fontSize: "14px" }}
-                        >
+                          className="material-symbols-outlined text-[14px]"
+                          >
                           close
                         </span>
                       </button>
@@ -483,7 +480,7 @@ export default function VendorOperationsPage() {
               href={localePath("/vendor/apply/legal")}
               className="text-sm text-slate-500 hover:text-slate-800 flex items-center gap-1"
             >
-              <span className="material-symbols-outlined text-sm">
+              <span className="material-symbols-outlined text-[14px]">
                 arrow_back
               </span>
               {t("vendor.applyPages.back")}
@@ -496,7 +493,7 @@ export default function VendorOperationsPage() {
               {saving
                 ? t("vendor.applyPages.saving")
                 : t("vendor.applyPages.continueBtn")}
-              <span className="material-symbols-outlined text-sm">
+              <span className="material-symbols-outlined text-[14px]">
                 arrow_forward
               </span>
             </button>

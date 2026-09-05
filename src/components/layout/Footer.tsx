@@ -86,9 +86,8 @@ export default function Footer() {
               />
               <Button size="icon" className="h-9 w-9 shrink-0">
                 <span
-                  className="material-symbols-outlined"
-                  style={{ fontSize: "16px" }}
-                >
+                  className="material-symbols-outlined text-[16px]"
+                  >
                   send
                 </span>
               </Button>
@@ -101,9 +100,8 @@ export default function Footer() {
                   className="flex items-center gap-2 hover:text-[#FF4B19] transition-colors"
                 >
                   <span
-                    className="material-symbols-outlined text-[#FF4B19]"
-                    style={{ fontSize: "16px" }}
-                  >
+                    className="material-symbols-outlined text-primary text-[16px]"
+                    >
                     mail
                   </span>
                   support@warshety.com
@@ -115,9 +113,8 @@ export default function Footer() {
                   className="flex items-center gap-2 hover:text-[#FF4B19] transition-colors"
                 >
                   <span
-                    className="material-symbols-outlined text-[#FF4B19]"
-                    style={{ fontSize: "16px" }}
-                  >
+                    className="material-symbols-outlined text-primary text-[16px]"
+                    >
                     phone
                   </span>
                   <span dir="ltr" style={{ unicodeBidi: "embed" }}>

@@ -55,7 +55,7 @@ export default function VehicleConfigurator() {
 
           {/* Arrow on hover */}
           <span
-            className="material-symbols-outlined absolute bottom-3 right-3 z-10 text-[20px] opacity-0 transition-all duration-300 group-hover:opacity-100"
+            className="material-symbols-outlined absolute bottom-3 right-3 z-10 opacity-0 transition-all duration-300 group-hover:opacity-100 text-[20px]"
             style={{ color: card.textColor }}
           >
             arrow_forward

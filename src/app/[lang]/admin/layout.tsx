@@ -149,8 +149,7 @@ export default function AdminLayout({
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f6f6f8] dark:bg-[#111621]">
         <span
-          className="material-symbols-outlined animate-spin text-[#FF4B19]"
-          style={{ fontSize: 40 }}
+          className="material-symbols-outlined animate-spin text-primary text-[32px]"
         >
           progress_activity
         </span>
@@ -207,8 +206,7 @@ export default function AdminLayout({
             className="ml-auto hidden lg:flex items-center justify-center w-7 h-7 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
           >
             <span
-              className="material-symbols-outlined text-slate-400"
-              style={{ fontSize: 18 }}
+              className="material-symbols-outlined text-muted-foreground text-[18px]"
             >
               {collapsed ? "chevron_right" : "chevron_left"}
             </span>
@@ -244,8 +242,7 @@ export default function AdminLayout({
                     )}
                   >
                     <span
-                      className="material-symbols-outlined shrink-0"
-                      style={{ fontSize: 20 }}
+                      className="material-symbols-outlined shrink-0 text-[20px]"
                     >
                       {item.icon}
                     </span>
@@ -278,8 +275,7 @@ export default function AdminLayout({
               </div>
               <Link href={`/${lang}`} className="shrink-0">
                 <span
-                  className="material-symbols-outlined text-slate-400 hover:text-[#FF4B19]"
-                  style={{ fontSize: 18 }}
+                  className="material-symbols-outlined text-muted-foreground hover:text-primary text-[18px]"
                 >
                   logout
                 </span>
@@ -303,8 +299,7 @@ export default function AdminLayout({
             className="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
           >
             <span
-              className="material-symbols-outlined"
-              style={{ fontSize: 22 }}
+              className="material-symbols-outlined text-[24px]"
             >
               menu
             </span>
@@ -315,8 +310,7 @@ export default function AdminLayout({
             className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-[#FF4B19] transition-colors font-semibold"
           >
             <span
-              className="material-symbols-outlined"
-              style={{ fontSize: 16 }}
+              className="material-symbols-outlined text-[16px]"
             >
               open_in_new
             </span>

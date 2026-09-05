@@ -174,8 +174,7 @@ export default function RolesPage() {
             <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-700 flex flex-wrap items-center gap-3">
               <div className="relative">
                 <span
-                  className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                  style={{ fontSize: 14 }}
+                  className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[14px]"
                 >
                   search
                 </span>
@@ -213,8 +212,7 @@ export default function RolesPage() {
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <span
-                  className="material-symbols-outlined animate-spin text-slate-400"
-                  style={{ fontSize: 30 }}
+                  className="material-symbols-outlined animate-spin text-muted-foreground text-[32px]"
                 >
                   progress_activity
                 </span>
@@ -272,8 +270,7 @@ export default function RolesPage() {
                           className="p-1.5 rounded-lg text-slate-400 hover:text-[#FF4B19] hover:bg-[#FF4B19]/5 transition-colors"
                         >
                           <span
-                            className="material-symbols-outlined"
-                            style={{ fontSize: 16 }}
+                            className="material-symbols-outlined text-[16px]"
                           >
                             open_in_new
                           </span>
@@ -311,14 +308,13 @@ export default function RolesPage() {
           </div>
 
           {/* Warning banner */}
-          <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 flex gap-3">
+          <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 flex gap-3 text-amber-700 dark:text-amber-400">
             <span
-              className="material-symbols-outlined text-amber-500 shrink-0"
-              style={{ fontSize: 20 }}
+              className="material-symbols-outlined shrink-0 text-[20px]"
             >
               warning
             </span>
-            <p className="text-sm text-amber-700 dark:text-amber-400">
+            <p className="text-sm">
               <strong>Admin access is powerful.</strong> Only grant admin role
               to trusted team members. Admins have full read/write access to all
               platform data including payments, user accounts, and system
@@ -350,8 +346,7 @@ export default function RolesPage() {
                       >
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <span
-                            className="material-symbols-outlined text-slate-400 shrink-0"
-                            style={{ fontSize: 14 }}
+                            className="material-symbols-outlined text-muted-foreground shrink-0 text-[14px]"
                           >
                             {p.icon}
                           </span>

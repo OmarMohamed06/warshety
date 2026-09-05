@@ -9,7 +9,7 @@ export default function NotFound() {
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 bg-[#f6f6f8] px-4 text-center dark:bg-[#111621]">
-      <span className="material-symbols-outlined text-5xl text-slate-300 dark:text-slate-600">
+      <span className="material-symbols-outlined text-muted-foreground text-[48px]">
         travel_explore
       </span>
       <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">

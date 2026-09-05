@@ -53,8 +53,8 @@ export function ErrorState({
     >
       <span
         className={cn(
-          "material-symbols-outlined text-slate-400 dark:text-slate-500",
-          compact ? "text-3xl" : "text-5xl",
+          "material-symbols-outlined text-muted-foreground",
+          compact ? "text-[32px]" : "text-[48px]",
         )}
       >
         {icon}
@@ -121,7 +121,7 @@ export function EmptyState({
         className,
       )}
     >
-      <span className="material-symbols-outlined text-5xl text-slate-300 dark:text-slate-600">
+      <span className="material-symbols-outlined text-muted-foreground text-[48px]">
         {icon}
       </span>
       <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">

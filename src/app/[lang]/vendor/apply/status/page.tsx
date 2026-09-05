@@ -64,7 +64,7 @@ export default function VendorStatusPage() {
       <div className="min-h-screen bg-[#f6f6f8] dark:bg-[#111621] flex items-center justify-center px-6 py-16">
         <div className="max-w-md w-full text-center">
           <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
-            <span className="material-symbols-outlined text-4xl text-slate-400">
+            <span className="material-symbols-outlined text-muted-foreground text-[32px]">
               lock
             </span>
           </div>
@@ -99,7 +99,7 @@ export default function VendorStatusPage() {
       <div className="min-h-screen bg-[#f6f6f8] dark:bg-[#111621] flex items-center justify-center px-6 py-16">
         <div className="max-w-md w-full text-center">
           <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
-            <span className="material-symbols-outlined text-4xl text-slate-400">
+            <span className="material-symbols-outlined text-muted-foreground text-[32px]">
               article
             </span>
           </div>
@@ -114,7 +114,7 @@ export default function VendorStatusPage() {
               href="/vendor/apply"
               className="flex-1 py-3 text-center bg-[#FF4B19] text-white rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2"
             >
-              <span className="material-symbols-outlined text-sm">
+              <span className="material-symbols-outlined text-[14px]">
                 add_circle
               </span>
               {t("vendor.applyPages.applyNow")}
@@ -211,7 +211,7 @@ export default function VendorStatusPage() {
           className={`${bannerBg} rounded-3xl p-10 text-center text-white mb-8 shadow-2xl`}
         >
           <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-5">
-            <span className="material-symbols-outlined text-4xl">
+            <span className="material-symbols-outlined text-[32px]">
               {bannerIcon}
             </span>
           </div>
@@ -252,7 +252,7 @@ export default function VendorStatusPage() {
                             : "bg-slate-100 dark:bg-slate-700 text-slate-400"
                     }`}
                   >
-                    <span className="material-symbols-outlined text-xl">
+                    <span className="material-symbols-outlined text-[20px]">
                       {step.icon}
                     </span>
                   </div>
@@ -316,7 +316,7 @@ export default function VendorStatusPage() {
             <ul className="space-y-3">
               {NEXT_STEPS.map((item) => (
                 <li key={item.icon} className="flex items-start gap-3">
-                  <span className="material-symbols-outlined text-[#FF4B19] text-lg mt-0.5">
+                  <span className="material-symbols-outlined text-primary mt-0.5 text-[18px]">
                     {item.icon}
                   </span>
                   <span className="text-sm text-slate-600 dark:text-slate-400">
@@ -330,11 +330,11 @@ export default function VendorStatusPage() {
 
         {/* Approved call-to-action */}
         {isApproved && (
-          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-6 mb-6 flex items-center gap-4">
-            <span className="material-symbols-outlined text-green-600 text-3xl shrink-0">
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-6 mb-6 flex items-center gap-4 text-green-800 dark:text-green-300">
+            <span className="material-symbols-outlined shrink-0 text-[32px]">
               rocket_launch
             </span>
-            <p className="text-sm text-green-800 dark:text-green-300 font-medium">
+            <p className="text-sm font-medium">
               {t("vendor.applyPages.appSubmittedDesc")}
             </p>
           </div>
@@ -354,7 +354,7 @@ export default function VendorStatusPage() {
               href="/vendor/dashboard"
               className="flex-1 py-3 text-center bg-green-600 text-white rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2"
             >
-              <span className="material-symbols-outlined text-sm">
+              <span className="material-symbols-outlined text-[14px]">
                 dashboard
               </span>
               {t("vendor.applyPages.nextStep3")}
@@ -364,7 +364,7 @@ export default function VendorStatusPage() {
               href="mailto:vendors@warshety.eg"
               className="flex-1 py-3 text-center bg-[#FF4B19] text-white rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2"
             >
-              <span className="material-symbols-outlined text-sm">
+              <span className="material-symbols-outlined text-[14px]">
                 support_agent
               </span>
               {t("vendor.applyPages.contactSupport")}

@@ -628,7 +628,7 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                       : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-primary"
                   }`}
                 >
-                  <span className="material-symbols-outlined text-base">
+                  <span className="material-symbols-outlined text-[16px]">
                     directions_car
                   </span>
                   {vehicleLabel(v)}
@@ -638,7 +638,7 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                 href="/garage"
                 className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium border border-dashed border-slate-300 dark:border-slate-600 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
               >
-                <span className="material-symbols-outlined text-base">add</span>
+                <span className="material-symbols-outlined text-[16px]">add</span>
                 {t("services.addVehicle")}
               </Link>
             </div>
@@ -647,16 +647,15 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
           {/* Filter by Make — dropdown */}
           <div className="flex flex-col gap-1.5">
             <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-base">
+              <span className="material-symbols-outlined text-[16px]">
                 emoji_transportation
               </span>
               {t("services.filterByMake")}
             </p>
             <div className="relative">
               <span
-                className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none z-10"
-                style={{ fontSize: "18px" }}
-              >
+                className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none z-10 text-[18px]"
+                >
                 directions_car
               </span>
               <select
@@ -910,9 +909,8 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                                     className="inline-flex items-center gap-0.5 bg-muted text-muted-foreground text-[10px] font-medium px-1.5 py-0.5 rounded-full border border-border"
                                   >
                                     <span
-                                      className="material-symbols-outlined"
-                                      style={{ fontSize: "10px" }}
-                                    >
+                                      className="material-symbols-outlined text-[12px]"
+                                      >
                                       fork_right
                                     </span>
                                     {loc}

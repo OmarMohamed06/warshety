@@ -29,8 +29,7 @@ export function GarageAppPromo({ locale = "en" }: Props) {
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-3">
             <span
-              className="material-symbols-outlined text-[#FF4B19]"
-              style={{ fontSize: 18 }}
+              className="material-symbols-outlined text-primary text-[18px]"
             >
               garage
             </span>
@@ -68,8 +67,8 @@ export function GarageAppPromo({ locale = "en" }: Props) {
                 className="flex items-center gap-2 text-sm text-slate-200"
               >
                 <span
-                  className="material-symbols-outlined text-[#FF4B19] shrink-0"
-                  style={{ fontSize: 16, fontVariationSettings: "'FILL' 1" }}
+                  className="material-symbols-outlined text-primary shrink-0 text-[16px]"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
                 >
                   check_circle
                 </span>

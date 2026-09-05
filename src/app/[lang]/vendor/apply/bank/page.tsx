@@ -82,10 +82,9 @@ export default function VendorBankPage() {
 
         <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 border border-slate-100 dark:border-slate-700 shadow-sm space-y-6">
           <div className="flex items-center gap-3 pb-2 border-b border-slate-100 dark:border-slate-700">
-            <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
               <span
-                className="material-symbols-outlined text-orange-600"
-                style={{ fontSize: 22 }}
+                className="material-symbols-outlined text-[24px]"
               >
                 account_balance
               </span>
@@ -173,14 +172,13 @@ export default function VendorBankPage() {
           </div>
 
           {/* Info box */}
-          <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex gap-3">
+          <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex gap-3 text-amber-700 dark:text-amber-400">
             <span
-              className="material-symbols-outlined text-amber-600 shrink-0"
-              style={{ fontSize: 20 }}
+              className="material-symbols-outlined shrink-0 text-[20px]"
             >
               lock
             </span>
-            <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
+            <p className="text-xs leading-relaxed">
               {t("vendor.applyPages.bankSecurityNote")}
             </p>
           </div>
@@ -199,8 +197,7 @@ export default function VendorBankPage() {
             >
               {t("vendor.applyPages.continueBtn")}
               <span
-                className="material-symbols-outlined"
-                style={{ fontSize: 18 }}
+                className="material-symbols-outlined text-[18px]"
               >
                 arrow_forward
               </span>
