@@ -36,16 +36,16 @@ export function SmartBookingPrompt({ open, onClose, locale = "en" }: Props) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200"
+        className="fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-[2px] animate-in fade-in duration-200"
         onClick={onClose}
       />
 
       {/* Card */}
       <div
-        className="fixed inset-x-4 bottom-0 sm:inset-auto sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 z-50 max-w-md w-full animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300"
+        className="fixed inset-x-0 bottom-0 sm:inset-auto sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 z-50 w-full max-w-md sm:w-[calc(100%-3rem)] animate-in slide-in-from-bottom-8 fade-in-0 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200"
         dir={isAr ? "rtl" : "ltr"}
       >
-        <div className="bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl p-7 shadow-2xl border border-slate-100 dark:border-slate-800">
+        <div className="bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl shadow-slate-950/25 ring-1 ring-slate-900/5 dark:ring-white/10">
           {/* Success icon */}
           <div className="flex items-center gap-3 mb-5">
             <div className="w-12 h-12 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">

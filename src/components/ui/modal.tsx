@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type ModalSize = "sm" | "md" | "lg" | "xl";
+export type ModalSize = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
 
 export interface ModalProps {
   /** Controls visibility. The modal stays mounted for CSS transitions. */
@@ -34,10 +34,12 @@ export interface ModalProps {
 }
 
 const sizeMap: Record<ModalSize, string> = {
+  xs: "max-w-xs",
   sm: "max-w-sm",
   md: "max-w-md",
   lg: "max-w-lg",
   xl: "max-w-xl",
+  "2xl": "max-w-2xl",
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -94,7 +96,7 @@ export function Modal({
         aria-hidden="true"
         onClick={onClose}
         className={cn(
-          "fixed inset-0 bg-black/40 backdrop-blur-sm z-[1000]",
+          "fixed inset-0 bg-slate-950/50 backdrop-blur-[2px] z-[1000]",
           "transition-opacity duration-200",
           open
             ? "opacity-100 pointer-events-auto"
@@ -105,7 +107,7 @@ export function Modal({
       {/* ── Centering wrapper ── */}
       <div
         className={cn(
-          "fixed inset-0 z-[1001] flex items-center justify-center p-4",
+          "fixed inset-0 z-[1001] flex items-end justify-center sm:items-center sm:p-6",
           "transition-opacity duration-200",
           open
             ? "opacity-100 pointer-events-auto"
@@ -120,23 +122,29 @@ export function Modal({
           aria-labelledby={title ? "modal-title" : undefined}
           aria-describedby={description ? "modal-description" : undefined}
           className={cn(
-            "w-full bg-white dark:bg-slate-900 rounded-2xl shadow-2xl",
-            "border border-slate-100 dark:border-slate-800",
+            "w-full bg-white dark:bg-slate-900",
+            "rounded-t-3xl sm:rounded-2xl",
+            "shadow-2xl shadow-slate-950/25 ring-1 ring-slate-900/5 dark:ring-white/10",
             "transition-transform duration-200",
-            "flex flex-col max-h-[calc(100dvh-2rem)]",
-            open ? "scale-100" : "scale-95",
+            "flex flex-col max-h-[calc(100dvh-3rem)] sm:max-h-[calc(100dvh-4rem)]",
+            // Sheets rise; centred panels scale.
+            open
+              ? "translate-y-0 sm:scale-100"
+              : "translate-y-3 sm:translate-y-0 sm:scale-95",
             sizeMap[size],
             className,
           )}
         >
           {/* ── Header ── */}
           {(title || description) && (
-            <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex-1 min-w-0 pr-4">
+            <div className="flex items-start justify-between gap-4 px-5 pt-5 pb-4 sm:px-6 sm:pt-6">
+              <div className="min-w-0 flex-1">
                 {title && (
                   <h2
                     id="modal-title"
-                    className="text-lg font-black text-slate-900 dark:text-white"
+                    // font-black (900) at 18px reads as shouting; semibold with
+                    // tightened tracking is the same emphasis, better colour.
+                    className="text-lg leading-snug font-semibold tracking-tight text-slate-900 dark:text-white"
                   >
                     {title}
                   </h2>
@@ -144,7 +152,7 @@ export function Modal({
                 {description && (
                   <p
                     id="modal-description"
-                    className="text-sm text-slate-500 mt-1"
+                    className="mt-1.5 text-sm leading-relaxed text-slate-500 dark:text-slate-400"
                   >
                     {description}
                   </p>
@@ -156,9 +164,10 @@ export function Modal({
                 onClick={onClose}
                 aria-label="Close dialog"
                 className={cn(
-                  "w-8 h-8 rounded-lg shrink-0",
+                  "size-8 rounded-lg shrink-0 -me-1.5",
                   "flex items-center justify-center",
                   "hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors",
+                  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF4B19]",
                   "text-slate-500",
                 )}
               >
@@ -174,14 +183,14 @@ export function Modal({
 
           {/* ── Body ── */}
           {children && (
-            <div className="px-6 py-5 text-sm text-slate-700 dark:text-slate-300 overflow-y-auto flex-1">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-5 text-sm leading-relaxed text-slate-700 sm:px-6 sm:pb-6 dark:text-slate-300">
               {children}
             </div>
           )}
 
           {/* ── Footer ── */}
           {footer && (
-            <div className="px-6 pb-6 pt-4 flex items-center justify-end gap-3 border-t border-slate-100 dark:border-slate-800">
+            <div className="mt-auto flex flex-col-reverse gap-2 border-t border-slate-100 bg-slate-50/60 px-5 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-6 dark:border-slate-800 dark:bg-slate-800/40">
               {footer}
             </div>
           )}
@@ -241,10 +250,12 @@ export function ConfirmModal({
   // Import Button lazily to avoid a circular import risk
   // (Button → this file → Button). In practice they're siblings but this
   // keeps things explicit.
+  const base =
+    "inline-flex h-10 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition-all disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2";
   const variantStyle =
     confirmVariant === "danger"
-      ? "bg-red-500 text-white font-bold rounded-xl px-5 py-2.5 text-sm hover:opacity-90 transition-all disabled:opacity-50"
-      : "bg-[#FF4B19] text-white font-bold rounded-xl px-5 py-2.5 text-sm hover:opacity-90 shadow-lg shadow-[#FF4B19]/20 transition-all disabled:opacity-50";
+      ? `${base} bg-red-500 text-white hover:bg-red-600 focus-visible:outline-red-500`
+      : `${base} bg-[#FF4B19] text-white hover:bg-[#e63f10] shadow-lg shadow-[#FF4B19]/20 focus-visible:outline-[#FF4B19]`;
 
   return (
     <Modal
@@ -257,7 +268,7 @@ export function ConfirmModal({
         <>
           <button
             onClick={onClose}
-            className="border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl px-5 py-2.5 text-sm hover:border-slate-300 transition-all"
+            className={`${base} border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 focus-visible:outline-slate-400 dark:border-slate-700 dark:bg-transparent dark:text-slate-200 dark:hover:bg-slate-800`}
           >
             {cancelLabel}
           </button>
@@ -266,7 +277,13 @@ export function ConfirmModal({
             disabled={loading}
             className={variantStyle}
           >
-            {loading ? "…" : confirmLabel}
+            {loading && (
+              <span
+                aria-hidden="true"
+                className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+              />
+            )}
+            {confirmLabel}
           </button>
         </>
       }

@@ -30,6 +30,18 @@ export function VoucherModal({ userReward, onClose }: VoucherModalProps) {
     );
   }, [userReward]);
 
+  // Escape to dismiss + freeze the page behind the sheet.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onKey);
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previous;
+    };
+  }, [onClose]);
+
   if (!userReward) return null;
 
   const isService = !!userReward.qr_data;
@@ -50,13 +62,14 @@ export function VoucherModal({ userReward, onClose }: VoucherModalProps) {
     <div
       ref={backdropRef}
       onClick={handleBackdrop}
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/50 backdrop-blur-[2px] sm:items-center sm:p-6"
     >
-      <div className="relative w-full max-w-sm animate-in slide-in-from-bottom-4 rounded-t-3xl bg-card p-6 shadow-2xl sm:rounded-2xl">
-        {/* Close */}
+      <div className="relative max-h-[calc(100dvh-3rem)] w-full max-w-sm overflow-y-auto overscroll-contain rounded-t-3xl bg-card p-6 shadow-2xl shadow-slate-950/25 ring-1 ring-slate-900/5 duration-200 animate-in fade-in-0 slide-in-from-bottom-8 sm:max-h-[calc(100dvh-4rem)] sm:rounded-2xl sm:slide-in-from-bottom-0 sm:zoom-in-95 dark:ring-white/10">
+        {/* Close — same 32px target and inset as Dialog's */}
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-full p-1 text-muted-foreground hover:text-foreground"
+          aria-label="Close"
+          className="absolute end-4 top-4 flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
           <X size={18} />
         </button>
@@ -67,9 +80,11 @@ export function VoucherModal({ userReward, onClose }: VoucherModalProps) {
             <QrCode size={32} className="text-primary" />
           </div>
 
-          <div>
-            <h2 className="text-lg font-bold text-foreground">{title}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
+          <div className="px-4">
+            <h2 className="text-lg leading-snug font-semibold tracking-tight text-foreground">
+              {title}
+            </h2>
+            <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
               {isService
                 ? "Show this QR or code to the service center"
                 : "Apply this code at checkout for parts"}
@@ -102,7 +117,7 @@ export function VoucherModal({ userReward, onClose }: VoucherModalProps) {
               <button
                 onClick={handleCopy}
                 className={cn(
-                  "rounded-lg p-1.5 transition-colors",
+                  "flex size-8 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-background/70",
                   copied
                     ? "text-green-600"
                     : "text-muted-foreground hover:text-foreground",
