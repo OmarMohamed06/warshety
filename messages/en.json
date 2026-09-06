@@ -563,7 +563,11 @@
     "distance": "Distance",
     "allGovernorates": "All Governorates",
     "allDistricts": "All Districts",
-    "newCenter": "New"
+    "newCenter": "New",
+    "clearAll": "Clear all",
+    "featured": "Featured",
+    "branches": "branches",
+    "showResults": "Show {count} results"
   },
   "parts": {
     "home": "Home",

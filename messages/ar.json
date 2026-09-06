@@ -563,7 +563,11 @@
     "distance": "المسافة",
     "allGovernorates": "جميع المحافظات",
     "allDistricts": "جميع الأحياء",
-    "newCenter": "جديد"
+    "newCenter": "جديد",
+    "clearAll": "مسح الكل",
+    "featured": "مميّز",
+    "branches": "فروع",
+    "showResults": "عرض {count} نتيجة"
   },
   "parts": {
     "home": "الرئيسية",
