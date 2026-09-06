@@ -13,21 +13,12 @@ import type { DbReview } from "@/services/reviewService";
 import enMessages from "../../../../../messages/en.json";
 import arMessages from "../../../../../messages/ar.json";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  MapPin,
-  Star,
-  CheckCircle2,
-  Phone,
-  Clock,
-  Wrench,
-  ArrowLeft,
-  ExternalLink,
-} from "lucide-react";
+import { Icon } from "@/components/ui/icon";
 
 type Locale = "en" | "ar";
+
+/** The page's content panels, so they stay in step with each other. */
+const PANEL = "rounded-2xl bg-card p-5 ring-1 ring-foreground/10 sm:p-6";
 
 interface Props {
   params: Promise<{ lang: string; slug: string }>;
@@ -253,10 +244,20 @@ export default async function ServiceCenterPage({ params }: Props) {
     mapsLink: vendor.maps_link ?? null,
   };
 
+  // Rating / location / bookings, assembled once so the separators cannot get
+  // out of step with which pieces actually rendered.
+  const locationLine = [center.governorate, center.district, center.city]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
     <div className="min-h-screen bg-muted/40">
-      {/* Hero */}
-      <div className="h-72 relative">
+      {/* ── Banner ──
+          Shorter than the old 288px, and it no longer carries the name: text
+          burned over a photo was unreadable on light covers and vanished
+          entirely when a center had no image at all. The identity block sits
+          below it, in the flow — nothing overlaps. */}
+      <div className="relative h-[180px] sm:h-[220px]">
         {center.image ? (
           <NextImage
             src={center.image}
@@ -270,51 +271,54 @@ export default async function ServiceCenterPage({ params }: Props) {
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-slate-700 to-slate-900" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-        <div className="absolute top-6 start-6">
-          <Button
-            asChild
-            variant="ghost"
-            size="sm"
-            className="text-white/80 hover:text-white hover:bg-white/10"
-          >
-            <Link href={`/${lang}/services`}>
-              <ArrowLeft className="w-4 h-4 me-1 rtl:-scale-x-100" />
-              {sc.backToCenters}
-            </Link>
-          </Button>
-        </div>
-        <div className="absolute bottom-6 start-6 text-white">
-          <h1 className="text-4xl font-black mb-1">{center.name}</h1>
-          <div className="flex items-center gap-3 text-sm flex-wrap">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
+
+        {/* Solid enough to stay legible on a light photo. */}
+        <Link
+          href={`/${lang}/services`}
+          className="absolute start-4 top-4 inline-flex h-10 items-center gap-1.5 rounded-lg bg-black/50 px-3 text-xs font-semibold text-white backdrop-blur transition-colors hover:bg-black/70 sm:start-6 sm:top-6"
+        >
+          <Icon name="arrow_back" size="sm" className="rtl:-scale-x-100" />
+          {sc.backToCenters}
+        </Link>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
+        {/* ── Identity ── */}
+        <header className="mb-6">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            {center.name}
+          </h1>
+          <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
             {center.reviewCount > 0 ? (
-              <span className="flex items-center gap-1">
-                <Star className="w-4 h-4 text-primary fill-primary" />
-                {center.rating.toFixed(1)} ({center.reviewCount} {sc.reviews})
+              <span className="inline-flex items-center gap-1 font-semibold text-foreground">
+                <Icon name="star" size="sm" filled className="text-amber-500" />
+                {center.rating.toFixed(1)}
+                <span className="font-normal text-muted-foreground">
+                  ({center.reviewCount} {sc.reviews})
+                </span>
               </span>
             ) : (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/20 text-white text-xs font-semibold backdrop-blur-sm">
+              <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-foreground">
                 {sc.newCenter}
               </span>
             )}
-            {(center.governorate || center.city) && (
+
+            {locationLine && (
               <>
-                {center.reviewCount > 0 && <span>·</span>}
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-4 h-4" />
-                  {[center.governorate, center.district, center.city]
-                    .filter(Boolean)
-                    .join(" · ")}
+                <span aria-hidden="true">·</span>
+                <span className="inline-flex items-center gap-1">
+                  <Icon name="location_on" size="sm" />
+                  {locationLine}
                 </span>
               </>
             )}
+
             {center.completedBookings > 0 && (
               <>
-                {(center.reviewCount > 0 ||
-                  center.governorate ||
-                  center.city) && <span>·</span>}
-                <span className="flex items-center gap-1">
-                  <CheckCircle2 className="w-4 h-4" />
+                <span aria-hidden="true">·</span>
+                <span className="inline-flex items-center gap-1">
+                  <Icon name="task_alt" size="sm" />
                   {center.completedBookings.toLocaleString(
                     locale === "ar" ? "ar-EG" : "en-EG",
                   )}{" "}
@@ -323,210 +327,226 @@ export default async function ServiceCenterPage({ params }: Props) {
               </>
             )}
           </div>
-        </div>
-      </div>
+        </header>
 
-      <div className="max-w-7xl mx-auto px-6 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main content */}
-          <div className="lg:col-span-2 space-y-6">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          {/* ── Main content ── */}
+          <div className="space-y-6 lg:col-span-2">
             {/* About */}
-            <Card>
-              <CardHeader>
-                <CardTitle>{sc.about}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-5">
-                {center.description && (
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    {center.description}
-                  </p>
-                )}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-start gap-3">
-                    <MapPin className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                    <div>
-                      <p className="font-semibold">{sc.address}</p>
-                      <p className="text-muted-foreground">
-                        {[
-                          center.address,
-                          center.district,
-                          center.city,
-                          center.governorate,
-                        ]
-                          .filter(Boolean)
-                          .join(", ") ||
-                          (locale === "ar" ? "القاهرة، مصر" : "Cairo, Egypt")}
-                      </p>
-                      {center.mapsLink && (
+            <section className={PANEL}>
+              <h2 className="text-base font-semibold">{sc.about}</h2>
+
+              {center.description && (
+                <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">
+                  {center.description}
+                </p>
+              )}
+
+              {/* Each field gets the glyph it means. CheckCircle2 used to label
+                  the email address, which said nothing about email. */}
+              <dl className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="flex items-start gap-3">
+                  <Icon
+                    name="location_on"
+                    size="lg"
+                    className="mt-0.5 shrink-0 text-muted-foreground"
+                  />
+                  <div className="min-w-0">
+                    <dt className="text-sm font-semibold">{sc.address}</dt>
+                    <dd className="text-sm text-muted-foreground">
+                      {[
+                        center.address,
+                        center.district,
+                        center.city,
+                        center.governorate,
+                      ]
+                        .filter(Boolean)
+                        .join(", ") ||
+                        (locale === "ar" ? "القاهرة، مصر" : "Cairo, Egypt")}
+                    </dd>
+                    {center.mapsLink && (
+                      <dd>
                         <a
                           href={center.mapsLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1"
+                          className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
                         >
-                          <ExternalLink className="w-3 h-3" />
+                          <Icon name="open_in_new" size="2xs" />
                           {sc.viewOnMaps}
                         </a>
-                      )}
-                    </div>
+                      </dd>
+                    )}
                   </div>
-                  {center.email && (
-                    <div className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                      <div>
-                        <p className="font-semibold">Email</p>
-                        <p className="text-muted-foreground">{center.email}</p>
-                      </div>
-                    </div>
-                  )}
-                  {center.hours && (
-                    <div className="flex items-start gap-3">
-                      <Clock className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                      <div>
-                        <p className="font-semibold">{sc.workingHours}</p>
-                        <p className="text-muted-foreground whitespace-pre-line text-xs leading-relaxed mt-0.5">
-                          {center.hours}
-                        </p>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
-                {/* Branch locations — only shown when vendor has branches */}
-                {branches.length > 0 && (
-                  <div className="pt-2">
-                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5" />
-                      {sc.branchLocations}
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {branches.map((b) => (
-                        <div
-                          key={b.id}
-                          className="flex items-start gap-3 px-4 py-3 rounded-xl border bg-muted/40"
-                        >
-                          <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                          <div className="min-w-0">
-                            <p className="text-sm font-bold leading-tight flex items-center gap-1.5 flex-wrap">
-                              {locale === "ar" ? b.name_ar || b.name : b.name}
-                              {b.is_main && (
-                                <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-semibold">
-                                  {sc.mainBranch}
-                                </span>
-                              )}
-                            </p>
-                            {(b.address || b.city) && (
-                              <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                                {[
-                                  b.address,
-                                  locale === "ar"
-                                    ? b.city_ar || b.city
-                                    : b.city,
-                                ]
-                                  .filter(Boolean)
-                                  .join(", ")}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+                {center.email && (
+                  <div className="flex items-start gap-3">
+                    <Icon
+                      name="mail"
+                      size="lg"
+                      className="mt-0.5 shrink-0 text-muted-foreground"
+                    />
+                    <div className="min-w-0">
+                      <dt className="text-sm font-semibold">{sc.email}</dt>
+                      <dd className="truncate text-sm text-muted-foreground">
+                        {center.email}
+                      </dd>
                     </div>
                   </div>
                 )}
-              </CardContent>
-            </Card>
 
-            {/* Services */}
-            <Card>
-              <CardHeader>
-                <CardTitle>{sc.servicesOffered}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {(vendor.specializations ?? []).length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Wrench className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                    <p className="text-sm">{sc.noServices}</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {(() => {
-                      const specs = vendor.specializations as string[];
-                      // Group selected service slugs by their parent category.
-                      // Also support legacy category-key entries.
-                      const grouped: {
-                        cat: (typeof SERVICE_CATEGORIES)[0];
-                        slugs: string[];
-                      }[] = [];
-                      for (const cat of SERVICE_CATEGORIES) {
-                        if (specs.includes(cat.key)) {
-                          // legacy: whole category selected → show all its services
-                          grouped.push({ cat, slugs: cat.services });
-                        } else {
-                          const selected = cat.services.filter((s) =>
-                            specs.includes(s),
-                          );
-                          if (selected.length)
-                            grouped.push({ cat, slugs: selected });
-                        }
-                      }
-                      return grouped.map(({ cat, slugs }) => {
-                        const catName =
-                          (msgs as any).home?.serviceCategories?.[cat.key] ??
-                          cat.key;
-                        return (
-                          <div key={cat.key}>
-                            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                              {catName}
-                            </p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {slugs.map((svcSlug) => {
-                                const svcName =
-                                  (msgs as any).home?.services?.[svcSlug] ??
-                                  svcSlug;
-                                return (
-                                  <Badge
-                                    key={svcSlug}
-                                    variant="secondary"
-                                    className="text-xs"
-                                  >
-                                    {svcName}
-                                  </Badge>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        );
-                      });
-                    })()}
+                {center.hours && (
+                  <div className="flex items-start gap-3">
+                    <Icon
+                      name="schedule"
+                      size="lg"
+                      className="mt-0.5 shrink-0 text-muted-foreground"
+                    />
+                    <div className="min-w-0">
+                      <dt className="text-sm font-semibold">
+                        {sc.workingHours}
+                      </dt>
+                      <dd className="mt-0.5 text-xs leading-relaxed whitespace-pre-line text-muted-foreground">
+                        {center.hours}
+                      </dd>
+                    </div>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </dl>
+            </section>
 
-            {/* Supported Makes */}
-            {center.supportedMakes.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>{sc.supportedMakes}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
+            {/* Branches — lifted out of the About card, which was carrying
+                three unrelated jobs. */}
+            {branches.length > 0 && (
+              <section className={PANEL}>
+                <div className="flex items-baseline justify-between gap-3">
+                  <h2 className="text-base font-semibold">
+                    {sc.branchLocations}
+                  </h2>
+                  <span className="text-xs tabular-nums text-muted-foreground">
+                    {branches.length}
+                  </span>
+                </div>
+                <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {branches.map((b) => (
+                    <li
+                      key={b.id}
+                      className="flex items-start gap-3 rounded-xl border bg-muted/40 p-3"
+                    >
+                      <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-card text-muted-foreground ring-1 ring-border">
+                        <Icon name="storefront" size="lg" />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="flex flex-wrap items-center gap-1.5 text-sm leading-tight font-semibold">
+                          {locale === "ar" ? b.name_ar || b.name : b.name}
+                          {b.is_main && (
+                            <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+                              {sc.mainBranch}
+                            </span>
+                          )}
+                        </p>
+                        {(b.address || b.city) && (
+                          <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                            {[
+                              b.address,
+                              locale === "ar" ? b.city_ar || b.city : b.city,
+                            ]
+                              .filter(Boolean)
+                              .join(", ")}
+                          </p>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {/* Services + makes. "Supported Makes" was a whole card wrapping a
+                single row of chips; it belongs with what the center offers. */}
+            <section className={PANEL}>
+              <h2 className="text-base font-semibold">{sc.servicesOffered}</h2>
+
+              {(vendor.specializations ?? []).length === 0 ? (
+                <div className="py-8 text-center text-muted-foreground">
+                  <Icon name="build" size="2xl" className="opacity-30" />
+                  <p className="mt-2 text-sm">{sc.noServices}</p>
+                </div>
+              ) : (
+                <div className="mt-4 space-y-5">
+                  {(() => {
+                    const specs = vendor.specializations as string[];
+                    // Group selected service slugs by their parent category.
+                    // Also support legacy category-key entries.
+                    const grouped: {
+                      cat: (typeof SERVICE_CATEGORIES)[0];
+                      slugs: string[];
+                    }[] = [];
+                    for (const cat of SERVICE_CATEGORIES) {
+                      if (specs.includes(cat.key)) {
+                        // legacy: whole category selected → show all its services
+                        grouped.push({ cat, slugs: cat.services });
+                      } else {
+                        const selected = cat.services.filter((s) =>
+                          specs.includes(s),
+                        );
+                        if (selected.length)
+                          grouped.push({ cat, slugs: selected });
+                      }
+                    }
+                    return grouped.map(({ cat, slugs }) => {
+                      const catName =
+                        (msgs as any).home?.serviceCategories?.[cat.key] ??
+                        cat.key;
+                      return (
+                        <div key={cat.key}>
+                          <p className="mb-2 text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
+                            {catName}
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {slugs.map((svcSlug) => {
+                              const svcName =
+                                (msgs as any).home?.services?.[svcSlug] ??
+                                svcSlug;
+                              return (
+                                <span
+                                  key={svcSlug}
+                                  className="rounded-md bg-muted px-2.5 py-1.5 text-xs font-medium"
+                                >
+                                  {svcName}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              )}
+
+              {center.supportedMakes.length > 0 && (
+                <div className="mt-6 border-t pt-5">
+                  <p className="mb-2 text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
+                    {sc.supportedMakes}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
                     {center.supportedMakes.map((m) => (
-                      <Badge
+                      <span
                         key={m}
-                        variant="outline"
-                        className="px-3 py-1 text-xs"
+                        className="rounded-full border px-2.5 py-1 text-xs font-medium"
                       >
                         {m}
-                      </Badge>
+                      </span>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                </div>
+              )}
+            </section>
           </div>
 
-          {/* Booking sidebar */}
+          {/* Booking sidebar — untouched. */}
           <div>
             <BookingSidebar
               vendorId={center.id}
