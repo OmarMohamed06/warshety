@@ -157,22 +157,14 @@ export function VehicleSpotlight({
           />
         </dl>
 
-        {/* ── Actions ── */}
-        <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-          <Button asChild className="h-11 flex-1 gap-2 text-sm sm:flex-none sm:px-5">
+        {/* ── Action ──
+            One CTA, because booking is the only thing a saved vehicle
+            actually feeds. There is no parts catalogue to send anyone to. */}
+        <div className="mt-5">
+          <Button asChild className="h-11 w-full gap-2 text-sm sm:w-auto sm:px-5">
             <Link href="/services">
               <Icon name="car_repair" size="sm" />
               {t("garage.bookService")}
-            </Link>
-          </Button>
-          <Button
-            asChild
-            variant="outline"
-            className="h-11 flex-1 gap-2 text-sm sm:flex-none sm:px-5"
-          >
-            <Link href="/search">
-              <Icon name="search" size="sm" />
-              {t("garage.findParts")}
             </Link>
           </Button>
         </div>
@@ -181,7 +173,7 @@ export function VehicleSpotlight({
       {/* ── What "active" means. The old page buried this in a generic tips
              strip; it belongs on the thing it describes. ── */}
       <p className="relative flex items-start gap-2 border-t border-border bg-muted/40 px-5 py-3.5 text-xs text-muted-foreground sm:px-7">
-        <Icon name="filter_alt" size="sm" className="mt-px shrink-0" />
+        <Icon name="edit_note" size="sm" className="mt-px shrink-0" />
         {t("garage.activeExplainer")}
       </p>
     </section>
