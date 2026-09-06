@@ -1923,7 +1923,22 @@
     "selectBranch": "اختر الفرع",
     "mainBranch": "رئيسي",
     "phoneNumber": "رقم الهاتف",
-    "phoneHint": "يُستخدم لتأكيد الحجز وإرسال التحديثات عبر الرسائل القصيرة."
+    "phoneHint": "يُستخدم لتأكيد الحجز وإرسال التحديثات عبر الرسائل القصيرة.",
+    "step1": "ما الذي تحتاجه؟",
+    "step2Vehicle": "سيارتك",
+    "step2Problem": "ما المشكلة؟",
+    "step3": "متى؟",
+    "step4": "كيف نتواصل معك",
+    "morning": "صباحاً",
+    "afternoon": "مساءً",
+    "change": "تغيير",
+    "fromYourGarage": "من كراجك",
+    "otherDate": "اختر تاريخاً آخر",
+    "activeBookingTitle": "لديك حجز قائم بالفعل",
+    "activeBookingDesc": "أكمل حجزك الحالي أو ألغه قبل إنشاء موعد جديد.",
+    "viewMyBooking": "عرض حجزي",
+    "errorPhone": "من فضلك أدخل رقم هاتفك لتأكيد الحجز عبر الرسائل القصيرة.",
+    "errorGeneric": "تعذّر إنشاء الحجز. حاول مرة أخرى."
   },
   "filterSidebar": {
     "vehicleCompatibility": "توافق المركبة",
