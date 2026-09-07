@@ -12,6 +12,8 @@ import { Ticket, ChevronRight, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
+import { REWARDS_CONFIG } from "@/config/rewards";
 import { RewardCard } from "@/components/garage/RewardCard";
 import { VoucherModal } from "@/components/garage/VoucherModal";
 import { PointsHistoryModal } from "@/components/garage/PointsHistoryModal";
@@ -237,7 +239,37 @@ export default function RewardsDashboard({ locale }: RewardsDashboardProps) {
       </div>
 
       {/* ── Catalogue Tab ─────────────────────────────────────────────────── */}
-      {activeTab === "catalogue" && (
+      {activeTab === "catalogue" && !REWARDS_CONFIG.catalogueLive && (
+        <div className="mx-auto max-w-lg px-5 py-5">
+          {/* Nothing to browse yet, so don't dress an empty grid up as one.
+              Category pills and the redeem flow stay wired behind the flag. */}
+          <div className="rounded-2xl border border-dashed border-border bg-card px-6 py-14 text-center">
+            <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary">
+              <Icon name="redeem" size="2xl" />
+            </div>
+            <h2 className="mt-5 text-lg font-bold tracking-tight">
+              {isRTL ? "المكافآت قريباً" : "Rewards are coming soon"}
+            </h2>
+            <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-muted-foreground">
+              {isRTL
+                ? "نقاطك تتجمع من الآن. بمجرد إطلاق المكافآت ستتمكن من استبدالها من هنا."
+                : "Your points are already adding up. The moment rewards launch, you'll be able to spend them here."}
+            </p>
+
+            {/* The one real number on this screen — points genuinely accrue
+                from completed bookings and reviews. */}
+            {!loading && (
+              <p className="mt-6 inline-flex items-center gap-2 rounded-full bg-muted px-4 py-2 text-sm font-semibold">
+                <Icon name="star" size="sm" filled tone="accent" />
+                <span className="tabular-nums">{points.toLocaleString()}</span>
+                {isRTL ? "نقطة في رصيدك" : "points in your balance"}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === "catalogue" && REWARDS_CONFIG.catalogueLive && (
         <div className="mx-auto max-w-lg px-5 py-5">
           {/* Category filter pills */}
           <div className="mb-5 flex gap-2 overflow-x-auto pb-1 scrollbar-none">
@@ -310,16 +342,28 @@ export default function RewardsDashboard({ locale }: RewardsDashboardProps) {
                 size={48}
                 className="mx-auto mb-3 text-muted-foreground/40"
               />
-              <p className="font-semibold text-foreground">No vouchers yet</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Redeem rewards from the catalogue to get vouchers.
+              <p className="font-semibold text-foreground">
+                {isRTL ? "لا توجد قسائم بعد" : "No vouchers yet"}
               </p>
-              <Button
-                className="mt-4"
-                onClick={() => setActiveTab("catalogue")}
-              >
-                Browse Rewards
-              </Button>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {REWARDS_CONFIG.catalogueLive
+                  ? isRTL
+                    ? "استبدل مكافأة من القائمة للحصول على قسيمة."
+                    : "Redeem rewards from the catalogue to get vouchers."
+                  : isRTL
+                    ? "ستظهر قسائمك هنا بمجرد إطلاق المكافآت."
+                    : "Your vouchers will appear here once rewards launch."}
+              </p>
+              {/* No "Browse Rewards" button while there is nothing to browse —
+                  it would land on the coming-soon panel. */}
+              {REWARDS_CONFIG.catalogueLive && (
+                <Button
+                  className="mt-4"
+                  onClick={() => setActiveTab("catalogue")}
+                >
+                  {isRTL ? "تصفح المكافآت" : "Browse Rewards"}
+                </Button>
+              )}
             </div>
           ) : (
             <>
