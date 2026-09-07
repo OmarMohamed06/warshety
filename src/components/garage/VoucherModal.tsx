@@ -31,7 +31,14 @@ export function VoucherModal({ userReward, onClose }: VoucherModalProps) {
   }, [userReward]);
 
   // Escape to dismiss + freeze the page behind the sheet.
+  //
+  // Guarded on `userReward`. The early return below sits after the hooks, as
+  // it must, so without this check the effect still ran while the modal was
+  // closed — and the rewards page mounts this component unconditionally.
+  // That pinned `body { overflow: hidden }` for the whole visit and made the
+  // page impossible to scroll, with no visible modal to explain why.
   useEffect(() => {
+    if (!userReward) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", onKey);
     const previous = document.body.style.overflow;
@@ -40,7 +47,7 @@ export function VoucherModal({ userReward, onClose }: VoucherModalProps) {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = previous;
     };
-  }, [onClose]);
+  }, [userReward, onClose]);
 
   if (!userReward) return null;
 
