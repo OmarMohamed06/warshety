@@ -416,7 +416,7 @@ export default function VendorCalendarPage() {
             }}
           >
             {vendor?.business_name ?? t("vendor.mainLocation")}
-            <span className="ml-1 text-xs opacity-60">
+            <span className="ms-1 text-xs opacity-60">
               ({t("vendor.mainBadge")})
             </span>
           </Button>
@@ -446,7 +446,7 @@ export default function VendorCalendarPage() {
             <p className="text-sm text-muted-foreground mt-0.5">
               {t(`vendor.calMonths.${month}`)} {year} &mdash;{" "}
               {t("vendor.calendarSubtitle")}
-              <span className="ml-2 text-primary font-medium">
+              <span className="ms-2 text-primary font-medium">
                 &middot;{" "}
                 {selectedBranch
                   ? (branches.find((b) => b.id === selectedBranch)?.name ?? "")
@@ -745,7 +745,7 @@ export default function VendorCalendarPage() {
                           }{" "}
                           {t("vendor.blocked")}
                           {(slotSettings.cars_per_slot ?? 1) > 1 && (
-                            <span className="ml-2 text-primary font-medium">
+                            <span className="ms-2 text-primary font-medium">
                               · {slotSettings.cars_per_slot}{" "}
                               {t("vendor.carsPerSlot")}
                             </span>

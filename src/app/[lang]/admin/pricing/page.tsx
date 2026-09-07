@@ -201,7 +201,7 @@ export default function PricingPage() {
                 receipt_long
               </span>
               <h2 className="font-black">Billing Rates</h2>
-              <span className="ml-2 text-xs font-semibold text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">
+              <span className="ms-2 text-xs font-semibold text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">
                 Platform defaults — can be overridden per-vendor in Billing →
                 Settings
               </span>

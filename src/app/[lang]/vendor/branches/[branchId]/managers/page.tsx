@@ -282,7 +282,7 @@ export default function BranchManagersPage({
               setShowAssignDialog(true);
             }}
           >
-            <UserPlus className="h-4 w-4 mr-2" />
+            <UserPlus className="h-4 w-4 me-2" />
             {t("vendor.bmAssignManager")}
           </Button>
         </div>
@@ -337,7 +337,7 @@ export default function BranchManagersPage({
               <Users className="h-4 w-4" />
               {t("vendor.bmAssignedManagers")}
               {managers.length > 0 && (
-                <Badge variant="secondary" className="ml-auto text-xs">
+                <Badge variant="secondary" className="ms-auto text-xs">
                   {managers.length}
                 </Badge>
               )}
@@ -464,9 +464,9 @@ export default function BranchManagersPage({
                   </Button>
                   <Button onClick={handleAssign} disabled={assigning}>
                     {assigning ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="h-4 w-4 me-2 animate-spin" />
                     ) : (
-                      <UserPlus className="h-4 w-4 mr-2" />
+                      <UserPlus className="h-4 w-4 me-2" />
                     )}
                     {t("vendor.bmAssignBtn")}
                   </Button>
@@ -515,9 +515,9 @@ export default function BranchManagersPage({
               disabled={removing}
             >
               {removing ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 me-2 animate-spin" />
               ) : (
-                <Trash2 className="h-4 w-4 mr-2" />
+                <Trash2 className="h-4 w-4 me-2" />
               )}
               {t("vendor.bmRemoveBtn")}
             </Button>

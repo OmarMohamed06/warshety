@@ -318,7 +318,7 @@ export default function VendorServicesPage() {
               >
                 {b.name}
                 {b.is_main && (
-                  <span className="ml-1 text-xs opacity-60">(Main)</span>
+                  <span className="ms-1 text-xs opacity-60">(Main)</span>
                 )}
               </Button>
             ))}

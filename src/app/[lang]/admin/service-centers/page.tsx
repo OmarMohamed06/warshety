@@ -241,7 +241,7 @@ export default function ServiceCentersPage() {
                           <div className="mt-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl px-4 py-3 space-y-2 text-sm">
                             {app.commercial_reg_no && (
                               <p className="text-slate-600 dark:text-slate-300">
-                                <span className="font-bold text-slate-400 text-xs uppercase tracking-wide mr-2">
+                                <span className="font-bold text-slate-400 text-xs uppercase tracking-wide me-2">
                                   {t("admin.regNo")}
                                 </span>
                                 {app.commercial_reg_no}
@@ -249,7 +249,7 @@ export default function ServiceCentersPage() {
                             )}
                             {app.description ? (
                               <p className="text-slate-500">
-                                <span className="font-bold text-slate-400 text-xs uppercase tracking-wide mr-2">
+                                <span className="font-bold text-slate-400 text-xs uppercase tracking-wide me-2">
                                   {t("admin.about")}
                                 </span>
                                 {app.description}

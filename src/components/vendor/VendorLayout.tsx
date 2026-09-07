@@ -255,7 +255,7 @@ export default function VendorLayout({
           <header className="h-14 border-b bg-background flex items-center gap-3 px-4 shrink-0">
             <Skeleton className="h-8 w-8 rounded-md md:hidden" />
             <Skeleton className="h-8 w-48 hidden sm:block" />
-            <div className="ml-auto flex items-center gap-2">
+            <div className="ms-auto flex items-center gap-2">
               <Skeleton className="h-8 w-8 rounded-md" />
             </div>
           </header>
@@ -318,7 +318,7 @@ export default function VendorLayout({
             />
           </div>
 
-          <div className="ml-auto flex items-center gap-1">
+          <div className="ms-auto flex items-center gap-1">
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-4 w-4" />
               <span className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-primary" />

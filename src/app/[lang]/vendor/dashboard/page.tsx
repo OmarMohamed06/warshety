@@ -280,7 +280,7 @@ export default function VendorDashboardPage() {
           </div>
           <Button asChild>
             <Link href="/vendor/services">
-              <PlusCircle className="h-4 w-4 mr-2" />
+              <PlusCircle className="h-4 w-4 me-2" />
               {t("vendor.newService")}
             </Link>
           </Button>

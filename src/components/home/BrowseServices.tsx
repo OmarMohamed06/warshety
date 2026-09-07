@@ -32,7 +32,7 @@ export default function BrowseServices() {
           </div>
           <Button variant="ghost" size="sm" asChild>
             <Link href="/services">
-              {t("home.viewAll")} <ArrowRight className="ml-1 h-3.5 w-3.5" />
+              {t("home.viewAll")} <ArrowRight className="ms-1 h-3.5 w-3.5" />
             </Link>
           </Button>
         </div>

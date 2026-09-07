@@ -459,7 +459,7 @@ export default function ProfilePage() {
                 <p className="font-bold text-sm">{link.label}</p>
                 <p className="text-xs text-slate-400">{link.desc}</p>
               </div>
-              <span className="material-symbols-outlined text-muted-foreground ml-auto">
+              <span className="material-symbols-outlined text-muted-foreground ms-auto">
                 chevron_right
               </span>
             </Link>
@@ -485,7 +485,7 @@ export default function ProfilePage() {
                     Manage bookings, schedule &amp; services for your branch
                   </p>
                 </div>
-                <span className="material-symbols-outlined text-primary ml-auto">
+                <span className="material-symbols-outlined text-primary ms-auto">
                   chevron_right
                 </span>
               </Link>

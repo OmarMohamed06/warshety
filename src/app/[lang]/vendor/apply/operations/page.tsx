@@ -325,7 +325,7 @@ export default function VendorOperationsPage() {
                         ? supportedMakes[0]
                         : `${supportedMakes.length} ${t("vendor.applyPages.makesSelected")}`}
                   </span>
-                  <span className="material-symbols-outlined text-muted-foreground ml-2 text-[16px]">
+                  <span className="material-symbols-outlined text-muted-foreground ms-2 text-[16px]">
                     {makesOpen ? "expand_less" : "expand_more"}
                   </span>
                 </button>

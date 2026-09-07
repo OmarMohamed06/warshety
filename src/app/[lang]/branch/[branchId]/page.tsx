@@ -1639,7 +1639,7 @@ function CalendarTab({
                         {daySlots.filter((s) => s.reason === "blocked").length}{" "}
                         {t("vendor.blocked")}
                         {(slotSettings.cars_per_slot ?? 1) > 1 && (
-                          <span className="ml-2 text-primary font-medium">
+                          <span className="ms-2 text-primary font-medium">
                             · {slotSettings.cars_per_slot} cars/slot
                           </span>
                         )}

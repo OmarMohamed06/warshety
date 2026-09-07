@@ -571,7 +571,7 @@ export default function VendorBillingPage() {
                                   {fmt(currentPeriod.end)}
                                   <ChevronRight className="h-3 w-3 text-blue-500" />
                                 </span>
-                                <span className="ml-0 inline-block text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 px-1.5 py-0.5 rounded-full font-semibold">
+                                <span className="ms-0 inline-block text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 px-1.5 py-0.5 rounded-full font-semibold">
                                   In Progress
                                 </span>
                               </td>
@@ -713,7 +713,7 @@ export default function VendorBillingPage() {
               <DialogDescription>
                 {detailPeriod?.label}
                 {detailPeriod?.isLive && (
-                  <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">
+                  <span className="ms-2 text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">
                     In Progress
                   </span>
                 )}

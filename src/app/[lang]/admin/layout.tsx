@@ -203,7 +203,7 @@ export default function AdminLayout({
           </Link>
           <button
             onClick={() => setCollapsed((c) => !c)}
-            className="ml-auto hidden lg:flex items-center justify-center w-7 h-7 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
+            className="ms-auto hidden lg:flex items-center justify-center w-7 h-7 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
           >
             <span
               className="material-symbols-outlined text-muted-foreground text-[18px]"
@@ -289,6 +289,9 @@ export default function AdminLayout({
       <div
         className={cn(
           "flex-1 flex flex-col overflow-hidden transition-all duration-300",
+          // Physical, deliberately: the sidebar above is pinned `left-0` in
+          // both directions, so the content offset must match it rather
+          // than flip with the writing direction.
           collapsed ? "lg:ml-16" : "lg:ml-60",
         )}
       >

@@ -402,7 +402,7 @@ export default function AdminDashboardPage() {
           {loading ? (
             <div className="flex items-center justify-center py-12 text-slate-400">
               <span
-                className="material-symbols-outlined animate-spin mr-2 text-[24px]"
+                className="material-symbols-outlined animate-spin me-2 text-[24px]"
               >
                 progress_activity
               </span>

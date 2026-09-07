@@ -148,7 +148,7 @@ export default function SearchPage() {
                   {isAr ? TYPE_LABELS[type].ar : TYPE_LABELS[type].en}
                   {counts[type] > 0 && (
                     <span
-                      className={`ml-0.5 rtl:ml-0 rtl:mr-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-black ${
+                      className={`ms-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-black ${
                         activeType === type
                           ? "bg-primary-foreground/20 text-primary-foreground"
                           : "bg-muted text-muted-foreground"

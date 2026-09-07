@@ -206,7 +206,7 @@ export default function BookingDetailPage({
                   {i < arr.length - 1 && (
                     <div
                       className={cn(
-                        "w-0.5 h-4 absolute ml-2.5 mt-5",
+                        "w-0.5 h-4 absolute ms-2.5 mt-5",
                         done
                           ? "bg-slate-300"
                           : "bg-slate-200 dark:bg-slate-700",

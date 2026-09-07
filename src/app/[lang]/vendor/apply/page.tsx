@@ -235,7 +235,7 @@ export default function VendorLandingPage() {
                     {t(`vendor.applyPages.faq${i}Q`)}
                   </span>
                   <span
-                    className="material-symbols-outlined text-muted-foreground shrink-0 ml-4 transition-transform text-[20px]"
+                    className="material-symbols-outlined text-muted-foreground shrink-0 ms-4 transition-transform text-[20px]"
                     style={{
                       transform:
                         openFaq === i ? "rotate(180deg)" : "rotate(0deg)",

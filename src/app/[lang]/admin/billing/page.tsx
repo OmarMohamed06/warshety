@@ -324,7 +324,7 @@ export default function BillingPage() {
               </option>
               <option value="paid">{t("admin.billing.statusPaid")}</option>
             </select>
-            <div className="ml-auto flex items-center gap-2 px-4 py-2.5 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 text-xs font-semibold rounded-xl">
+            <div className="ms-auto flex items-center gap-2 px-4 py-2.5 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 text-xs font-semibold rounded-xl">
               <span
                 className="material-symbols-outlined text-[16px]"
               >

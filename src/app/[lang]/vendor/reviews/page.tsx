@@ -144,7 +144,7 @@ function ReviewCard({
         </div>
 
         {/* Reply section */}
-        <div className="mt-4 ml-13">
+        <div className="mt-4 ms-13">
           {hasReply && !editing ? (
             <div className="bg-muted/60 rounded-xl p-4">
               <div className="flex items-center justify-between mb-2">

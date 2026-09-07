@@ -326,7 +326,7 @@ export default function Navbar() {
                     <span className="text-xs font-black text-muted-foreground w-7">{l.label}</span>
                     {l.code === "en" ? "English" : "العربية"}
                     {locale === l.code && (
-                      <CheckCircle2 className="w-3.5 h-3.5 ml-auto text-primary" />
+                      <CheckCircle2 className="w-3.5 h-3.5 ms-auto text-primary" />
                     )}
                   </DropdownMenuItem>
                 ))}
@@ -369,7 +369,7 @@ export default function Navbar() {
                           href="/vendor/dashboard"
                           className="text-primary font-semibold"
                         >
-                          <LayoutDashboard className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                          <LayoutDashboard className="w-4 h-4 me-2" />
                           {t("nav.vendorDashboard")}
                         </Link>
                       </DropdownMenuItem>
@@ -380,7 +380,7 @@ export default function Navbar() {
                           href="/admin/dashboard"
                           className="text-primary font-semibold"
                         >
-                          <ShieldCheck className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                          <ShieldCheck className="w-4 h-4 me-2" />
                           {t("nav.admin")}
                         </Link>
                       </DropdownMenuItem>
@@ -395,12 +395,12 @@ export default function Navbar() {
                             href={`/branch/${managedBranchId}`}
                             className="text-primary font-semibold"
                           >
-                            <Store className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                            <Store className="w-4 h-4 me-2" />
                             Branch Management
                           </Link>
                         ) : (
                           <span className="flex items-center text-muted-foreground">
-                            <Store className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                            <Store className="w-4 h-4 me-2" />
                             Branch Management
                           </span>
                         )}
@@ -408,7 +408,7 @@ export default function Navbar() {
                     )}
                     <DropdownMenuItem asChild>
                       <Link href="/bookings">
-                        <CalendarDays className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                        <CalendarDays className="w-4 h-4 me-2" />
                         {t("nav.myBookings")}
                       </Link>
                     </DropdownMenuItem>
@@ -417,7 +417,7 @@ export default function Navbar() {
                         href="/rewards"
                         className="text-orange-500 font-semibold"
                       >
-                        <Gift className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                        <Gift className="w-4 h-4 me-2" />
                         {t("nav.rewards")}
                       </Link>
                     </DropdownMenuItem>
@@ -429,7 +429,7 @@ export default function Navbar() {
                         window.location.href = localePath("/");
                       }}
                     >
-                      <LogOut className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                      <LogOut className="w-4 h-4 me-2" />
                       {t("nav.signOut")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -507,7 +507,7 @@ export default function Navbar() {
                   >
                     <Link href="/garage">
                       {t("nav.manage")}{" "}
-                      <ArrowRight className="w-3 h-3 ml-0.5 rtl:rotate-180" />
+                      <ArrowRight className="w-3 h-3 ms-0.5 rtl:rotate-180" />
                     </Link>
                   </Button>
                 </div>
