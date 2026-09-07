@@ -639,9 +639,11 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
             {t("services.subtitle")}
           </p>
 
-          {/* Mode + search + near me, on one row from sm up. */}
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <div className="flex h-11 shrink-0 items-center rounded-lg bg-muted p-1">
+          {/* One row from sm up. On a phone the segmented control takes its
+              own line and search shares the next with Near me — three items
+              on one 375px line overflowed, and Arabic labels are longer still. */}
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="flex h-11 items-center rounded-lg bg-muted p-1 sm:shrink-0">
               {(
                 [
                   { value: "service" as const, label: t("services.byService") },
@@ -654,7 +656,7 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                   onClick={() => setSearchMode(mode.value)}
                   aria-pressed={searchMode === mode.value}
                   className={cn(
-                    "h-9 rounded-md px-3 text-xs font-semibold transition-colors",
+                    "h-9 flex-1 rounded-md px-3 text-xs font-semibold transition-colors sm:flex-none",
                     searchMode === mode.value
                       ? "bg-card shadow-sm"
                       : "text-muted-foreground hover:text-foreground",
@@ -665,7 +667,8 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
               ))}
             </div>
 
-            <div className="relative min-w-[200px] flex-1">
+            <div className="flex items-center gap-2 sm:contents">
+            <div className="relative min-w-0 flex-1 sm:min-w-[200px]">
               <Icon
                 name="search"
                 size="md"
@@ -687,7 +690,7 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                 fires from this tap, never on page load. */}
             <Button
               variant={sortOption === "nearest" ? "default" : "outline"}
-              className="h-11 shrink-0 gap-1.5 px-4 text-sm"
+              className="h-11 shrink-0 gap-1.5 px-3 text-sm sm:px-4"
               onClick={() => {
                 if (hasDistances) {
                   setSortOption((o) => (o === "nearest" ? "relevance" : "nearest"));
@@ -700,6 +703,7 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
               <Icon name="near_me" size="sm" />
               {geo.loading ? t("nearMe.requesting") : t("services.nearMe")}
             </Button>
+            </div>
           </div>
 
           {/* Location trouble — explained inline rather than as a dead button */}
@@ -776,7 +780,10 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
           )}
 
           {/* Count + view + sort */}
-          <div className="sticky top-0 z-20 -mx-4 mb-4 flex items-center justify-between gap-2 bg-muted/60 px-4 py-2 backdrop-blur sm:static sm:mx-0 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none">
+          {/* flex-wrap, not a fixed row: count + Filters + view toggle + sort
+              does not fit 375px, and body has overflow-x:hidden so the excess
+              was clipped rather than scrollable. */}
+          <div className="sticky top-0 z-20 -mx-4 mb-4 flex flex-wrap items-center gap-2 bg-muted/60 px-4 py-2 backdrop-blur sm:static sm:mx-0 sm:flex-nowrap sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none">
             <p className="shrink-0 text-sm font-semibold">
               <span className="tabular-nums">{filtered.length}</span>{" "}
               <span className="font-normal text-muted-foreground">
@@ -784,7 +791,7 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
               </span>
             </p>
 
-            <div className="flex min-w-0 items-center gap-2">
+            <div className="ms-auto flex min-w-0 items-center gap-2">
               {/* Filters — phone only; the sidebar is always open from lg up */}
               <Button
                 variant="outline"
@@ -826,7 +833,7 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                 ))}
               </div>
 
-              <div className="relative min-w-0">
+              <div className="relative min-w-[7rem] shrink">
                 <select
                   value={sortOption}
                   onChange={(e) => {
