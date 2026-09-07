@@ -325,8 +325,17 @@ function VehicleForm({
             label={t("garage.mileage")}
             hint={t("garage.mileageHint")}
           >
-            <div className="relative">
-              <Input
+            {/* Flex siblings rather than an overlay on a padded field:
+                `pe-*` does not displace Input's own `px-*` through
+                tailwind-merge, so the space the suffix needs was never
+                actually reserved and it could sit on the digits. */}
+            <div
+              className={cn(
+                CONTROL,
+                "flex items-center gap-2 rounded-lg border border-input px-2.5 transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50",
+              )}
+            >
+              <input
                 id="vehicle-mileage"
                 type="number"
                 inputMode="numeric"
@@ -337,9 +346,9 @@ function VehicleForm({
                 }
                 placeholder="45000"
                 aria-describedby="vehicle-mileage-hint"
-                className={cn(CONTROL, "pe-12")}
+                className="h-full min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground md:text-sm"
               />
-              <span className="pointer-events-none absolute inset-y-0 end-3 flex items-center text-xs font-semibold text-muted-foreground">
+              <span className="pointer-events-none shrink-0 text-xs font-semibold text-muted-foreground">
                 km
               </span>
             </div>

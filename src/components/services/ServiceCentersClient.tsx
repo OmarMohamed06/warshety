@@ -8,7 +8,6 @@ import { useLanguage } from "@/context/LanguageContext";
 import { tGov, tArea } from "@/lib/locationData";
 import { LocaleLink as Link } from "@/components/ui/locale-link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Icon } from "@/components/ui/icon";
 import {
   Breadcrumb,
@@ -38,11 +37,41 @@ const CenterMap = dynamic(() => import("./CenterMap"), {
   loading: () => <Skeleton className="h-full w-full rounded-xl" />,
 });
 
-/** Native selects, styled once. 44px because these are thumb targets. */
-const SELECT =
-  "h-11 w-full cursor-pointer appearance-none rounded-lg border border-input bg-transparent ps-3 pe-9 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
-const SELECT_CHEVRON =
-  "pointer-events-none absolute end-2.5 top-1/2 -translate-y-1/2 text-muted-foreground";
+/**
+ * Field shells. The icon is a flex sibling of the control, never an absolute
+ * overlay on a padded one.
+ *
+ * The overlay approach needs the control's `padding-inline-start` to reserve
+ * exactly the space the glyph occupies, and that reservation is not reliable:
+ * `pl-*` displaces a base `px-*` through tailwind-merge, but `ps-*` does not —
+ * both survive and the winner is decided by stylesheet order. When `px-*` won,
+ * the icon sat on top of the text. As flex siblings there is nothing to
+ * coordinate, and it works the same in both writing directions.
+ */
+const FIELD_SHELL =
+  "flex h-11 w-full items-center gap-2 rounded-lg border border-input bg-transparent px-3 transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50";
+const BARE_CONTROL =
+  "h-full min-w-0 flex-1 cursor-pointer appearance-none truncate bg-transparent text-sm outline-none";
+
+/** Native select in a flex shell, with the chevron as a sibling. */
+function SelectShell({
+  className,
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={cn(FIELD_SHELL, className)}>
+      {children}
+      <Icon
+        name="expand_more"
+        size="md"
+        className="pointer-events-none shrink-0 text-muted-foreground"
+      />
+    </div>
+  );
+}
 
 type SortOption = "relevance" | "rating" | "nearest";
 type ViewMode = "list" | "map";
@@ -468,7 +497,7 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
           {t("services.allGovernorates")}
         </p>
         <div className="space-y-2">
-          <div className="relative">
+          <SelectShell>
             <select
               value={selectedGovernorate}
               onChange={(e) => {
@@ -476,7 +505,7 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                 setSelectedDistrict("");
               }}
               aria-label={t("services.allGovernorates")}
-              className={SELECT}
+              className={BARE_CONTROL}
             >
               <option value="">{t("services.allGovernorates")}</option>
               {availableGovernorates.map((gov) => (
@@ -485,15 +514,14 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                 </option>
               ))}
             </select>
-            <Icon name="expand_more" size="md" className={SELECT_CHEVRON} />
-          </div>
-          <div className="relative">
+          </SelectShell>
+          <SelectShell className="has-disabled:opacity-50">
             <select
               value={selectedDistrict}
               onChange={(e) => setSelectedDistrict(e.target.value)}
               disabled={!selectedGovernorate || availableDistricts.length === 0}
               aria-label={t("services.allDistricts")}
-              className={cn(SELECT, "disabled:cursor-not-allowed disabled:opacity-50")}
+              className={cn(BARE_CONTROL, "disabled:cursor-not-allowed")}
             >
               <option value="">{t("services.allDistricts")}</option>
               {availableDistricts.map((dist) => (
@@ -502,8 +530,7 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                 </option>
               ))}
             </select>
-            <Icon name="expand_more" size="md" className={SELECT_CHEVRON} />
-          </div>
+          </SelectShell>
         </div>
       </div>
 
@@ -550,12 +577,12 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
         <p className="mb-2 text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
           {t("services.filterByMake")}
         </p>
-        <div className="relative">
+        <SelectShell>
           <select
             value={selectedMake ?? ""}
             onChange={(e) => setSelectedMake(e.target.value || null)}
             aria-label={t("services.filterByMake")}
-            className={SELECT}
+            className={BARE_CONTROL}
           >
             <option value="">{isAr ? "كل الماركات" : "All Makes"}</option>
             {allMakes.map((make) => (
@@ -564,8 +591,7 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
               </option>
             ))}
           </select>
-          <Icon name="expand_more" size="md" className={SELECT_CHEVRON} />
-        </div>
+        </SelectShell>
       </div>
 
       {/* Quick filters — same two toggles as before, gathered with the rest
@@ -668,21 +694,21 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
             </div>
 
             <div className="flex items-center gap-2 sm:contents">
-            <div className="relative min-w-0 flex-1 sm:min-w-[200px]">
+            <div className={cn(FIELD_SHELL, "min-w-0 flex-1 sm:min-w-[200px]")}>
               <Icon
                 name="search"
                 size="md"
-                className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                className="pointer-events-none shrink-0 text-muted-foreground"
               />
-              <Input
+              <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-11 ps-10"
                 placeholder={
                   searchMode === "service"
                     ? t("services.servicePlaceholder")
                     : t("services.centerPlaceholder")
                 }
+                className="h-full min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground md:text-sm"
               />
             </div>
 
@@ -833,7 +859,7 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                 ))}
               </div>
 
-              <div className="relative min-w-[7rem] shrink">
+              <SelectShell className="h-10 min-w-[7rem] shrink bg-card px-2.5">
                 <select
                   value={sortOption}
                   onChange={(e) => {
@@ -846,18 +872,13 @@ export default function ServiceCentersClient({ initialCenters }: Props) {
                     setSortOption(next);
                   }}
                   aria-label={t("services.relevance")}
-                  className="h-10 w-full min-w-0 cursor-pointer appearance-none truncate rounded-lg bg-card ps-3 pe-9 text-xs font-semibold ring-1 ring-border focus:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                  className={cn(BARE_CONTROL, "text-xs font-semibold")}
                 >
                   <option value="relevance">{t("services.relevance")}</option>
                   <option value="rating">{t("services.highestRated")}</option>
                   <option value="nearest">{t("services.nearest")}</option>
                 </select>
-                <Icon
-                  name="expand_more"
-                  size="sm"
-                  className="pointer-events-none absolute end-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
-                />
-              </div>
+              </SelectShell>
             </div>
           </div>
 

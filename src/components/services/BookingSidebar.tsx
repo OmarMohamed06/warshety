@@ -601,7 +601,13 @@ export default function BookingSidebar({
                 {t("bookingSidebar.currentMileage")}
                 <span className="text-destructive" aria-hidden="true">*</span>
               </label>
-              <div className="relative">
+              {/* "km" is a flex sibling, not an overlay on a padded field:
+                  `pe-*` does not displace the base `px-*` through
+                  tailwind-merge, so the reserved space was never guaranteed. */}
+              <div
+                className={`${CONTROL} flex items-center gap-2`}
+                data-invalid={errorField === "mileage" || undefined}
+              >
                 <input
                   id="booking-mileage"
                   type="number"
@@ -611,9 +617,9 @@ export default function BookingSidebar({
                   onChange={(e) => setMileage(e.target.value)}
                   placeholder="45000"
                   aria-invalid={errorField === "mileage"}
-                  className={`${CONTROL} pe-12`}
+                  className="h-full min-w-0 flex-1 bg-transparent outline-none"
                 />
-                <span className="pointer-events-none absolute inset-y-0 end-3 flex items-center text-xs font-semibold text-muted-foreground">
+                <span className="pointer-events-none shrink-0 text-xs font-semibold text-muted-foreground">
                   km
                 </span>
               </div>
